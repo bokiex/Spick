@@ -56,29 +56,27 @@ def get_all():
     ), 404
 
 
-@app.route("/chat/<string:telegramtag>")
-def find_by_tag(telegramtag):
-    notif = Notification.query.filter_by(telegramtag=telegramtag).first()
-    if notif:
+@app.route("/chat/<string:telegramtag>", methods=['GET', 'POST', 'PUT', 'DELETE'])
+def notification(telegramtag):
+    if request.method == 'GET':
+        notif = Notification.query.filter_by(telegramtag=telegramtag).first()
+        if notif:
+            return jsonify(
+                {
+                    "code": 200,
+                    "data": notif.json(),
+                    'message': 'Notification information found'
+                }
+            )
         return jsonify(
             {
-                "code": 200,
-                "data": notif.json(),
-                'message': 'Notification information found'
+                "code": 404,
+                "message": "Notification information not found."
             }
-        )
-    return jsonify(
-        {
-            "code": 404,
-            "message": "Notification information not found."
-        }
-    ), 404
-
-#FOR TESTING PURPOSES ONLY
-@app.route("/chat/<string:telegramtag>", methods=['POST'])
-def create_notif(telegramtag):
-    if (Notification.query.filter_by(telegramtag=telegramtag).first()):
-        return jsonify(
+        ), 404
+    elif request.method == "POST":
+        if (Notification.query.filter_by(telegramtag=telegramtag).first()):
+            return jsonify(
             {
                 "code": 400,
                 "data": {
@@ -88,31 +86,33 @@ def create_notif(telegramtag):
             }
         ), 400
 
-    data = request.get_json()
-    print(data['chatid'])
-    notif = Notification(data['chatid'], telegramtag)
+        data = request.get_json()
+        print(data['chatid'])
+        notif = Notification(data['chatid'], telegramtag)
 
-    try:
-        db.session.add(notif)
-        db.session.commit()
-    except:
+        try:
+            db.session.add(notif)
+            db.session.commit()
+        except:
+            return jsonify(
+                {
+                    "code": 500,
+                    "data": {
+                        "chatid": data['chatid'],
+                        "telegramtag": telegramtag
+                    },
+                    "message": "An error occurred creating the notification"
+                }
+            ), 500
+
         return jsonify(
             {
-                "code": 500,
-                "data": {
-                    "telegramtag": telegramtag
-                },
-                "message": "An error occurred creating the notification"
+                "code": 201,
+                "data": notif.json(),
+                'message': 'Notification created'
             }
-        ), 500
+        ), 201
 
-    return jsonify(
-        {
-            "code": 201,
-            "data": notif.json(),
-            'message': 'Notification created'
-        }
-    ), 201
 
 
 @app.route("/notify/<string:host>", methods=["POST", 'GET'])
