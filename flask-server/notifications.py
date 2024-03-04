@@ -124,7 +124,6 @@ def send_notif(host):
     #print("creatorname: ",creatorname)
     #print("data: ",data)
     notiflist = data["data"]
-    #print("NL: ",notiflist)
     for user in notiflist:
         # request send
         #print("user: ",user)
