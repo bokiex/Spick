@@ -8,7 +8,7 @@ USE `notification`;
 -- ---------------------------------------------------------------- --
 DROP TABLE IF EXISTS `notification`;
 CREATE TABLE IF NOT EXISTS `notification` (
-  `chatid` varchar(64) NOT NULL,
+  `chatID` varchar(64) NOT NULL,
   `telegramtag` varchar(64) NOT NULL,
   PRIMARY KEY (`chatid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
