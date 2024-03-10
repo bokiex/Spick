@@ -1,12 +1,13 @@
 import time
 import pika
-from os import environ
+import os
 
-hostname = environ.get('hostname') #localhost
-port = environ.get('port')         #5672
-exchangename = environ.get('exchangename') #order_topic
-exchangetype = environ.get('exchangetype') #topic
-e_queue_name = environ.get('e_queue_name') #Error
+hostname = os.getenv('HOSTNAME') #localhost
+port = os.getenv('HOST_PORT')         #5672
+exchangename = os.getenv('EXCHANGE_NAME') #order_topic
+exchangetype = os.getenv('EXCHANGE_TYPE') #topic
+e_queue_name = os.getenv('ERROR_QUEUE_NAME') #Error
+n_queue_name = os.getenv('NOTI_QUEUE_NAME') #Notification
 
 #to create a connection to the broker
 def create_connection(max_retries=12, retry_interval=5):
@@ -53,7 +54,14 @@ def create_error_queue(channel):
     #bind Error queue
     channel.queue_bind(exchange=exchangename, queue=e_queue_name, routing_key='*.error') 
         # bind the queue to the exchange via the key 'error'
-        
+
+def create_notification_queue(channel):
+    print('amqp_setup:create_notification_queue')
+    channel.queue_declare(queue=e_queue_name, durable=True) # 'durable' makes the queue survive broker restarts
+    #bind Notification queue
+    channel.queue_bind(exchange=exchangename, queue=e_queue_name, routing_key='*.notification') 
+        # bind the queue to the exchange via the key 'notification'
+            
 if __name__ == '__main__':
     connection  = create_connection()
     channel = create_channel(connection)
