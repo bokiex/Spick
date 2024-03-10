@@ -6,7 +6,7 @@ import json
 
 app = Flask(__name__)
 CORS(app)
-
+api_key = os.getenv('GOOGLE_API_KEY')
 @app.route("/recommend", methods=['POST'])
 def getrecc():
     # Simple check of input format and data of the request are JSON
@@ -44,7 +44,7 @@ def processSearch(search):
     searchstr = search["type"] + "near" + search["township"]
     data = {"textQuery" : searchstr}
     json_data = json.dumps(data)
-    headers = {'Content-Type':'application/json', 'X-Goog-Api-Key':'AIzaSyCs9PnPDv3KmsDySwW_7SHwG2vLeBwyJJ4', 
+    headers = {'Content-Type':'application/json', 'X-Goog-Api-Key':api_key, 
                'X-Goog-FieldMask': 'places.displayName,places.formattedAddress,places.priceLevel'}
     print('\n-----calling places API-----')
     reply = rq.post(url, data = json_data, headers=headers)

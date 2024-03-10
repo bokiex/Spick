@@ -34,7 +34,7 @@ class Event(db.Model):
         }
         return dto
 
-@app.route("/event", methods=['GET', 'POST'])
+@app.route("/event", methods=['GET', 'POST', 'PUT', 'DELETE'])
 def event():
     if request.method == "GET":
         if Event.query.all() == []:
