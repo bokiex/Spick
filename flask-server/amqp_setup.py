@@ -47,6 +47,7 @@ def create_channel(connection):
 def create_queues(channel):
     print('amqp_setup:create queues')
     create_error_queue(channel)
+    create_notification_queue(channel)
     
 def create_error_queue(channel):
     print('amqp_setup:create_error_queue')
