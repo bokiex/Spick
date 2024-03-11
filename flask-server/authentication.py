@@ -7,7 +7,7 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://root@localhost:3
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
-class User(db.Model):
+class Auth(db.Model):
     __tablename__ = 'authentication'
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
@@ -23,7 +23,7 @@ class User(db.Model):
 @app.route('/signup', methods=['POST'])
 def signup():
     data = request.get_json()
-    user = User(username=data['username'], email=data['email'])
+    user = Auth(username=data['username'], email=data['email'])
     user.set_password(data['password'])
     db.session.add(user)
     db.session.commit()
@@ -31,11 +31,40 @@ def signup():
 
 @app.route('/login', methods=['POST'])
 def login():
+    # Initialize response structure
+    response = {"message": "", "error": ""}
+    status_code = 200
+
     data = request.get_json()
-    user = User.query.filter_by(username=data['username']).first()
-    if user and user.check_password(data['password']):
-        return jsonify({'message': 'Login successful'}), 200
-    return jsonify({'message': 'Invalid username or password'}), 401
+
+    # Check for missing data
+    if not data or 'username' not in data or 'password' not in data:
+        response['message'] = "Username and password are required."
+        response['error'] = "MissingData"
+        status_code = 400
+        return jsonify(response), status_code
+
+    # Attempt to retrieve the user by username
+    try:
+        user = Auth.query.filter_by(username=data['username']).first()
+        if not user:
+            response['message'] = "User not found."
+            response['error'] = "UserNotFound"
+            status_code = 404
+        elif not user.check_password(data['password']):
+            response['message'] = "Invalid password."
+            response['error'] = "InvalidPassword"
+            status_code = 401
+        else:
+            response['message'] = "Login successful."
+    except Exception as e:
+        app.logger.error(f"Error during user lookup or password check: {e}")
+        response['message'] = "An error occurred during login."
+        response['error'] = "InternalError"
+        status_code = 500
+
+    return jsonify(response), status_code
+
 
 if __name__ == '__main__':
     app.run(debug=True)
