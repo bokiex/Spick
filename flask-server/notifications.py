@@ -65,13 +65,13 @@ def notification(telegramtag):
                 {
                     "code": 200,
                     "data": notif.json(),
-                    'message': 'Notification information found'
+                    'message': 'Notification details found'
                 }
             )
         return jsonify(
             {
                 "code": 404,
-                "message": "Notification information not found."
+                "message": "Notification details not found."
             }
         ), 404
     elif request.method == "POST":
@@ -82,7 +82,7 @@ def notification(telegramtag):
                 "data": {
                     "telegramtag": telegramtag
                 },
-                "message": "Notification info already exists."
+                "message": "Notification details already exists."
             }
         ), 400
 
@@ -101,7 +101,7 @@ def notification(telegramtag):
                         "chatid": data['chatid'],
                         "telegramtag": telegramtag
                     },
-                    "message": "An error occurred creating the notification"
+                    "message": "An error occurred adding your notification details to database."
                 }
             ), 500
 
@@ -109,7 +109,7 @@ def notification(telegramtag):
             {
                 "code": 201,
                 "data": notif.json(),
-                'message': 'Notification created'
+                'message': 'Notification details added.'
             }
         ), 201
 
@@ -132,8 +132,7 @@ def send_notif(host):
             notifinfo = notif.json()
             chatid = notifinfo["chatid"]
             #print("chatid: ",chatid)
-            chatmsg = host + \
-                " has invited you to an event! Check it out on Spick now!"
+            chatmsg = "{host} has invited you to an event! Check it out on Spick now!"
             #chatparams = {'chat_id': chatid , 'text': chatmsg}
             sendurl = "https://api.telegram.org/bot" + token + \
                 "/sendMessage" + "?chat_id=" + chatid + "&text=" + chatmsg
@@ -147,8 +146,7 @@ def send_notif(host):
             }
         ), 404
     else:
-        successmsg = "Notification was successful." + \
-            str(countnotif) + " number of notifs were sent."
+        successmsg = f"Notification was successful. {str(countnotif)} notifications were sent."
         return jsonify(
             {
                 "code": 200,
