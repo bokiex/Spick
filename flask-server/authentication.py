@@ -1,38 +1,40 @@
+from flask import Flask, request, jsonify
+from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 
-# Example user database (in a real application, use a database system like SQLite, MySQL, etc.)
-users_db = {}
+app = Flask(__name__)
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://root@localhost:3306/authentication'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+db = SQLAlchemy(app)
 
-def signup(data):
-    username = data.get('username')
-    password = data.get('password')
-    email = data.get('email')
+class User(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(80), unique=True, nullable=False)
+    email = db.Column(db.String(120), unique=True, nullable=False)
+    password_hash = db.Column(db.String(128))
 
-    # Validate input
-    if not username or not password or not email:
-        return {'message': 'Missing data'}, 400
+    def set_password(self, password):
+        self.password_hash = generate_password_hash(password)
 
-    # Check if user already exists
-    if username in users_db:
-        return {'message': 'User already exists'}, 409
+    def check_password(self, password):
+        return check_password_hash(self.password_hash, password)
 
-    # Create a new user
-    hashed_password = generate_password_hash(password, method='sha256')
-    users_db[username] = {'password': hashed_password, 'email': email}
+@app.route('/signup', methods=['POST'])
+def signup():
+    data = request.get_json()
+    user = User(username=data['username'], email=data['email'])
+    user.set_password(data['password'])
+    db.session.add(user)
+    db.session.commit()
+    return jsonify({'message': 'Account created successfully'}), 201
 
-    return {'message': 'User created successfully'}, 201
+@app.route('/login', methods=['POST'])
+def login():
+    data = request.get_json()
+    user = User.query.filter_by(username=data['username']).first()
+    if user and user.check_password(data['password']):
+        return jsonify({'message': 'Login successful'}), 200
+    return jsonify({'message': 'Invalid username or password'}), 401
 
-def login(data):
-    username = data.get('username')
-    password = data.get('password')
-
-    # Validate input
-    if not username or not password:
-        return {'message': 'Missing username or password'}, 400
-
-    # Check if user exists
-    user = users_db.get(username)
-    if not user or not check_password_hash(user['password'], password):
-        return {'message': 'Invalid credentials'}, 401
-
-    return {'message': 'Logged in successfully'}, 200
+if __name__ == '__main__':
+    app.run(debug=True)
