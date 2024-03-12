@@ -4,7 +4,7 @@ CREATE DATABASE IF NOT EXISTS `user` DEFAULT CHARACTER SET utf8 COLLATE utf8_gen
 USE `user`;
 
 -- ---------------------------------------------------------------- --
---                     USER TABLE                        --
+--                     NOTIFICATION TABLE                        --
 -- ---------------------------------------------------------------- --
 DROP TABLE IF EXISTS `user`;
 CREATE TABLE IF NOT EXISTS `user` (

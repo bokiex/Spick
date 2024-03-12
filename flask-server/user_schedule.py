@@ -13,20 +13,22 @@ db = SQLAlchemy(app)
 class UserSchedule(db.Model):
     __tablename__ = 'user_schedule'
 
-    id = db.Column(db.Integer, primary_key=True)
-    eventID = db.Column(db.Integer, nullable=False)
-    userID = db.Column(db.Integer, nullable=False)
-    start_time = db.Column(db.TIMESTAMP, nullable=False)
-    end_time = db.Column(db.TIMESTAMP, nullable=False)
+    scheduleID = db.Column(db.Integer, primary_key=True)
+    eventID = db.Column(db.Integer, nullable=False)  # Now included
+    userID = db.Column(db.Integer, nullable=False)   # Now included
+    weekday = db.Column(db.CHAR, nullable=False)
+    start_time = db.Column(db.DateTime, nullable=False)
+    end_time = db.Column(db.DateTime, nullable=False)
     reason = db.Column(db.String(255), nullable=True)
 
     def json(self):
         return {
-            "id": self.id,
+            "scheduleID": self.scheduleID,
             "eventID": self.eventID,
             "userID": self.userID,
-            "start_time": self.start_time,
-            "end_time": self.end_time,
+            "weekday": self.weekday,
+            "start_time": self.start_time.isoformat(),
+            "end_time": self.end_time.isoformat(),
             "reason": self.reason
         }
 
@@ -34,17 +36,16 @@ class UserSchedule(db.Model):
 def manage_user_schedule():
     if request.method == "GET":
         schedules = UserSchedule.query.all()
-        if not schedules:
-            return jsonify({"message": "No schedules found."}), 404
-        return jsonify({"schedules": [schedule.json() for schedule in schedules]}), 200
+        return jsonify({"schedules": [schedule.json() for schedule in schedules]}), 200 if schedules else ({"message": "No schedules found."}, 404)
     
     elif request.method == "POST":
         req = request.get_json()
         schedule = UserSchedule(
             eventID=req['eventID'],
             userID=req['userID'],
-            start_time=req['start_time'],
-            end_time=req['end_time'],
+            weekday=req['weekday'],
+            start_time=datetime.fromisoformat(req['start_time']),
+            end_time=datetime.fromisoformat(req['end_time']),
             reason=req.get('reason')
         )
         db.session.add(schedule)
@@ -53,35 +54,33 @@ def manage_user_schedule():
     
     elif request.method == "PUT":
         req = request.get_json()
-        schedule_id = req.get('id')
+        schedule_id = req.get('scheduleID')
         if not schedule_id:
-            return jsonify({"message": "ID parameter missing."}), 400
+            return jsonify({"message": "ScheduleID parameter missing."}), 400
         
         schedule = UserSchedule.query.get(schedule_id)
         if not schedule:
             return jsonify({"message": "Schedule not found."}), 404
         
-        # Update schedule attributes if provided in request
-        if 'eventID' in req:
-            schedule.eventID = req['eventID']
-        if 'userID' in req:
-            schedule.userID = req['userID']
-        if 'start_time' in req:
-            schedule.start_time = req['start_time']
-        if 'end_time' in req:
-            schedule.end_time = req['end_time']
-        if 'reason' in req:
-            schedule.reason = req['reason']
+        schedule.eventID = req.get('eventID', schedule.eventID)  # Update if provided
+        schedule.userID = req.get('userID', schedule.userID)      # Update if provided
+        schedule.weekday = req.get('weekday', schedule.weekday)  # Update if provided
+        schedule.start_time = datetime.fromisoformat(req.get('start_time', schedule.start_time.isoformat()))
+        schedule.end_time = datetime.fromisoformat(req.get('end_time', schedule.end_time.isoformat()))
+        schedule.reason = req.get('reason', schedule.reason)
         
         db.session.commit()
         return jsonify(schedule.json()), 200
     
     elif request.method == "DELETE":
-        schedule_id = request.args.get('id')
-        if not schedule_id:
-            return jsonify({"message": "ID parameter missing."}), 400
+        event_id = request.args.get('eventID')
+        user_id = request.args.get('userID')
+        schedule_id = request.args.get('scheduleID')
         
-        schedule = UserSchedule.query.get(schedule_id)
+        if not event_id or not user_id or not schedule_id:
+            return jsonify({"message": "eventID, userID, and scheduleID parameters are required."}), 400
+        
+        schedule = UserSchedule.query.filter_by(eventID=event_id, userID=user_id, scheduleID=schedule_id).first()
         if not schedule:
             return jsonify({"message": "Schedule not found."}), 404
         
