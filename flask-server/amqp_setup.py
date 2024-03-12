@@ -2,12 +2,12 @@ import time
 import pika
 import os
 
-hostname = os.getenv('HOSTNAME') #localhost
-port = os.getenv('HOST_PORT')         #5672
-exchangename = os.getenv('EXCHANGE_NAME') #order_topic
-exchangetype = os.getenv('EXCHANGE_TYPE') #topic
-e_queue_name = os.getenv('ERROR_QUEUE_NAME') #Error
-n_queue_name = os.getenv('NOTI_QUEUE_NAME') #Notification
+hostname = os.getenv('HOSTNAME') or "localhost" #localhost
+port = os.getenv('HOST_PORT') or 5672         #5672
+exchangename = os.getenv('EXCHANGE_NAME') or "create_event_topic" #order_topic
+exchangetype = os.getenv('EXCHANGE_TYPE') or "topic" #topic
+e_queue_name = os.getenv('ERROR_QUEUE_NAME') or "Error"
+n_queue_name = os.getenv('NOTI_QUEUE_NAME') or "Notification"
 
 #to create a connection to the broker
 def create_connection(max_retries=12, retry_interval=5):
@@ -47,6 +47,7 @@ def create_channel(connection):
 def create_queues(channel):
     print('amqp_setup:create queues')
     create_error_queue(channel)
+    create_notification_queue(channel)
     
 def create_error_queue(channel):
     print('amqp_setup:create_error_queue')
@@ -62,7 +63,8 @@ def create_notification_queue(channel):
     channel.queue_bind(exchange=exchangename, queue=e_queue_name, routing_key='*.notification') 
         # bind the queue to the exchange via the key 'notification'
             
-if __name__ == '__main__':
-    connection  = create_connection()
+if __name__ == "__main__":  # execute this program only if it is run as a script (not by 'import')   
+    connection = create_connection()
     channel = create_channel(connection)
-    create_channel(channel)
+    create_queues(channel)
+    

@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Event Creation</title>
+    <!-- Bootstrap CSS -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN"
+      crossorigin="anonymous"
+    />
+    <!-- Bootstrap JS bundle to be placed before the closing </body> tag -->
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"
+      crossorigin="anonymous"
+    ></script>
+    <!-- Bootstrap Icons -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.0/font/bootstrap-icons.css"
+      rel="stylesheet"
+    />
+    <!-- Stylesheet -->
+    <link rel="stylesheet" href="event.css" />
+  </head>
+  <body>
+    <!-- Navbar Start-->
+    <nav class="navbar navbar-expand-md navbar-light bg-light m-1">
+      <div class="container-fluid m-0">
+        <a class="navbar-brand m-0" href="#">Schedular</a>
+        <button
+          class="navbar-toggler"
+          type="button"
+          data-toggle="collapse"
+          data-target="#navbarNav"
+          aria-controls="navbarNav"
+          aria-expanded="false"
+          aria-label="Toggle navigation"
+        >
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div
+          class="collapse navbar-collapse justify-content-center"
+          id="navbarNav"
+        >
+          <!-- Added justify-content-center to center align the navbar links -->
+          <ul class="navbar-nav">
+            <li class="nav-item">
+              <a class="nav-link" href="#"
+                ><i class="bi bi-calendar"></i> Calendar</a
+              >
+            </li>
+            <li class="nav-item">
+              <a class="nav-link active" href="#"
+                ><i class="bi bi-plus-square"></i> Create</a
+              >
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="#"
+                ><i class="bi bi-currency-dollar"></i> Billing</a
+              >
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="#"
+                ><i class="bi bi-person-square"></i> Profile</a
+              >
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+    <!-- Navbar End -->
+    <div class="container p-4">
+      <div class="row justify-content-center">
+        <!-- Form Start -->
+        <div class="form-container">
+          <!-- Sidebar start -->
+          <div class="form-sidebar">
+            <div class="step active">
+              <div class="circle">1</div>
+              <div class="step-content">
+                <span>Step 1</span>
+                <b>Details</b>
+              </div>
+            </div>
+            <div class="step">
+              <div class="circle">2</div>
+              <div class="step-content">
+                <span>Step 2</span>
+                <b>Type</b>
+              </div>
+            </div>
+            <div class="step">
+              <div class="circle">3</div>
+              <div class="step-content">
+                <span>Step 3</span>
+                <b>Date & Time</b>
+              </div>
+            </div>
+            <div class="step">
+              <div class="circle">4</div>
+              <div class="step-content">
+                <span>Step 4</span>
+                <b>End</b>
+              </div>
+            </div>
+          </div>
+          <!-- Sidebar end -->
+          <!-- Step 1 start -->
+          <div class="stp step-1">
+            <div class="header">
+              <h1 class="title">Event Details</h1>
+              <p class="exp">
+                Please provide the event title, event description, and
+                attendees.
+              </p>
+            </div>
+            <form>
+              <div class="label">
+                <label for="title">Event Title</label>
+                <p class="error">This Field Is Required</p>
+              </div>
+              <input
+                required
+                type="text"
+                id="title"
+                placeholder="e.g. ESD Meeting"
+              />
+              <div class="label">
+                <label for="description">Event Description</label>
+                <p class="error">This Field Is Required</p>
+              </div>
+              <input
+                required
+                type="text"
+                id="description"
+                placeholder="e.g. Deployment of site"
+              />
+              <div class="label">
+                <label for="attendees">Event Attendees</label>
+                <p class="error">This Field Is Required</p>
+              </div>
+              <input
+                required
+                type="text"
+                id="attendees"
+                placeholder="e.g. Ben Tan"
+              />
+            </form>
+            <div class="btns">
+              <button class="next-stp" type="submit">Next Step</button>
+            </div>
+          </div>
+          <!-- Step 1 end -->
+          <!-- Step 2 start -->
+          <div class="stp step-2">
+            <div class="header">
+              <h1 class="title">Pick the type of event.</h1>
+              <p class="exp">Select the type to get a venue recommendation.</p>
+            </div>
+            <form>
+              <div class="box" data-id="1">
+                <input type="checkbox" id="school" />
+                <div class="description">
+                  <label for="school">School Meeting</label>
+                  <small>School project meeting done in school.</small>
+                </div>
+              </div>
+              <div class="box" data-id="2">
+                <input type="checkbox" id="personal" />
+                <div class="description">
+                  <label for="personal">Personal</label>
+                  <small>Meeting with friends</small>
+                </div>
+              </div>
+              <div class="box" data-id="3">
+                <input type="checkbox" id="celebrations" />
+                <div class="description">
+                  <label for="celebrations">Celebrations</label>
+                  <small>Custom celebrations such as birthday parties.</small>
+                </div>
+              </div>
+            </form>
+            <div class="btns">
+              <button class="prev-stp" type="button">Go Back</button>
+              <button class="next-stp" type="submit" style="float: right">
+                Next Step
+              </button>
+            </div>
+          </div>
+          <!-- Step 2 end -->
+          <!-- Step 3 Start -->
+          <div class="stp step-3">
+            <div class="header">
+              <h1 class="title">Date and time.</h1>
+              <p class="exp">Select the date and time for the event.</p>
+            </div>
+            <div class="btns">
+              <button class="prev-stp" type="button">Go Back</button>
+              <button class="next-stp" type="submit" style="float: right">
+                Next Step
+              </button>
+            </div>
+          </div>
+          <!-- Step 3 End-->
+          <!-- Step 4 start -->
+          <div class="stp step-4">
+            <div class="header">
+              <h1 class="title">Thank you!</h1>
+              <p class="exp">
+                Your event invite has been created and sent to the invitees.
+              </p>
+            </div>
+            <button class="next-stp"></button>
+          </div>
+          <!-- Step 4 end -->
+        </div>
+      </div>
+    </div>
+    <script>
+      document.addEventListener('DOMContentLoaded', function() {
+        const navbar = document.querySelector('.navbar');
+    
+        // Function to move navbar links to the collapse menu on small screens
+        function moveNavLinks() {
+          const navbarNav = document.querySelector('.navbar-nav');
+          const navbarCollapse = document.querySelector('.navbar-collapse');
+          if (window.innerWidth < 768) {
+            // Move navbar links to the collapse menu
+            navbarNav.querySelectorAll('.nav-item').forEach(function(item) {
+              navbarCollapse.appendChild(item);
+            });
+          } else {
+            // Move navbar links back to their original position
+            navbarCollapse.querySelectorAll('.nav-item').forEach(function(item) {
+              navbarNav.appendChild(item);
+            });
+          }
+        }
+    
+        // Call moveNavLinks when the page loads and when the window is resized
+        moveNavLinks();
+        window.addEventListener('resize', moveNavLinks);
+      });
+    </script>
+    <!-- Javascript -->
+    <script src="app.js"></script>
+
+  </body>
+</html>

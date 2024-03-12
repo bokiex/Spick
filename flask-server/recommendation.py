@@ -53,10 +53,9 @@ def processSearch(search):
     print('search_result:', response)
     
     try:
-        code = response["places"]
         return {
-        "code": 201,
-        "data": response
+            "code": 201,
+            "data": response
         }
 
     except:
