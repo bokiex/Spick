@@ -1,10 +1,10 @@
--- Database: `user`
+-- Database: `user_schedule`
 --
 CREATE DATABASE IF NOT EXISTS `user_schedule` DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci;
 USE `user_schedule`;
 
 -- ---------------------------------------------------------------- --
---                     NOTIFICATION TABLE                        --
+--                     USER SCHEDULE TABLE                        --
 -- ---------------------------------------------------------------- --
 DROP TABLE IF EXISTS `user_schedule`;
 CREATE TABLE IF NOT EXISTS `user_schedule` (
