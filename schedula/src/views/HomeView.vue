@@ -50,7 +50,8 @@ export default {
             selected: {
                 startTime: '',
                 endTime: ''
-            }
+            },
+            calendar: null
         }
     },
     methods: {
@@ -65,13 +66,7 @@ export default {
             calendarApi.unselect() // clear date selection
             this.selected.startTime = selectInfo.startStr
             this.selected.endTime = selectInfo.endStr
-            calendarApi.addEvent({
-                id: 1,
-                title: 'dynamic event',
-                start: selectInfo.startStr,
-                end: selectInfo.endStr,
-                allDay: selectInfo.allDay
-            })
+            this.calendar = calendarApi
         },
         handleEventClick(clickInfo) {
             if (confirm(`Are you sure you want to delete the event '${clickInfo.event.title}'`)) {
@@ -80,6 +75,18 @@ export default {
         },
         handleEvents(events) {
             this.currentEvents = events
+        },
+
+        createEvent() {
+            if (this.calendar) {
+                this.calendar.addEvent({
+                    title: document.getElementById('eventName').value,
+                    start: this.selected.startTime,
+                    end: this.selected.endTime
+                })
+                let modal = Modal.getInstance(document.getElementById('createEventForm'))
+                modal.hide()
+            }
         }
     }
 }
@@ -89,7 +96,8 @@ export default {
         <FullCalendar :options="calendarOptions">
             <template v-slot:eventContent="arg">
                 <b>{{ arg.timeText }}</b>
-                <i>{{ arg.event.title }}</i>
+                <br />
+                <p>{{ arg.event.title }}</p>
             </template></FullCalendar
         >
         <!-- Modal -->
@@ -139,7 +147,9 @@ export default {
                         </div>
                     </div>
                     <div class="modal-footer align-items-center">
-                        <button type="button" class="btn btn-primary">Create</button>
+                        <button type="button" class="btn btn-primary" @click="createEvent()">
+                            Create
+                        </button>
                     </div>
                 </div>
             </div>

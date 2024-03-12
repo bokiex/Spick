@@ -3,7 +3,7 @@
 <template>
     <nav class="navbar navbar-expand-lg navbar-light bg-light m-3">
         <div class="container-fluid">
-            <a class="navbar-brand" href="#">Schedula</a>
+            <a class="navbar-brand" href="#">Spick</a>
             <button
                 class="navbar-toggler"
                 type="button"
