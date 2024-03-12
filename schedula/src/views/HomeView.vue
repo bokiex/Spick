@@ -7,6 +7,8 @@ import bootstrap5Plugin from '@fullcalendar/bootstrap5'
 import { Modal } from 'bootstrap'
 import VueDatePicker from '@vuepic/vue-datepicker'
 import '@vuepic/vue-datepicker/dist/main.css'
+import axios from 'axios'
+
 let INITIAL_EVENTS = [
     {
         id: 1,
@@ -77,15 +79,32 @@ export default {
             this.currentEvents = events
         },
 
-        createEvent() {
+        async createEvent() {
             if (this.calendar) {
                 this.calendar.addEvent({
                     title: document.getElementById('eventName').value,
                     start: this.selected.startTime,
                     end: this.selected.endTime
                 })
-                let modal = Modal.getInstance(document.getElementById('createEventForm'))
-                modal.hide()
+
+                await axios
+                    .post(
+                        'http://localhost:5000/event',
+                        {
+                            eventName: document.getElementById('eventName').value,
+                            eventLocation: 'Garden of Eden',
+                            start: this.selected.startTime,
+                            end: this.selected.endTime
+                        },
+                        {
+                            headers: {}
+                        }
+                    )
+                    .then((response) => {
+                        console.log(response)
+                        let modal = Modal.getInstance(document.getElementById('createEventForm'))
+                        modal.hide()
+                    })
             }
         }
     }
