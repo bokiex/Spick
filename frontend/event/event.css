@@ -272,3 +272,36 @@ form .error {
   width: 0;
   height: 0;
 }
+
+@media (max-width: 768px) {
+  /* Stack sidebar above the form content on small screens */
+  .form-container {
+    flex-direction: column;
+    align-items: center;
+    width: auto; /* Set width to auto to handle smaller screen sizes */
+    height: auto; /* Allow height to adjust to content */
+    padding: 0; /* Remove padding if needed */
+  }
+
+  /* Adjust the sidebar to display horizontally */
+  .form-sidebar {
+    flex-direction: row;
+    justify-content: center;
+    padding: 10; /* Remove padding if needed */
+    width: 100%; /* Full width */
+    margin-bottom: 1rem; /* Add some space between the steps and the form */
+    border-top-right-radius: 1rem; /* Add this line to round the top-right corner */
+    border-bottom-right-radius: 1rem; /* Add this line to round the bottom-right corner when stacked */
+  }
+
+  /* Hide all step content, only show the circle/number */
+  .form-sidebar .step .step-content {
+    display: none;
+  }
+
+  /* Align the circles horizontally */
+  .form-sidebar .step {
+    margin-right: 0.5rem; /* Space out the circles */
+  }
+
+}
