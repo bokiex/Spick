@@ -1,0 +1,26 @@
+version: "3.8"
+
+
+services:
+
+
+  reservation-mysql:
+      platform: linux/amd64
+      build:
+        context: ./mysql
+        dockerfile: Dockerfile
+      env_file:
+        - ./mysql/.env
+
+
+    ###############################################
+    # callbook: The test_invoke_http.py program
+    ###############################################
+  reservation-app:
+    platform: linux/amd64
+    build:
+      context: .
+      dockerfile: Dockerfile
+    depends_on:
+      - reservation-mysql
+  
