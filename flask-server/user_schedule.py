@@ -16,7 +16,7 @@ class UserSchedule(db.Model):
     scheduleID = db.Column(db.Integer, primary_key=True)
     eventID = db.Column(db.Integer, nullable=False)  # Now included
     userID = db.Column(db.Integer, nullable=False)   # Now included
-    weekday = db.Column(db.CHAR, nullable=False)
+    weekday = db.Column(db.CHAR(2), nullable=False)
     start_time = db.Column(db.DateTime, nullable=False)
     end_time = db.Column(db.DateTime, nullable=False)
     reason = db.Column(db.String(255), nullable=True)
