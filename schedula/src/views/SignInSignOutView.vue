@@ -25,21 +25,6 @@ export default {
                         <input type="password" placeholder="Password" />
                     </div>
                     <input type="submit" value="Login" class="btn solid" />
-                    <p class="social-text">Or Sign in with social platforms</p>
-                    <div class="social-media">
-                        <a href="#" class="social-icon">
-                            <i class="fab fa-facebook-f"></i>
-                        </a>
-                        <a href="#" class="social-icon">
-                            <i class="fab fa-twitter"></i>
-                        </a>
-                        <a href="#" class="social-icon">
-                            <i class="fab fa-google"></i>
-                        </a>
-                        <a href="#" class="social-icon">
-                            <i class="fab fa-linkedin-in"></i>
-                        </a>
-                    </div>
                 </form>
                 <form action="#" class="sign-up-form">
                     <h2 class="title">Sign up</h2>
@@ -51,26 +36,20 @@ export default {
                         <i class="fas fa-envelope"></i>
                         <input type="email" placeholder="Email" />
                     </div>
+                    <div class="input-field" style="margin-bottom: 0.1rem;">
+                        <i class="fa-brands fa-telegram"></i>
+                        <input type="text" placeholder="Telegram Handle" />
+                    </div>
+                    <p>Kindly include '@' with your Telegram Handle</p>
                     <div class="input-field">
                         <i class="fas fa-lock"></i>
                         <input type="password" placeholder="Password" />
                     </div>
-                    <input type="submit" class="btn" value="Sign up" />
-                    <p class="social-text">Or Sign up with social platforms</p>
-                    <div class="social-media">
-                        <a href="#" class="social-icon">
-                            <i class="fab fa-facebook-f"></i>
-                        </a>
-                        <a href="#" class="social-icon">
-                            <i class="fab fa-twitter"></i>
-                        </a>
-                        <a href="#" class="social-icon">
-                            <i class="fab fa-google"></i>
-                        </a>
-                        <a href="#" class="social-icon">
-                            <i class="fab fa-linkedin-in"></i>
-                        </a>
+                    <div class="checkbox-container">
+                        <input type="checkbox" id="spick-bot-check">
+                        <label for="spick-bot-check">Please tick me after sending a 'HI' to our friendly <a href="#" class="spick-bot-link">Spick Bot</a> before signing up!!</label>
                     </div>
+                    <input type="submit" class="btn" value="Sign up" />
                 </form>
             </div>
         </div>
@@ -80,8 +59,7 @@ export default {
                 <div class="content">
                     <h3>New here ?</h3>
                     <p>
-                        Lorem ipsum, dolor sit amet consectetur adipisicing elit. Debitis, ex
-                        ratione. Aliquid!
+                        Sign up now to be part of the scheduling squad and start coordinating your events with ease!!
                     </p>
                     <button class="btn transparent" id="sign-up-btn" @click="signUpClick">
                         Sign up
@@ -91,10 +69,9 @@ export default {
             </div>
             <div class="panel right-panel">
                 <div class="content">
-                    <h3>One of us ?</h3>
+                    <h3>Already a Member?</h3>
                     <p>
-                        Lorem ipsum dolor sit amet consectetur adipisicing elit. Nostrum laboriosam
-                        ad deleniti.
+                        Sign In below and continue streamlining your event planning journey!!
                     </p>
                     <button class="btn transparent" id="sign-in-btn" @click="signInClick">
                         Sign in
@@ -122,7 +99,7 @@ input {
 
 .container {
     position: relative;
-    width: 100%;
+    /* width: 100%; */
     background-color: #fff;
     min-height: 100vh;
     overflow: hidden;
@@ -134,6 +111,39 @@ input {
     height: 100%;
     top: 0;
     left: 0;
+    right: 0;
+}
+
+.sign-up-form p {
+        font-size: 0.7rem;
+        color: #a1a1a1;
+        text-align: left ;
+    }
+
+.checkbox-container {
+    margin: 0.5rem 0;
+    display: flex;
+}
+
+.checkbox-container label {
+    font-size: 0.8rem;
+    color: #a1a1a1;
+    text-align: left;
+    cursor: pointer;
+    margin-left: 0.2rem;
+}
+
+.checkbox-container input[type="checkbox"] {
+    margin-right: 0.3rem;
+}
+
+.spick-bot-link {
+    color: #5995fd;
+    text-decoration: none;
+}
+
+.spick-bot-link:hover {
+    text-decoration: underline;
 }
 
 .signin-signup {

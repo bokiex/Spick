@@ -4,7 +4,7 @@ import CalendarView from '../views/CalendarView.vue'
 import EventsView from '../views/EventsView.vue'
 import EventView from '../views/EventView.vue'
 import EventFormView from '../views/EventFormView.vue'
-import AuthenticationView from '../views/AuthenticationView.vue'
+import SignInSignOutView from '../views/SignInSignOutView.vue'
 
 const router = createRouter({
     history: createWebHistory(import.meta.env.BASE_URL),
@@ -35,9 +35,9 @@ const router = createRouter({
             component: EventView
         },
         {
-            path: '/authentication',
-            name: 'authentication',
-            component: AuthenticationView
+            path: '/SignInSignOut',
+            name: 'SignInSignOut',
+            component: SignInSignOutView
         }
     ]
 })
