@@ -3,7 +3,7 @@ import { CalendarDays, SquarePlus, UserRound, TentTree } from 'lucide-vue-next'
 </script>
 
 <template>
-    <nav class="navbar navbar-expand-lg navbar-light bg-light m-3">
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
         <div class="container-fluid">
             <a class="navbar-brand" href="#">Spick</a>
             <button

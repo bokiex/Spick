@@ -8,6 +8,7 @@ import { Modal } from 'bootstrap'
 import VueDatePicker from '@vuepic/vue-datepicker'
 import '@vuepic/vue-datepicker/dist/main.css'
 import axios from 'axios'
+import Navbar from '@/components/Navbar.vue'
 
 let INITIAL_EVENTS = [
     {
@@ -25,7 +26,8 @@ let INITIAL_EVENTS = [
 export default {
     components: {
         FullCalendar, // make the <FullCalendar> tag available
-        VueDatePicker
+        VueDatePicker,
+        Navbar
     },
     data() {
         return {
@@ -51,9 +53,19 @@ export default {
             },
             selected: {
                 startTime: '',
-                endTime: ''
+                endTime: '',
+                typeOfEvent: '',
+                township: ''
             },
-            calendar: null
+            calendar: null,
+            locations: [
+                'Orchard Road',
+                'Sentosa',
+                'Marina Bay',
+                'Chinatown',
+                'Little India',
+                'Jurong East'
+            ]
         }
     },
     methods: {
@@ -78,7 +90,12 @@ export default {
         handleEvents(events) {
             this.currentEvents = events
         },
-
+        handleEventTypeSelect(event) {
+            this.selected.typeOfEvent = event.target.value
+        },
+        handleTownshipSelect(event) {
+            this.selected.township = event.target.value
+        },
         async createEvent() {
             if (this.calendar) {
                 this.calendar.addEvent({
@@ -145,6 +162,34 @@ export default {
                             </div>
                             <div class="col-9">
                                 <input type="text" id="eventName" class="form-control" />
+                            </div>
+                        </div>
+                        <div class="row align-items-center mb-1">
+                            <div class="col-3">
+                                <label for="eventName" class="col-form-label">Type of Event:</label>
+                            </div>
+                            <div class="col-9">
+                                <select class="form-select" @click="handleSelect">
+                                    <option value="Restaurant">Restaurant</option>
+                                    <option value="Picnic">Picnic</option>
+                                    <option value="Birthday">Birthday</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row align-items-center mb-1">
+                            <div class="col-3">
+                                <label for="eventName" class="col-form-label">Where:</label>
+                            </div>
+                            <div class="col-9">
+                                <select class="form-select" @click="handleSelect">
+                                    <option
+                                        v-for="place in this.locations"
+                                        :key="place"
+                                        :value="place"
+                                    >
+                                        {{ place }}
+                                    </option>
+                                </select>
                             </div>
                         </div>
                         <div class="row">

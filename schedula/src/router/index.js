@@ -1,38 +1,45 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import HomeView from '../views/HomeView.vue'
+
+import CalendarView from '../views/CalendarView.vue'
 import EventsView from '../views/EventsView.vue'
-import Event from '../views/Event.vue'
-import EventForm from '../views/EventForm.vue'
+import EventView from '../views/EventView.vue'
+import EventFormView from '../views/EventFormView.vue'
+import AuthenticationView from '../views/AuthenticationView.vue'
 
 const router = createRouter({
-  history: createWebHistory(import.meta.env.BASE_URL),
-  routes: [
-    {
-      path: '/',
-      name: 'home',
-      component: HomeView
-    },
-    {
-      path: '/events',
-      name: 'events',
-      component: EventsView
-    },
-    {
-      path: '/events/:id',
-      name: 'event',
-      component: Event
-    },
-    {
-      path: '/create',
-      name: 'create',
-      component: EventForm
-    },
-    {
-      path: '/profile',
-      name: 'profile',
-      component: Event
-    }
-  ]
+    history: createWebHistory(import.meta.env.BASE_URL),
+    routes: [
+        {
+            path: '/',
+            name: 'home',
+            component: CalendarView
+        },
+        {
+            path: '/events',
+            name: 'events',
+            component: EventsView
+        },
+        {
+            path: '/events/:id',
+            name: 'event',
+            component: EventView
+        },
+        {
+            path: '/create',
+            name: 'create',
+            component: EventFormView
+        },
+        {
+            path: '/profile',
+            name: 'profile',
+            component: EventView
+        },
+        {
+            path: '/authentication',
+            name: 'authentication',
+            component: AuthenticationView
+        }
+    ]
 })
 
 export default router
