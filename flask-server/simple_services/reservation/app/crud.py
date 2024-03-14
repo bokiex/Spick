@@ -5,8 +5,9 @@ def get_reservations(db: Session):
     return db.query(models.Reservation).all()
 
 def create_reservation(db: Session, reservation: schemas.Reservation):
- 
+   
     db_reservation = models.Reservation(**reservation.dict())
+
     db.add(db_reservation)
     db.commit()
     db.refresh(db_reservation)

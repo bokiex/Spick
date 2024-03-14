@@ -1,4 +1,6 @@
-<script setup></script>
+<script setup>
+import { CalendarDays, SquarePlus, UserRound, TentTree } from 'lucide-vue-next'
+</script>
 
 <template>
     <nav class="navbar navbar-expand-lg navbar-light bg-light m-3">
@@ -18,20 +20,24 @@
             <div class="collapse navbar-collapse" id="navbarSupportedContent">
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                     <li class="nav-item">
-                        <a class="nav-link" href="/"><i class="bi bi-calendar"></i> Calendar</a>
+                        <RouterLink class="nav-link" to="/">
+                            <CalendarDays /><span>Calendar</span>
+                        </RouterLink>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link active" href="#"
-                            ><i class="bi bi-plus-square"></i> Create</a
+                        <RouterLink class="nav-link" to="/create">
+                            <SquarePlus /><span>Create</span>
+                        </RouterLink>
+                    </li>
+                    <li class="nav-item">
+                        <RouterLink class="nav-link" to="/events">
+                            <TentTree /><span>Events</span> </RouterLink
                         >
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#"
-                            ><i class="bi bi-currency-dollar"></i> Billing</a
-                        >
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#"><i class="bi bi-person-square"></i> Profile</a>
+                        <RouterLink class="nav-link" to="/profile">
+                            <UserRound /><span>Profile</span>
+                        </RouterLink>
                     </li>
                 </ul>
             </div>
