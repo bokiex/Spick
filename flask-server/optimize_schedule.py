@@ -1,48 +1,73 @@
-from flask import Flask, request, jsonify
 from datetime import datetime, timedelta
+from collections import defaultdict
+import requests
+from flask import Flask, jsonify
 
 app = Flask(__name__)
 
-# Add your optimization logic here
+def fetch_schedules():
+    # Replace with actual fetch from your service
+    schedule_service_url = 'http://localhost:5000/user_schedule'
+    try:
+        response = requests.get(schedule_service_url)
+        if response.status_code == 200:
+            return response.json()['schedules']
+        else:
+            print(f"Failed to fetch schedules: {response.status_code}")
+            return []
+    except requests.RequestException as e:
+        print(f"Request failed: {e}")
+        return []
 
-def find_common_time(users_schedules):
-    # Define the time range for comparison, from 9am to 9pm
-    start_time = datetime.now().replace(hour=9, minute=0, second=0, microsecond=0)
-    end_time = start_time + timedelta(hours=12)
+def initialize_week():
+    # Initializes full availability for a week with simplification (whole day available)
+    return {day: [('00:00', '23:59')] for day in ["M", "T", "W", "Th", "F", "Sa", "Su"]}
 
-    # Initialize a dictionary to count the availability for each time slot
-    availability_counts = {}
+def mark_unavailable_times(week, schedules):
+    for schedule in schedules:
+        weekday = schedule['weekday']
+        start = datetime.strptime(schedule['start_time'], "%Y-%m-%dT%H:%M:%S").time()
+        end = datetime.strptime(schedule['end_time'], "%Y-%m-%dT%H:%M:%S").time()
+        
+        # Assuming a simplified model: only keep timeslots that don't intersect with the schedule
+        if start == datetime.strptime('00:00', "%H:%M").time() and end == datetime.strptime('23:59', "%H:%M").time():
+            week[weekday] = []  # The whole day is booked
+        else:
+            # Update available slots for the day
+            new_slots = []
+            for avail_start, avail_end in week[weekday]:
+                avail_start_dt = datetime.strptime(avail_start, "%H:%M")
+                avail_end_dt = datetime.strptime(avail_end, "%H:%M")
+                start_dt = datetime.combine(avail_start_dt.date(), start)
+                end_dt = datetime.combine(avail_end_dt.date(), end)
 
-    # Count the availability for each time slot
-    for user_schedule in users_schedules:
-        user_start_time = max(user_schedule['start_time'], start_time)
-        user_end_time = min(user_schedule['end_time'], end_time)
+                if start_dt.time() > avail_start_dt.time():
+                    new_slots.append((avail_start, start_dt.strftime("%H:%M")))
+                if end_dt.time() < avail_end_dt.time():
+                    new_slots.append((end_dt.strftime("%H:%M"), avail_end))
+            
+            week[weekday] = new_slots
 
-        # Iterate over each hour within the time range
-        current_time = user_start_time
-        while current_time <= user_end_time:
-            # Increment the availability count for this time slot
-            availability_counts[current_time] = availability_counts.get(current_time, 0) + 1
+    return week
 
-            # Move to the next hour
-            current_time += timedelta(hours=1)
+def find_common_availability(schedules):
+    event_schedules = defaultdict(list)
+    for schedule in schedules:
+        event_schedules[schedule['eventID']].append(schedule)
+    
+    event_availability = {}
+    for event_id, schedules in event_schedules.items():
+        week = initialize_week()
+        week = mark_unavailable_times(week, schedules)
+        event_availability[event_id] = week
+    
+    return event_availability
 
-    # Calculate the percentage of users available for each time slot
-    total_users = len(users_schedules)
-    common_times = []
-    for time_slot, count in availability_counts.items():
-        # Check if the percentage of availability is greater than or equal to 60%
-        if (count / total_users) * 100 >= 60:
-            # Check if the duration of the time slot is at least 1 hour
-            if time_slot + timedelta(hours=1) in availability_counts:
-                common_times.append((time_slot, (count / total_users) * 100))
+@app.route('/optimize_schedule', methods=['GET'])
+def optimize_schedule():
+    schedules_data = fetch_schedules()  # This should ideally be replaced with a real fetch
+    available_times = find_common_availability(schedules_data)
+    return jsonify(available_times)
 
-    # Sort common times by availability percentage
-    common_times.sort(key=lambda x: x[1], reverse=True)
-
-    if common_times:
-        return common_times
-    else:
-        return "Not enough participants available."
 if __name__ == '__main__':
     app.run(host="0.0.0.0", port=5001, debug=True)
