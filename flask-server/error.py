@@ -3,7 +3,7 @@ import json
 import pika
 from os import environ
 
-e_queue_name = environ.get('Error') #Error
+e_queue_name = environ.get('Error') or "Error" #Error
 
 def receiveError(channel):
     try:

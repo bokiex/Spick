@@ -8,6 +8,7 @@ import { Modal } from 'bootstrap'
 import VueDatePicker from '@vuepic/vue-datepicker'
 import '@vuepic/vue-datepicker/dist/main.css'
 import axios from 'axios'
+import Navbar from '@/components/Navbar.vue'
 
 let INITIAL_EVENTS = [
     {
@@ -25,7 +26,8 @@ let INITIAL_EVENTS = [
 export default {
     components: {
         FullCalendar, // make the <FullCalendar> tag available
-        VueDatePicker
+        VueDatePicker,
+        Navbar
     },
     data() {
         return {
@@ -111,6 +113,7 @@ export default {
 }
 </script>
 <template>
+    <Navbar />
     <div class="container">
         <FullCalendar :options="calendarOptions">
             <template v-slot:eventContent="arg">

@@ -40,7 +40,7 @@ def create_event():
                 channel.basic_publish(exchange=exchangename, routing_key="create_event.error",body=message, properties=pika.BasicProperties(delivery_mode=2))
                 return result
             else:
-                channel.basic_publish(exchange=exchangename, routing_key="create_event.info",body=message, properties=pika.BasicProperties(delivery_mode=2))
+                channel.basic_publish(exchange=exchangename, routing_key="create_event.notification",body=message, properties=pika.BasicProperties(delivery_mode=2))
 
         except Exception as e:
             # Unexpected error in code
