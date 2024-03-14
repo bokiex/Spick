@@ -30,7 +30,9 @@ class Event(db.Model):
             "eventName": self.eventName,
             "startTime": self.startTime,
             "endTime": self.endTime,
-            "eventLocation": self.eventLocation
+            "timeoutTime": self.timeoutTime,
+            "eventLocation": self.eventLocation,
+            "userID": self.userID,
         }
         return dto
 

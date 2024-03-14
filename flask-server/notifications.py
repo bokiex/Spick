@@ -113,27 +113,24 @@ def notification(telegramtag):
             }
         ), 201
 
-
-
+"""
+Takes in this json format:
+{
+    "data": ["@user1", "@user2"]
+}
+"""
 @app.route("/notify/<string:host>", methods=["POST", 'GET'])
 def send_notif(host):
-    # some function here
     countnotif = 0
-    # json sent is a list of telegram tags to be notified
     data = request.get_json()
-    #print("creatorname: ",creatorname)
-    #print("data: ",data)
+
     notiflist = data["data"]
     for user in notiflist:
-        # request send
-        #print("user: ",user)
         if (Notification.query.filter_by(telegramtag=user).first()):
             notif = Notification.query.filter_by(telegramtag=user).first()
             notifinfo = notif.json()
             chatid = notifinfo["chatid"]
-            #print("chatid: ",chatid)
             chatmsg = "{host} has invited you to an event! Check it out on Spick now!"
-            #chatparams = {'chat_id': chatid , 'text': chatmsg}
             sendurl = "https://api.telegram.org/bot" + token + \
                 "/sendMessage" + "?chat_id=" + chatid + "&text=" + chatmsg
             r = requests.get(sendurl)
