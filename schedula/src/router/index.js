@@ -5,6 +5,8 @@ import EventsView from '../views/EventsView.vue'
 import EventView from '../views/EventView.vue'
 import EventFormView from '../views/EventFormView.vue'
 import SignInSignUpView from '../views/SignInSignUpView.vue'
+import AuthenticationView from '../views/AuthenticationView.vue'
+import ProfileView from '../views/ProfileView.vue'
 
 const router = createRouter({
     history: createWebHistory(import.meta.env.BASE_URL),
@@ -32,7 +34,7 @@ const router = createRouter({
         {
             path: '/profile',
             name: 'profile',
-            component: EventView
+            component: ProfileView
         },
         {
             path: '/SignInSignUp',
