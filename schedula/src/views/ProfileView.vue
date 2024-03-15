@@ -128,16 +128,19 @@ export default {
                 name: '',
                 password: '',
                 tele: '',
-                email: '',
-                newPwd: '',
-                confirmPwd: ''
+                email: ''
             }
         }
     },
     methods: {
         saveSettings() {
             // Logic to save user settings
-            console.log('Saved', this.user)
+            axios.post('http://localhost:5000/signup', {
+                name : document.getElementById("userName").value,
+                tele: document.getElementById("userTele").value,
+                email: document.getElementById("userEmail").value
+            });
+            console.log('Saved', this.user);
         },
         updatePassword() {
             // Check if new password matches confirm password
@@ -147,9 +150,10 @@ export default {
             }
             
             // Send a request to the microservice to update the password
-            axios.post('http://your-microservice-url/api/update-password', {
+            axios.post('http://localhost:5000/signup', {
                 password: this.newPwd
-            })
+            });
+            console.log('Saved', this.user);
         }
     }
 }
