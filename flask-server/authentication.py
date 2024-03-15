@@ -1,18 +1,21 @@
 from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
+from flask_cors import CORS
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://root@localhost:3306/authentication'
+CORS(app)
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://root@localhost:3306/user'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
 class Auth(db.Model):
-    __tablename__ = 'authentication'
+    __tablename__ = 'user'
     userid = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
     password_hash = db.Column(db.String(128))
+    telegramtag = db.Column(db.String(64), nullable=False)
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password, method='pbkdf2:sha256')
@@ -23,7 +26,7 @@ class Auth(db.Model):
 @app.route('/signup', methods=['POST'])
 def signup():
     data = request.get_json()
-    user = Auth(username=data['username'], email=data['email'])
+    user = Auth(username=data['username'], email=data['email'], telegramtag=data['telegramtag'])
     user.set_password(data['password'])
     db.session.add(user)
     db.session.commit()
@@ -70,3 +73,19 @@ def login():
 
 if __name__ == '__main__':
     app.run(debug=True)
+
+
+# JSON File received from SignInSignUp:
+# SignUp:
+# {
+#     "username": "username",
+#     "email": "email",
+#     "password": "password",
+#     "telegramtag": "telegramtag"
+#}
+
+#SignIn / Login:
+# {
+#   "username": "username",
+#   "password": "password",
+#}

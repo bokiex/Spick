@@ -1,6 +1,44 @@
 <script>
+import axios from 'axios';
+import router from  '../router';
+
 export default {
+    data(){
+        return{
+            username: '',
+            email: '',
+            telegramHandle:'',
+            password: '',
+        };
+    },
     methods: {
+        async signUp(){
+            try{
+                const response = await axios.post('http://127.0.0.1:5000/signup', {
+                    username : this.username,
+                    email: this.email,
+                    telegramtag: this.telegramHandle,
+                    password: this.password,
+                });
+                console.log(response.data);
+                this.signInClick(); //redirect to login page after successful registration
+            }catch(error){
+                console.log(error.response.data);
+            }
+        },
+        async signIn(){
+            try{
+                const response = await axios.post('http://127.0.0.1:5000/login',{
+                    username: this.username,
+                    password: this.password,
+                });
+                console.log(response.data);
+                router.push('/');
+            }catch(error){
+                console.log(error.response.data);
+            }
+        },
+
         signUpClick() {
             document.querySelector('.container').classList.add('sign-up-mode')
         },
@@ -14,36 +52,36 @@ export default {
     <div class="container">
         <div class="forms-container">
             <div class="signin-signup">
-                <form action="#" class="sign-in-form">
+                <form @submit.prevent="signIn" class="sign-in-form">
                     <h2 class="title">Sign in</h2>
                     <div class="input-field">
                         <i class="fas fa-user"></i>
-                        <input type="text" placeholder="Username" />
+                        <input v-model="username" type="text" placeholder="Username" />
                     </div>
                     <div class="input-field">
                         <i class="fas fa-lock"></i>
-                        <input type="password" placeholder="Password" />
+                        <input v-model="password" type="password" placeholder="Password" />
                     </div>
                     <input type="submit" value="Login" class="btn solid" />
                 </form>
-                <form action="#" class="sign-up-form">
+                <form @submit.prevent="signUp" class="sign-up-form">
                     <h2 class="title">Sign up</h2>
                     <div class="input-field">
                         <i class="fas fa-user"></i>
-                        <input type="text" placeholder="Username" />
+                        <input v-model="username" type="text" placeholder="Username" />
                     </div>
                     <div class="input-field">
                         <i class="fas fa-envelope"></i>
-                        <input type="email" placeholder="Email" />
+                        <input v-model="email" type="email" placeholder="Email" />
                     </div>
                     <div class="input-field" style="margin-bottom: 0.1rem;">
                         <i class="fa-brands fa-telegram"></i>
-                        <input type="text" placeholder="Telegram Handle" />
+                        <input v-model="telegramHandle" type="text" placeholder="Telegram Handle" />
                     </div>
                     <p>Kindly include '@' with your Telegram Handle</p>
                     <div class="input-field">
                         <i class="fas fa-lock"></i>
-                        <input type="password" placeholder="Password" />
+                        <input v-model="password" type="password" placeholder="Password" />
                     </div>
                     <div class="checkbox-container">
                         <input type="checkbox" id="spick-bot-check">
