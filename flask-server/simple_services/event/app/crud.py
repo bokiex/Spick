@@ -5,7 +5,7 @@ import models, schemas
 def get_events(db: Session):
     return db.query(models.Event).all()
 
-def create_event(db: Session, event: schemas.Event):
+def create_event(db: Session, event: schemas.Event, invitees: list):
     if db.query(models.Event).filter(models.Event.event_name == event.event_name).first():
             return None
     db_event = models.Event(**event.dict())
@@ -34,3 +34,13 @@ def delete_event(db: Session, event_id: int):
         db.delete(db_event)
         db.commit()
     return db_event
+
+def get_invitees(db: Session, event_id: int):
+    return db.query(models.Invitee).filter(models.Invitee.event_id == event_id).all()
+
+def create_invitee(db: Session, invitee: schemas.Invitee):
+    db_invitee = models.Invitee(**invitee.dict())
+    db.add(db_invitee)
+    db.commit()
+    db.refresh(db_invitee)
+    return db_invitee

@@ -3,6 +3,9 @@ import requests
 import os
 from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
+import amqp_connection
+import json
+import pika
 from os import environ
 from dotenv import load_dotenv
 load_dotenv()
@@ -16,10 +19,10 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://is213@localhost:
 #app.config['SQLALCHEMY_DATABASE_URI'] = environ.get('dbURL')
 #------------------------------------------------------------------------------------------
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-token = os.getenv('BOT_TOKEN')
+token = "6996801409:AAGDWkgPaCtRAqH08y9lwYJQif6ESOnQ984"
 
 db = SQLAlchemy(app)
-
+n_queue_name = environ.get('Notification') or "Notification"  # Notification
 
 class Notification(db.Model):
     __tablename__ = 'notification'
@@ -35,6 +38,24 @@ class Notification(db.Model):
         return {"chatid": self.chatid, "telegramtag": self.telegramtag}
 
 
+def receiveNotification(channel):
+    try:
+        channel.basic_consume(queue=n_queue_name, on_message_callback=callback, auto_ack=True)
+        print('Error microservice: Consuming from queue:', n_queue_name)
+        channel.start_consuming()
+        
+    except pika.exceptions.AMQPError as e:
+        print(f"Error microservice: Failed to connect: {e}")
+        
+    except KeyboardInterrupt:
+        print("Error microservice: Program interrupted by user.")
+        
+        
+def callback(channel, method, properties, body):
+    print("\nError microservice: Received an error by " + __file__)
+    processNotification(body)
+    print()
+    
 @app.route("/chat")
 def get_all():
     chatlist = Notification.query.all()
@@ -113,18 +134,10 @@ def notification(telegramtag):
             }
         ), 201
 
-"""
-Takes in this json format:
-{
-    "data": ["@user1", "@user2"]
-}
-"""
-@app.route("/notify/<string:host>", methods=["POST", 'GET'])
-def send_notif(host):
+def processNotification(event):
     countnotif = 0
     data = request.get_json()
-
-    notiflist = data["data"]
+    notiflist = data['invitees']
     for user in notiflist:
         if (Notification.query.filter_by(telegramtag=user).first()):
             notif = Notification.query.filter_by(telegramtag=user).first()
@@ -154,3 +167,8 @@ def send_notif(host):
 
 if __name__ == '__main__':
     app.run(host="0.0.0.0",  port=5000, debug=True)
+    print("Error microservice: Getting Connection")
+    connection = amqp_connection.create_connection()
+    print("Error microservice: Connection established successfully")
+    channel = connection.channel()
+    receiveError(channel)
