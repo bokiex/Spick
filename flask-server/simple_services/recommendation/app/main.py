@@ -14,13 +14,14 @@ def get_db():
     finally:
         db.close()
 
-# Get all events
-@app.get("/events", response_model=list[schemas.Event])
-def get_events(db: Session = Depends(get_db)):
-    res = crud.get_events(db)
+# Get recommendations from Places API
+@app.post("/recommendation", response_model=list[schemas.Recommendation])
+def get_recommendation( db: Session = Depends(get_db)):
+    res = crud.get_recommendation(db)
     if res == []:
-        return jsonable_encoder({"message": "No events found."}), 404
+        return jsonable_encoder({"message": "No recommendation found."}), 404
     return jsonable_encoder(res)
+
 
 # Get event by ID
 @app.get("/events/{event_id}")

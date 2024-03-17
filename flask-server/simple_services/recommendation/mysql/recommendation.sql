@@ -7,8 +7,6 @@ DROP TABLE IF EXISTS `recommendations`;
 CREATE TABLE IF NOT EXISTS `recommendations` (
     `recommendation_id` INT PRIMARY KEY AUTO_INCREMENT,
     `event_id` INT FOREIGN KEY REFERENCES `events`(`event_id`),
-    `location_name` varchar(64) NOT NULL,
-    `location_desc` varchar(256),
-    `latitude` DECIMAL(10, 8),
-    `longitude` DECIMAL(11, 8),
+    `recommendation_name` varchar(64) NOT NULL,
+    `recommendation_address` varchar(256),
 )   ENGINE=InnoDB DEFAULT CHARSET=utf8;

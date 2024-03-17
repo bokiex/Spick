@@ -1,8 +1,101 @@
 from sqlalchemy.orm import Session
 import models, schemas
+import requests as rq
+from flask_cors import CORS
+from flask import Flask, request, jsonify
+import os, sys
+import json
+api_key = "AIzaSyBVwaHGbGTnc-cQHpIM6qqMbGIb7C-xKVA"
 
-def get_recommendations(db: Session):
-    return db.query(models.Recommendation).all()
+"""
+format of input
+{
+    "type": "Picnic",
+    "township": "Jurong"
+}
+format of output
+{
+    "code": 201,
+    "data": {
+        "places": [
+            {
+                "displayName": {
+                    "languageCode": "en",
+                    "text": "Pandan Reservoir Park"
+                },
+                "formattedAddress": "700 W Coast Rd, Singapore 608785"
+            },            
+            {
+                "displayName": {
+                    "languageCode": "en",
+                    "text": "Jurong Lake Gardens"
+                },
+                "formattedAddress": "Yuan Ching Rd, Singapore"
+            },
+        ]
+    }
+}       
+"""
+def get_recommendation(db: Session, eventID: int):
+    # Simple check of input format and data of the request are JSON
+    if request.is_json:
+        try:
+            search = request.get_json()
+            print("\nReceived search terms in JSON:", search)
+
+            # 1. Send search info
+            result = processSearch(search)
+
+            # 2. Save the result to the database
+            result = jsonify(result)
+            for i in result['data']['places']:
+                recommendation = schemas.Recommendation(event_id = eventID, recommendation_name = i['displayName']['text'], recommendation_address = i['formattedAddress'])
+                create_recommendation(db, recommendation)
+
+            # 3. Return the result
+            return db.query(models.Recommendation).all()
+
+        except Exception as e:
+            # Unexpected error in code
+            exc_type, exc_obj, exc_tb = sys.exc_info()
+            fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+            ex_str = str(e) + " at " + str(exc_type) + ": " + fname + ": line " + str(exc_tb.tb_lineno)
+            print(ex_str)
+
+            return jsonify({
+                "code": 500,
+                "message": "recommendation.py internal error: " + ex_str
+            }), 500
+
+    # if reached here, not a JSON request.
+    return jsonify({
+        "code": 400,
+        "message": "Invalid JSON input: " + str(request.get_data())
+    }), 400
+
+def processSearch(search):
+    url = "https://places.googleapis.com/v1/places:searchText"
+    # placeholder data
+    searchstr = search["type"] + "near" + search["township"]
+    data = {"textQuery" : searchstr}
+    json_data = json.dumps(data)
+    headers = {'Content-Type':'application/json', 'X-Goog-Api-Key':api_key, 
+               'X-Goog-FieldMask': 'places.displayName,places.formattedAddress,places.priceLevel'}
+    print('\n-----calling places API-----')
+    reply = rq.post(url, data = json_data, headers=headers)
+    response = reply.json()
+
+    print('search_result:', response)
+    
+    try:
+        return {
+            "code": 201,
+            "data": response
+        }
+
+    except:
+        return response["error"]
+    
 
 def create_recommendation(db: Session, recommendation: schemas.Recommendation):
     if db.query(models.Recommendation).filter(models.Recommendation.location_name == recommendation.location_name).first() \
@@ -21,6 +114,5 @@ def delete_recommendation(db: Session, event_id: int):
     db_recommendation = db.query(models.Recommendation).filter(models.Recommendation.event_id == event_id).all()
     for i in db_recommendation:
         db.delete(i)
-
     db.commit()
     return db_recommendation
