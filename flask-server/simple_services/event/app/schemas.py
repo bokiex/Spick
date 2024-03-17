@@ -10,3 +10,4 @@ class Event(BaseModel):
     timeout: datetime
     event_location: str
     user_id: int
+
