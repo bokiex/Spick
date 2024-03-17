@@ -22,30 +22,29 @@ def get_events(db: Session = Depends(get_db)):
         return jsonable_encoder({"message": "No events found."}), 404
     return jsonable_encoder(res)
 
-# Get public events
-@app.get("/events/public")
-async def get_public_events():
-    return {"events": []}
-
-# Get private events
-@app.get("/events/private")
-async def get_private_events():
-    return {"events": []}
-
 # Get event by ID
 @app.get("/events/{event_id}")
 async def get_event_by_id(event_id: int):
-    return {"event_id": event_id}
+    res = crud.get_event_by_id(event_id)
+    if res == []:
+        return jsonable_encoder({"message": "No event found."}), 404
+    return jsonable_encoder(res)
 
 # Update event
 @app.put("/events/{event_id}")
 async def update_event(event_id: int):
-    return {"event_id": event_id}
+    res = crud.update_event(event_id)
+    if res == []:
+        return jsonable_encoder({"message": "No event found."}), 404
+    return jsonable_encoder(res)
 
 # Delete event
 @app.delete("/events/{event_id}")
 async def delete_event(event_id: int):
-    return {"event_id": event_id}
+    res = crud.delete_event(event_id)
+    if res == []:
+        return jsonable_encoder({"message": "No event found."}), 404
+    return jsonable_encoder(res)
 
 # Create event
 @app.post("/events", response_model=schemas.Event)

@@ -1,6 +1,0 @@
-{
-  "dependencies": {
-    "bootstrap-vue": "^2.23.1",
-    "flask-cors": "^0.0.1"
-  }
-}
