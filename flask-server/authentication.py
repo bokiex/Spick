@@ -11,7 +11,7 @@ db = SQLAlchemy(app)
 
 class Auth(db.Model):
     __tablename__ = 'user'
-    userid = db.Column(db.Integer, primary_key=True)
+    userID = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
     password_hash = db.Column(db.String(128))
@@ -62,6 +62,7 @@ def login():
             status_code = 401
         else:
             response['message'] = "Login successful."
+            response['userID'] = user.userID
     except Exception as e:
         app.logger.error(f"Error during user lookup or password check: {e}")
         response['message'] = "An error occurred during login."
@@ -70,6 +71,56 @@ def login():
 
     return jsonify(response), status_code
 
+# New /user/<int:user_id> route
+@app.route('/user/<int:user_id>', methods=['GET', 'PUT'])
+def user_details(user_id):
+    user = Auth.query.get(user_id)
+    if not user:
+        return jsonify({'message': 'User not found'}), 404
+    
+    if request.method == 'GET':
+        # Return user details
+        user_info = {
+            'userID': user.userID,
+            'username': user.username,
+            'email': user.email,
+            'telegramtag': user.telegramtag
+        }
+        return jsonify(user_info), 200
+
+    elif request.method == 'PUT':
+        # Update user details
+        data = request.get_json()
+        user.username = data.get('username', user.username)
+        user.email = data.get('email', user.email)
+        user.telegramtag = data.get('telegramtag', user.telegramtag)
+        db.session.commit()
+        return jsonify({'message': 'User updated successfully'}), 200
+
+# New /user/<int:user_id>/change_password route
+@app.route('/user/<int:user_id>/change_password', methods=['PUT'])
+def change_user_password(user_id):
+    user = Auth.query.get(user_id)
+    if not user:
+        return jsonify({'message': 'User not found'}), 404
+
+    data = request.get_json()
+    old_password = data.get('password')
+    new_password = data.get('newPwd')
+    confirm_password = data.get('confirmPwd')
+
+    if not user.check_password(old_password):
+        return jsonify({'message': 'Current password is incorrect'}), 401
+    
+    if new_password != confirm_password:
+        return jsonify({'message': 'New passwords do not match'}), 400
+
+    if old_password == new_password:
+        return jsonify({'message': "New password can't be the same as the old password"}), 400
+
+    user.set_password(new_password)
+    db.session.commit()
+    return jsonify({'message': 'Password updated successfully'}), 200
 
 if __name__ == '__main__':
     app.run(debug=True)
@@ -89,3 +140,5 @@ if __name__ == '__main__':
 #   "username": "username",
 #   "password": "password",
 #}
+
+# JSON File received from ProfileView:

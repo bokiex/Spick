@@ -1,3 +1,99 @@
+<script>
+import axios from 'axios';
+export default {
+    data() {
+        return {
+            user: {
+                userID: localStorage.getItem('userID'),
+                name: '',
+                password: '',
+                tele: '',
+                email: '',
+                newPwd: '',
+                confirmPwd: ''
+            }
+        }
+    },
+    mounted(){
+        this.loadUserData();
+    },
+    methods: {
+        loadUserData(){
+            console.log(this.user.userID);
+            axios.get(`http://127.0.0.1:5000/user/${this.user.userID}`)
+                .then(response => {
+                    this.user.name = response.data.username;
+                    this.user.tele = response.data.telegramtag;
+                    this.user.email = response.data.email;
+                })
+                .catch(error => console.error(error))
+        },
+        // saveSettings() {
+        //     // Logic to save user settings
+        //     axios.post('http://localhost:5000/signup', {
+        //         name : document.getElementById("userName").value,
+        //         tele: document.getElementById("userTele").value,
+        //         email: document.getElementById("userEmail").value
+        //     });
+        //     console.log('Saved', this.user);
+        // },
+
+        // updatePassword() {
+        //     // Check if new password matches confirm password
+        //     if (this.newPwd !== this.confirmPwd) {
+        //         alert('New password and confirm password do not match');
+        //         return;
+        //     }
+        //     // Send a request to the microservice to update the password
+        //     axios.post('http://localhost:5000/signup', {
+        //         password: this.newPwd
+        //     });
+        //     console.log('Saved', this.user);
+        // }
+
+        saveSettings() {
+            // Logic to save user settings
+            axios.put(`http://127.0.0.1:5000/user/${this.user.userID}`, {
+                username: this.user.name,
+                telegramtag: this.user.tele,
+                email: this.user.email
+            })
+            .then(response => {
+                console.log('Settings saved', response.data);
+                // Additional logic upon success
+            })
+            .catch(error => console.error(error));
+        },
+        updatePassword() {
+            // Check if new password matches confirm password
+            if (this.user.newPwd !== this.user.confirmPwd) {
+                alert('New password and confirm password do not match');
+                return;
+            }
+            
+            // Check if new password is different from the old password
+            if (this.user.password === this.user.newPwd) {
+                alert("New password can't be the same as the old password");
+                return;
+            }
+            
+            // Send a request to the microservice to update the password
+            axios.put(`http://127.0.0.1:5000/user/${this.user.userID}/password`, {
+                oldPassword: this.user.password,
+                newPassword: this.user.newPwd
+            })
+            .then(response => {
+                console.log('Password updated', response.data);
+                // Additional logic upon success
+            })
+            .catch(error => {
+                console.error(error.response.data);
+            });
+        }
+    }
+}
+</script>
+
 <template>
     <div class="container my-4">
         <!-- Personal Information -->
@@ -118,46 +214,6 @@
         </div>
     </div>
 </template>
-
-<script>
-import axios from 'axios';
-export default {
-    data() {
-        return {
-            user: {
-                name: '',
-                password: '',
-                tele: '',
-                email: ''
-            }
-        }
-    },
-    methods: {
-        saveSettings() {
-            // Logic to save user settings
-            axios.post('http://localhost:5000/signup', {
-                name : document.getElementById("userName").value,
-                tele: document.getElementById("userTele").value,
-                email: document.getElementById("userEmail").value
-            });
-            console.log('Saved', this.user);
-        },
-        updatePassword() {
-            // Check if new password matches confirm password
-            if (this.newPwd !== this.confirmPwd) {
-                alert('New password and confirm password do not match');
-                return;
-            }
-            
-            // Send a request to the microservice to update the password
-            axios.post('http://localhost:5000/signup', {
-                password: this.newPwd
-            });
-            console.log('Saved', this.user);
-        }
-    }
-}
-</script>
 
 <style>
 * {
