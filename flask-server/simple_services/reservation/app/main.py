@@ -1,6 +1,7 @@
 from fastapi import FastAPI, Depends
-from database import SessionLocal
+
 import crud, schemas
+from database import SessionLocal
 from sqlalchemy.orm import Session
 from fastapi.encoders import jsonable_encoder
 

@@ -6,7 +6,7 @@ import json
 
 app = Flask(__name__)
 CORS(app)
-api_key = os.getenv('GOOGLE_API_KEY')
+api_key = "AIzaSyBVwaHGbGTnc-cQHpIM6qqMbGIb7C-xKVA"
 @app.route("/recommend", methods=['POST'])
 def getrecc():
     # Simple check of input format and data of the request are JSON

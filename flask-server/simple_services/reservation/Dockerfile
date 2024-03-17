@@ -1,11 +1,14 @@
 FROM python:3-slim
 
-WORKDIR /code
+WORKDIR /usr/src/app
 
-COPY ./requirements.txt /code/requirements.txt
+ENV DB_PASSWORD=root
 
-RUN pip install -r /code/requirements.txt
+COPY ./requirements.txt ./
 
-COPY ./app /code/app
 
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "80"]
+RUN pip install -r ./requirements.txt
+
+COPY ./app ./
+
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "80"]

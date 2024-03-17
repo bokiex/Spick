@@ -1,17 +1,43 @@
 version: "3.8"
 
+volumes:
+  reservation-mysql-data:
+    driver: local
+  reservation-mysql-logs:
+    driver: local
+
+networks:
+  spick-net:
+    driver: bridge
 
 services:
-
-
   reservation-mysql:
-      platform: linux/amd64
-      build:
-        context: ./mysql
-        dockerfile: Dockerfile
-      env_file:
-        - ./mysql/.env
-
+    platform: linux/amd64
+    build:
+      context: ./mysql
+      dockerfile: Dockerfile
+    networks:
+      - spick-net
+    volumes:
+      - reservation-mysql-data:/var/lib/mysql
+      - reservation-mysql-logs:/var/log/mysql
+    env_file:
+      - ./mysql/.env
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "mysqladmin",
+          "ping",
+          "-h",
+          "localhost",
+          "-u",
+          "${DATABASE_USER}",
+          "-p${DATABASE_PASSWORD}",
+        ]
+      interval: 30s
+      timeout: 5s
+      retries: 10
 
     ###############################################
     # callbook: The test_invoke_http.py program
@@ -21,6 +47,11 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+    networks:
+      - spick-net
+    environment:
+      DB_USER: ${DATABASE_USER}
+      DB_PASSWORD: ${DATABASE_PASSWORD}
     depends_on:
-      - reservation-mysql
-  
+      reservation-mysql:
+        condition: service_healthy

@@ -128,7 +128,6 @@ export default {
 }
 </script>
 <template>
-    <Navbar />
     <div class="container">
         <FullCalendar :options="calendarOptions">
             <template v-slot:eventContent="arg">
