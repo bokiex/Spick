@@ -50,7 +50,34 @@ def receiveNotification(channel):
     except KeyboardInterrupt:
         print("Error microservice: Program interrupted by user.")
         
-        
+"""
+
+"body": {
+    "event_id": 1,
+    "event_name": "Picnic",
+    "event_desc": "Picnic at Marina Bay",
+    "start_time": "2021-10-01 15:00:00",
+    "end_time": "2021-10-01 18:00:00",
+    "time_out": "2021-09-30 23:59:59",
+    "category": "Picnic",
+    "township": "Marina Bay",
+    "invitees": [
+        {
+        'userID': 1
+        'username': "user2",
+        'email': "user2@email.com",
+        'telegramtag': "@user2"
+        },
+        {
+            'userID': 2
+            'username': "user3",
+            'email': "user3@email.com",
+            'telegramtag': "@user3"
+        }
+    ],
+    "user_id": "user1"
+}
+"""
 def callback(channel, method, properties, body):
     print("\nError microservice: Received an error by " + __file__)
     processNotification(body)
@@ -139,11 +166,12 @@ def processNotification(event):
     data = request.get_json()
     notiflist = data['invitees']
     for user in notiflist:
-        if (Notification.query.filter_by(telegramtag=user).first()):
-            notif = Notification.query.filter_by(telegramtag=user).first()
+        notif = Notification.query.filter_by(telegramtag=user).first()
+        if (notif):
             notifinfo = notif.json()
             chatid = notifinfo["chatid"]
-            chatmsg = "{host} has invited you to an event! Check it out on Spick now!"
+            host = event['user_id']
+            chatmsg = f"{host} has invited you to an event! Check it out on Spick now!"
             sendurl = "https://api.telegram.org/bot" + token + \
                 "/sendMessage" + "?chat_id=" + chatid + "&text=" + chatmsg
             r = requests.get(sendurl)
@@ -167,8 +195,8 @@ def processNotification(event):
 
 if __name__ == '__main__':
     app.run(host="0.0.0.0",  port=5000, debug=True)
-    print("Error microservice: Getting Connection")
+    print("Notification microservice: Getting Connection")
     connection = amqp_connection.create_connection()
-    print("Error microservice: Connection established successfully")
+    print("Notification microservice: Connection established successfully")
     channel = connection.channel()
-    receiveError(channel)
+    receiveNotification(channel)
