@@ -7,6 +7,7 @@ import EventFormView from '../views/EventFormView.vue'
 import SignInSignUpView from '../views/SignInSignUpView.vue'
 //import AuthenticationView from '../views/AuthenticationView.vue'
 import ProfileView from '../views/ProfileView.vue'
+import ReservationView from '@/views/ReservationView.vue'
 
 const router = createRouter({
     history: createWebHistory(import.meta.env.BASE_URL),
@@ -40,6 +41,11 @@ const router = createRouter({
             path: '/SignInSignUp',
             name: 'SignInSignUp',
             component: SignInSignUpView
+        },
+        {
+            path: '/reservation',
+            name: 'reservation',
+            component: ReservationView
         }
     ]
 })
