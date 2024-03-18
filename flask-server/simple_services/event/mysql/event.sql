@@ -20,7 +20,7 @@ CREATE TABLE IF NOT EXISTS `event` (
 
 DROP TABLE IF EXISTS `invitee`;
 CREATE TABLE IF NOT EXISTS `invitee` (
-    `event_id` INT PRIMARY KEY ,
+    `event_id` INT PRIMARY KEY,
     `user_id` INT,
     `status` varchar(64),
     FOREIGN KEY (event_id) REFERENCES event(event_id),

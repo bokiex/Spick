@@ -6,7 +6,7 @@ class Event(BaseModel):
     event_desc: str
     start_time: datetime
     end_time: datetime
-    timeout: datetime
+    time_out: datetime
     user_id: int
 
 class Invitee(BaseModel):

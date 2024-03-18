@@ -5,7 +5,7 @@ import models, schemas
 def get_events(db: Session):
     return db.query(models.Event).all()
 
-def create_event(db: Session, event: schemas.Event, invitees: list):
+def create_event(db: Session, event: schemas.Event):
     if db.query(models.Event).filter(models.Event.event_name == event.event_name).first():
             return None
     db_event = models.Event(**event.dict())
@@ -39,6 +39,8 @@ def get_invitees(db: Session, event_id: int):
     return db.query(models.Invitee).filter(models.Invitee.event_id == event_id).all()
 
 def create_invitee(db: Session, invitee: schemas.Invitee):
+    if db.query(models.Invitee).filter(models.Invitee.user_id == invitee.user_id, models.Invitee.event_id == invitee.event_id).first():
+        return None
     db_invitee = models.Invitee(**invitee.dict())
     db.add(db_invitee)
     db.commit()
