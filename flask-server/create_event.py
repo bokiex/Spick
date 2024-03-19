@@ -13,8 +13,9 @@ import json
 app = Flask(__name__)
 CORS(app)
 
-event_url = os.getenv('EVENT_URL') or "http://localhost:5000/event"
-notification_url = os.getenv("NOTIFICATION_URL") or "http://localhost:5005/notification"
+event_url = environ.get('EVENT_URL') or "http://localhost:5000/event"
+notification_url = environ.get("NOTIFICATION_URL") or "http://localhost:5005/notification"
+recommendation_url = environ.get('RECOMMENDATION_URL') or "http://localhost:5100/recommendation"
 
 exchangename = "create_event_topic"
 exchangetype = "topic"
@@ -27,12 +28,55 @@ if not amqp_connection.check_exchange(channel, exchangename, exchangetype):
     sys.exit(0)  # Exit with a success status
 
 """
+Sample event JSON input:
 {
-    "eventName": "Picnic",
-    "startTime": "2021-10-01 15:00:00",
-    "endTime": "2021-10-01 18:00:00",
+    "event_name": "Picnic",
+    "event_desc": "Picnic at Marina Bay",
+    "start_time": "2021-10-01 15:00:00",
+    "end_time": "2021-10-01 18:00:00",
+    "time_out": "2021-09-30 23:59:59",
     "category": "Picnic",
     "township": "Marina Bay",
+    "invitees": ["user2", "user3"],
+    "user_id": "user1"
+}
+
+Sample event JSON output:
+{
+    "code": 201,
+    "data": {
+        "event_id": 1,
+        "event_name": "Picnic",
+        "event_desc": "Picnic at Marina Bay",
+        "start_time": "2021-10-01 15:00:00",
+        "end_time": "2021-10-01 18:00:00",
+        "time_out": "2021-09-30 23:59:59",
+        "category": "Picnic",
+        "township": "Marina Bay",
+        "invitees": [
+            {
+            'userID': 1
+            'username': "user2",
+            'email': "user2@email.com",
+            'telegramtag': "@user2"
+            },
+            {
+                'userID': 2
+                'username': "user3",
+                'email': "user3@email.com",
+                'telegramtag': "@user3"
+            }
+        ],
+        "user_id": "user1",
+        "recommendations": [    
+            {
+                "recommendation_id": 1,
+                "event_id": 1,
+                "recommendation_name": "Pandan Reservoir Park",
+                "recommendation_address": "700 W Coast Rd, Singapore 608785"
+            }
+        ]
+    }
 }
 """
 @app.route("/create_event", methods=['POST'])
@@ -97,7 +141,7 @@ def processRecommendation(category, township):
         "type": category,
         "township": township
     }
-    getRecommendation = invoke_http("http://localhost:5100/recommendation", method='POST', json=search)
+    getRecommendation = invoke_http(recommendation_url, method='POST', json=search)
     return getRecommendation
 
 if __name__ == "__main__":

@@ -3,6 +3,9 @@ import requests
 import os
 from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
+import amqp_connection
+import json
+import pika
 from os import environ
 from dotenv import load_dotenv
 load_dotenv()
@@ -16,10 +19,10 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://is213@localhost:
 #app.config['SQLALCHEMY_DATABASE_URI'] = environ.get('dbURL')
 #------------------------------------------------------------------------------------------
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-token = os.getenv('BOT_TOKEN')
+token = "6996801409:AAGDWkgPaCtRAqH08y9lwYJQif6ESOnQ984"
 
 db = SQLAlchemy(app)
-
+n_queue_name = environ.get('Notification') or "Notification"  # Notification
 
 class Notification(db.Model):
     __tablename__ = 'notification'
@@ -35,6 +38,51 @@ class Notification(db.Model):
         return {"chatid": self.chatid, "telegramtag": self.telegramtag}
 
 
+def receiveNotification(channel):
+    try:
+        channel.basic_consume(queue=n_queue_name, on_message_callback=callback, auto_ack=True)
+        print('Error microservice: Consuming from queue:', n_queue_name)
+        channel.start_consuming()
+        
+    except pika.exceptions.AMQPError as e:
+        print(f"Error microservice: Failed to connect: {e}")
+        
+    except KeyboardInterrupt:
+        print("Error microservice: Program interrupted by user.")
+        
+"""
+
+"body": {
+    "event_id": 1,
+    "event_name": "Picnic",
+    "event_desc": "Picnic at Marina Bay",
+    "start_time": "2021-10-01 15:00:00",
+    "end_time": "2021-10-01 18:00:00",
+    "time_out": "2021-09-30 23:59:59",
+    "category": "Picnic",
+    "township": "Marina Bay",
+    "invitees": [
+        {
+        'userID': 1
+        'username': "user2",
+        'email': "user2@email.com",
+        'telegramtag': "@user2"
+        },
+        {
+            'userID': 2
+            'username': "user3",
+            'email': "user3@email.com",
+            'telegramtag': "@user3"
+        }
+    ],
+    "user_id": "user1"
+}
+"""
+def callback(channel, method, properties, body):
+    print("\nError microservice: Received an error by " + __file__)
+    processNotification(body)
+    print()
+    
 @app.route("/chat")
 def get_all():
     chatlist = Notification.query.all()
@@ -113,24 +161,17 @@ def notification(telegramtag):
             }
         ), 201
 
-"""
-Takes in this json format:
-{
-    "data": ["@user1", "@user2"]
-}
-"""
-@app.route("/notify/<string:host>", methods=["POST", 'GET'])
-def send_notif(host):
+def processNotification(event):
     countnotif = 0
     data = request.get_json()
-
-    notiflist = data["data"]
+    notiflist = data['invitees']
     for user in notiflist:
-        if (Notification.query.filter_by(telegramtag=user).first()):
-            notif = Notification.query.filter_by(telegramtag=user).first()
+        notif = Notification.query.filter_by(telegramtag=user).first()
+        if (notif):
             notifinfo = notif.json()
             chatid = notifinfo["chatid"]
-            chatmsg = "{host} has invited you to an event! Check it out on Spick now!"
+            host = event['user_id']
+            chatmsg = f"{host} has invited you to an event! Check it out on Spick now!"
             sendurl = "https://api.telegram.org/bot" + token + \
                 "/sendMessage" + "?chat_id=" + chatid + "&text=" + chatmsg
             r = requests.get(sendurl)
@@ -154,3 +195,8 @@ def send_notif(host):
 
 if __name__ == '__main__':
     app.run(host="0.0.0.0",  port=5000, debug=True)
+    print("Notification microservice: Getting Connection")
+    connection = amqp_connection.create_connection()
+    print("Notification microservice: Connection established successfully")
+    channel = connection.channel()
+    receiveNotification(channel)

@@ -34,3 +34,15 @@ def delete_event(db: Session, event_id: int):
         db.delete(db_event)
         db.commit()
     return db_event
+
+def get_invitees(db: Session, event_id: int):
+    return db.query(models.Invitee).filter(models.Invitee.event_id == event_id).all()
+
+def create_invitee(db: Session, invitee: schemas.Invitee):
+    if db.query(models.Invitee).filter(models.Invitee.user_id == invitee.user_id, models.Invitee.event_id == invitee.event_id).first():
+        return None
+    db_invitee = models.Invitee(**invitee.dict())
+    db.add(db_invitee)
+    db.commit()
+    db.refresh(db_invitee)
+    return db_invitee

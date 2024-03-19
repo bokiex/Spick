@@ -13,7 +13,7 @@ format of input
     "type": "Picnic",
     "township": "Jurong"
 }
-format of output
+format of output of Places API
 {
     "code": 201,
     "data": {
@@ -34,7 +34,26 @@ format of output
             },
         ]
     }
-}       
+}    
+
+format of output of recommendation
+{
+    "data": 
+    [
+        {
+            "recommendation_id": 1,
+            "event_id": 1,
+            "recommendation_name": "Pandan Reservoir Park",
+            "recommendation_address": "700 W Coast Rd, Singapore 608785"
+        },            
+        {
+            "recommendation_id": 2,
+            "event_id": 1,
+            "recommendation_name": "Jurong Lake Gardens",
+            "recommendation_address": "Yuan Ching Rd, Singapore"
+        },
+    ]
+}
 """
 def get_recommendation(db: Session, eventID: int):
     # Simple check of input format and data of the request are JSON
