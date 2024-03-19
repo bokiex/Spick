@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-
 from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
@@ -12,13 +10,11 @@ db = SQLAlchemy(app)
 
 class UserSchedule(db.Model):
     __tablename__ = 'user_schedule'
-
-    scheduleID = db.Column(db.Integer, primary_key=True)
+    scheduleID = db.Column(db.Integer, primary_key=True, autoincrement=True)
     eventID = db.Column(db.Integer, nullable=False)
     userID = db.Column(db.Integer, nullable=False)
     start_time = db.Column(db.DateTime, nullable=False)
     end_time = db.Column(db.DateTime, nullable=False)
-    reason = db.Column(db.String(255), nullable=True)
     token = db.Column(db.String(255), nullable=False)
 
     def json(self):
@@ -28,53 +24,64 @@ class UserSchedule(db.Model):
             "userID": self.userID,
             "start_time": self.start_time.isoformat(),
             "end_time": self.end_time.isoformat(),
-            "reason": self.reason,
             "token": self.token
         }
 
 @app.route("/user_schedule", methods=['GET'])
 def get_user_schedule():
-    # Optional: Fetch schedules for a specific token if provided, else fetch all.
+    # Making token mandatory for the query
     token = request.args.get('token')
-    if token:
-        schedules = UserSchedule.query.filter_by(token=token).all()
+    if not token:
+        return jsonify({"message": "Token parameter is required."}), 400
+
+    schedules = UserSchedule.query.filter_by(token=token).all()
+
+    if schedules:
+        return jsonify({"schedules": [schedule.json() for schedule in schedules]}), 200
     else:
-        schedules = UserSchedule.query.all()
-
-    if not schedules:
-        return jsonify({"message": "No schedules found."}), 404
-
-    # Format the schedules into the desired JSON structure.
-    formatted_schedules = {"schedules": [schedule.json() for schedule in schedules]}
-
-    return jsonify(formatted_schedules), 200
+        return jsonify({"message": "No schedules found for provided token."}), 404
 
 @app.route("/user_schedule", methods=['POST'])
 def create_user_schedule():
     req = request.get_json()
-    if not all(key in req for key in ['eventID', 'userID', 'start_time', 'end_time', 'token']):
-        return jsonify({"message": "Missing required fields."}), 400
-    
-    schedule = UserSchedule(
-        eventID=req['eventID'],
-        userID=req['userID'],
-        start_time=datetime.fromisoformat(req['start_time']),
-        end_time=datetime.fromisoformat(req['end_time']),
-        reason=req.get('reason', ''),
-        token=req['token']
-    )
-    db.session.add(schedule)
-    db.session.commit()
-    return jsonify(schedule.json()), 201
+    sched_list = req.get('sched_list')
 
-@app.route("/user_schedule/delete", methods=['DELETE'])
+    if not sched_list:
+        return jsonify({"message": "Missing 'sched_list' in request."}), 400
+
+    created_schedules = []
+
+    for sched in sched_list:
+        if not all(key in sched for key in ['eventID', 'userID', 'start_time', 'end_time', 'token']):
+            return jsonify({"message": "Missing required fields in one or more schedules."}), 400
+
+        schedule = UserSchedule(
+            eventID=sched['eventID'],
+            userID=sched['userID'],
+            start_time=datetime.fromisoformat(sched['start_time']),
+            end_time=datetime.fromisoformat(sched['end_time']),
+            token=sched['token']
+        )
+
+        db.session.add(schedule)
+        try:
+            db.session.commit()
+            created_schedules.append(schedule.json())
+        except Exception as e:
+            db.session.rollback()
+            return jsonify({"error": "Failed to create schedule", "detail": str(e)}), 500
+
+    return jsonify({"created_schedules": created_schedules}), 201
+
+@app.route("/user_schedule", methods=['DELETE'])
 def delete_user_schedule():
-    token = request.args.get('token')
-    userID = request.args.get('userID')
-    scheduleID = request.args.get('scheduleID')
+    req = request.get_json()
+    token = req.get('token')
+    userID = req.get('userID')
+    scheduleID = req.get('scheduleID')
 
     if not all([token, userID, scheduleID]):
-        return jsonify({"message": "Token, userID, and scheduleID are required."}), 400
+        return jsonify({"message": "Token, userID, and scheduleID are required in the JSON payload."}), 400
 
     schedule = UserSchedule.query.filter_by(scheduleID=scheduleID, userID=userID, token=token).first()
     if schedule:
