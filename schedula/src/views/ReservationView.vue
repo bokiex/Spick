@@ -1,30 +1,31 @@
 <script>
 export default {
-    data() {
-        return {
-          timeslots: [
-            {date:'2024-03-14', start_time:'2024-03-14T21:00:00', end_time: '2024-03-14T13:00:00'},
-            {date:'2024-03-14', start_time:'2024-03-14T21:00:00', end_time: '2024-03-14T13:00:00'},
-            {date:'2024-03-14', start_time:'2024-03-14T21:00:00', end_time: '2024-03-14T13:00:00'}
-          ],
-          venues: [
-            {
-              name: 'SMU',
-              address: 'Victoria Road',
-              imageUrl: 'https://via.placeholder.com/150'
-            },
-            {
-              name: 'SMU',
-              address: 'Victoria Road',
-              imageUrl: 'https://via.placeholder.com/150'
-            },
-            {
-              name: 'SMU',
-              address: 'Victoria Road',
-              imageUrl: 'https://via.placeholder.com/150'
-            },
-          ]
-        };
+  userID: localStorage.getItem('userID'),
+  data() {
+      return {
+        timeslots: [
+          {date:'2024-03-14', start_time:'2024-03-14T21:00:00', end_time: '2024-03-14T13:00:00'},
+          {date:'2024-03-14', start_time:'2024-03-14T21:00:00', end_time: '2024-03-14T13:00:00'},
+          {date:'2024-03-14', start_time:'2024-03-14T21:00:00', end_time: '2024-03-14T13:00:00'}
+        ],
+        venues: [
+          {
+            name: 'SMU',
+            address: 'Victoria Road',
+            imageUrl: 'https://via.placeholder.com/150'
+          },
+          {
+            name: 'SMU',
+            address: 'Victoria Road',
+            imageUrl: 'https://via.placeholder.com/150'
+          },
+          {
+            name: 'SMU',
+            address: 'Victoria Road',
+            imageUrl: 'https://via.placeholder.com/150'
+          },
+        ]
+      };
     }
 };
 </script>

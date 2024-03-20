@@ -13,11 +13,4 @@ CREATE TABLE IF NOT EXISTS `user` (
   `email` VARCHAR(120) UNIQUE NOT NULL,
   `password_hash` VARCHAR(128),
   `telegramtag` varchar(64) NOT NULL
-  -- PRIMARY KEY (`chatid`)
   ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
-
--- INSERT INTO notification(chatid,telegramtag) 
--- VALUES 
--- ('121187187', '@bokyannn'),
--- ('788802319', '@hotatementai');

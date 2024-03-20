@@ -30,10 +30,11 @@ async def get_event_by_id(event_id: int):
         return jsonable_encoder({"message": "No event found."})
     return jsonable_encoder(res)
 
+
 # Update event
-@app.put("/event/{event_id}")
-async def update_event(event_id: int):
-    res = crud.update_event(event_id)
+@app.put("/event")
+async def update_event(event: schemas.Event, db: Session = Depends(get_db)):
+    res = crud.update_event(db, event)
     if res == []:
         return jsonable_encoder({"message": "No event found."})
     return jsonable_encoder(res)
@@ -46,6 +47,16 @@ async def delete_event(event_id: int):
         return jsonable_encoder({"message": "No event found."})
     return jsonable_encoder(res)
 
+"""
+{
+    "event_name": "Picnic",
+    "event_desc": "Picnic at GOTB",
+    "start_time": "2024-01-01",
+    "end_time": "2024-01-01",
+    "time_out": "2024-01-01",
+    "user_id": 1
+}
+"""
 # Create event
 @app.post("/event")
 async def create_event(event: schemas.Event, db: Session = Depends(get_db)):
@@ -54,20 +65,80 @@ async def create_event(event: schemas.Event, db: Session = Depends(get_db)):
         return jsonable_encoder({"message": "An event with the same name already exists."})
     return jsonable_encoder({"data": res, "message": "Event has been created."})
 
-@app.post("/event/invitees")
-def get_invitees(event_id: int):
-    res = crud.get_invitees(event_id)
+"""
+{
+    "data": [
+        {
+            "user_id": 1,
+            "event_id": 1,
+            "status": "Y"
+        },
+        {
+            "user_id": 3,
+            "event_id": 1,
+            "status": "Y"
+        }
+    ],
+    "message": "Invitees found."
+}
+"""
+@app.get("/event/invitee/responded/{event_id}")
+def get_invitee_responded(event_id: int, db: Session = Depends(get_db)):
+    res = crud.get_invitee_responded(db, event_id)
     if res == []:
         return jsonable_encoder({"message": "No invitees found."})
     return jsonable_encoder({"data": res, "message": "Invitees found."})
 
-@app.post("/event/invitees")
+"""
+{
+    "data": [
+        {
+            "user_id": 1,
+            "event_id": 1,
+            "status": "Y"
+        },
+        {
+            "user_id": 2,
+            "event_id": 1,
+            "status": null
+        },
+        {
+            "user_id": 3,
+            "event_id": 1,
+            "status": "Y"
+        }
+    ],
+    "message": "Invitees found."
+}
+"""
+@app.get("/event/invitee/{event_id}")
+def get_invitees(event_id:int, db: Session = Depends(get_db)):
+    res = crud.get_invitee(db, event_id)
+    if res == []:
+        return jsonable_encoder({"message": "No invitees found."})
+    return jsonable_encoder({"data": res, "message": "Invitees found."})
+
+@app.put("/event/invitee")
+async def update_invitee(invitee: schemas.Invitee, db: Session = Depends(get_db)):
+    res = crud.update_invitee(db, invitee)
+    if res is None:
+        return jsonable_encoder({"message": "No invitee found."})
+    return jsonable_encoder({"data": res, "message": "Invitee has been updated."})
+
+
+"""
+{
+    "event_id": 1,
+    "user_id": 1
+}
+"""
+@app.post("/event/invitee")
 async def create_invitees(invitee: schemas.Invitee, db: Session = Depends(get_db)):
     
     res = crud.create_invitee(db, invitee)
     if res is None:
         return jsonable_encoder({"message": "User has already been invited to this event."})
-    return jsonable_encoder({"data": {"invitee_id": res.invitee_id}, "message": "Invitee has been added."})
+    return jsonable_encoder({"data": {"user_id": res.user_id}, "message": "Invitee has been added."})
 
 #!/usr/bin/env python3
 # The above shebang (#!) operator tells Unix-like environments
