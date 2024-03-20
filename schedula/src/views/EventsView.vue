@@ -18,6 +18,7 @@ import Card from '@/components/Card.vue'
 
 export default {
     name: 'EventsPage',
+    userID: localStorage.getItem('userID'),
     data() {
         return {
             // Sample events data

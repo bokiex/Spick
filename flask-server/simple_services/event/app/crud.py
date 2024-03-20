@@ -1,15 +1,33 @@
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 import models, schemas
+from fastapi.encoders import jsonable_encoder
+
 
 
 def get_events(db: Session):
-    return db.query(models.Event).all()
+    res = db.query(models.Event).options(joinedload(models.Event.recommendation)).all()
+   
+    return res
 
 def create_event(db: Session, event: schemas.Event):
-    if db.query(models.Event).filter(models.Event.event_name == event.event_name).first():
-            return None
-    db_event = models.Event(**event.dict())
+    # if db.query(models.Event).filter(models.Event.event_name == event.event_name).first():
+    #         return None
+    event_data = event.dict(exclude={'invitees', 'recommendation'})
+    print(jsonable_encoder(event))
+    db_event = models.Event(**event_data)
     db.add(db_event)
+    db.flush()
+ 
+    
+    # for invitee in event.invitees:
+    #     db_invitee = models.Invitee(**invitee.dict(), event_id=db_event.event_id)
+    #     db.add(db_invitee)
+    
+    for recommend in event.recommendation:
+   
+        db_recommend = models.Recommendation(**recommend.dict(), event_id=db_event.event_id)
+        db.add(db_recommend)
+
     db.commit()
     db.refresh(db_event)
     return db_event

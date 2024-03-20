@@ -10,6 +10,7 @@ app = FastAPI()
 
 reservation_ms = "http://0.0.0.0:3400/reservation"
 event_ms = "http://0.0.0.0:3600/events"
+recommendation_ms = "http://0.0.0.0:"
 
 @app.get("/ping")
 def ping():
@@ -18,11 +19,17 @@ def ping():
 @app.post("/reserve")
 def reserve(reservation: schemas.Reservation):
 
-    res= requests.post( reservation_ms, json=jsonable_encoder(reservation))
+    
+    reservation_details = {
+        "user_id": reservation.user_id,
+        "reservation_name": reservation.reservation_name,
+        "reservation_address": reservation.reservation_address
+    }
+
+    res= requests.post( reservation_ms, json=reservation_details)
 
     if res.status_code not in range(200,300):
         return {"message": "reservation failed"}
-    
-    
-    return {"message": "reserved"}
+    else:
+        update_event = requests.put( event_ms + f"/{reservation.event_id}", json=res.json())
 

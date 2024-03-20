@@ -5,6 +5,7 @@ from flask_cors import CORS
 from flask import Flask, request, jsonify
 import os, sys
 import json
+from fastapi.encoders import jsonable_encoder
 api_key = "AIzaSyBVwaHGbGTnc-cQHpIM6qqMbGIb7C-xKVA"
 
 """
@@ -55,24 +56,33 @@ format of output of recommendation
     ]
 }
 """
-def get_recommendation(db: Session, eventID: int):
+def get_recommendation( search):
     # Simple check of input format and data of the request are JSON
-    if request.is_json:
+  
         try:
-            search = request.get_json()
+            
             print("\nReceived search terms in JSON:", search)
 
             # 1. Send search info
             result = processSearch(search)
 
             # 2. Save the result to the database
-            result = jsonify(result)
+            result = jsonable_encoder(result)
+            res = []
             for i in result['data']['places']:
-                recommendation = schemas.Recommendation(event_id = eventID, recommendation_name = i['displayName']['text'], recommendation_address = i['formattedAddress'])
-                create_recommendation(db, recommendation)
+                recommendation_name = i['displayName']['text']
+                recommendation_address = i['formattedAddress']
+                recommendation = {
+                    "recommendation_name": recommendation_name,
+                    "recommendation_address": recommendation_address
+                }
+                recommendation = schemas.Recommendation(**recommendation)
+                res.append(recommendation)
+            return res
+            #     create_recommendation(db, recommendation)
 
-            # 3. Return the result
-            return db.query(models.Recommendation).all()
+            # # 3. Return the result
+            # return db.query(models.Recommendation).all()
 
         except Exception as e:
             # Unexpected error in code
@@ -81,21 +91,23 @@ def get_recommendation(db: Session, eventID: int):
             ex_str = str(e) + " at " + str(exc_type) + ": " + fname + ": line " + str(exc_tb.tb_lineno)
             print(ex_str)
 
-            return jsonify({
+            return jsonable_encoder({
                 "code": 500,
                 "message": "recommendation.py internal error: " + ex_str
             }), 500
 
     # if reached here, not a JSON request.
-    return jsonify({
-        "code": 400,
-        "message": "Invalid JSON input: " + str(request.get_data())
-    }), 400
+    # return jsonify({
+    #     "code": 400,
+    #     "message": "Invalid JSON input: " + str(request.get_data())
+    # }), 400
 
 def processSearch(search):
     url = "https://places.googleapis.com/v1/places:searchText"
     # placeholder data
+    search = jsonable_encoder(search)
     searchstr = search["type"] + "near" + search["township"]
+  
     data = {"textQuery" : searchstr}
     json_data = json.dumps(data)
     headers = {'Content-Type':'application/json', 'X-Goog-Api-Key':api_key, 

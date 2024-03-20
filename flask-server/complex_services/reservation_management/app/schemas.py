@@ -5,6 +5,10 @@ from datetime import datetime
 class Reservation(BaseModel):
 
     user_id: int
-    location_lat: float
-    location_long: float
-    created_at: datetime | None = None
+    event_id: int
+    address: str
+    num_guests: int
+    reservation_name: str
+    start_time: datetime
+    end_time: datetime
+    

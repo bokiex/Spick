@@ -1,3 +1,8 @@
+<script>
+    export default {
+        userID: localStorage.getItem('userID'),
+    }
+</script>
 <template>
     <div class="event-page">
         <!-- Event Header with Image and Title -->

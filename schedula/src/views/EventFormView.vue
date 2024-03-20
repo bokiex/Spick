@@ -152,6 +152,7 @@
 
 <script>
 export default {
+    userID: localStorage.getItem('userID'),
     data() {
         return {
             currentStep: 1,
