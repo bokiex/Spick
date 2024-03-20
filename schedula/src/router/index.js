@@ -50,6 +50,11 @@ const router = createRouter({
             path: '/reservation',
             name: 'reservation',
             component: ReservationView
+        },
+        {
+            path: '/RSVP',
+            name: 'RSVP',
+            component: RSVP
         }
     ]
 });
