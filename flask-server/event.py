@@ -52,7 +52,14 @@ def event():
         db.session.add(event)
         db.session.commit()
         return jsonify(event.json()), 201
-    
+
+def add_attendees():
+    if attendees == maxattendees:
+        return {"message": "Event is full."}, 400
+    attendees += 1
+
+    return {"message": "Attendee added."}, 200    
+
 if __name__ == '__main__':
     app.run(host="0.0.0.0",  port=5000, debug=True)
     

@@ -21,7 +21,7 @@ class Event(Base):
 class Invitee(Base):
     __tablename__ = 'invitee'
     event_id = Column(Integer, primary_key=True, nullable=False)
-    user_id = Column(Integer, nullable=False)
+    user_id = Column(Integer, primary_key=True, nullable=False)
     status = Column(String(64), nullable=True)
 
 class Recommendation(Base):

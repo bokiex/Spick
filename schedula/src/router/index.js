@@ -7,7 +7,7 @@ import EventFormView from '../views/EventFormView.vue'
 import SignInSignUpView from '../views/SignInSignUpView.vue'
 import ProfileView from '../views/ProfileView.vue'
 import ReservationView from '@/views/ReservationView.vue'
-
+import RSVP from '../views/RSVP.vue'
 const router = createRouter({
     history: createWebHistory(import.meta.env.BASE_URL),
     routes: [
@@ -49,8 +49,12 @@ const router = createRouter({
         {
             path: '/reservation',
             name: 'reservation',
-            component: ReservationView,
-            meta: { requiresAuth: true }
+            component: ReservationView
+        },
+        {
+            path: '/RSVP',
+            name: 'RSVP',
+            component: RSVP
         }
     ]
 });

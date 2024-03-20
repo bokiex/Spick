@@ -34,3 +34,4 @@ class EventResponse(BaseModel):
     user_id: int
     recommendation: List[Recommend] = []
     invitees: List[Invitee] = []
+    status: str | None = None
