@@ -12,4 +12,4 @@ class Event(BaseModel):
 class Invitee(BaseModel):
     event_id: int
     user_id: int
-    status: str
+    status: str | None = None
