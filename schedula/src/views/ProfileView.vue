@@ -1,5 +1,6 @@
 <script>
 import axios from 'axios';
+import router from '../router'
 export default {
     data() {
         return {
@@ -89,6 +90,10 @@ export default {
             .catch(error => {
                 console.error(error.response.data);
             });
+        },
+        logout(){
+            localStorage.removeItem('userID');
+            router.push({ name: 'SignInSignUp' })
         }
     }
 }
@@ -209,6 +214,14 @@ export default {
                             </div>
                         </div>
                     </div>
+                </div>
+            </div>
+        </div>
+        <div class="row justify-content-center" style="margin-top: 2rem">
+            <!-- Button -->
+            <div class="col-lg-8 col-md-10">
+                <div class="d-flex justify-content-end mb-3">
+                    <button type="submit" @click="logout" class="btn btn-primary">Log Out</button>
                 </div>
             </div>
         </div>
