@@ -18,8 +18,6 @@ def get_db():
 @app.get("/event", response_model=list[schemas.Event])
 def get_events(db: Session = Depends(get_db)):
     res = crud.get_events(db)
-    if res == []:
-        return jsonable_encoder({"message": "No events found."})
     return jsonable_encoder(res)
 
 # Get event by ID
@@ -54,14 +52,14 @@ async def create_event(event: schemas.Event, db: Session = Depends(get_db)):
         return jsonable_encoder({"message": "An event with the same name already exists."})
     return jsonable_encoder({"data": res, "message": "Event has been created."})
 
-@app.post("/event/invitees")
+@app.get("/event/invitees")
 def get_invitees(event_id: int):
     res = crud.get_invitees(event_id)
     if res == []:
         return jsonable_encoder({"message": "No invitees found."})
     return jsonable_encoder({"data": res, "message": "Invitees found."})
 
-@app.post("/event/invitees")
+@app.post("/event/{event_id}/invitees")
 async def create_invitees(invitee: schemas.Invitee, db: Session = Depends(get_db)):
     
     res = crud.create_invitee(db, invitee)
