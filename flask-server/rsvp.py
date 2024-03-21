@@ -162,15 +162,34 @@ def delete_schedule():
     
 # Output
 # {
-#   "message": "Optimization successful",
-#   "optimized_timeslots": [
-#     {
-#       "date": "2023-12-01",
-#       "start_time": "11:00:00",
-#       "end_time": "12:00:00"
+#     "2024-04-01": {
+#         "attending_users": [
+#             101,
+#             102,
+#             103
+#         ],
+#         "common_slots": [
+#             {
+#                 "end": "2024-04-01T10:00:00",
+#                 "start": "2024-04-01T08:00:00"
+#             }
+#         ],
+#         "non_attending_users": []
 #     },
-#     ...
-#   ]
+#     "2024-04-02": {
+#         "attending_users": [
+#             101,
+#             102,
+#             103
+#         ],
+#         "common_slots": [
+#             {
+#                 "end": "2024-04-02T09:30:00",
+#                 "start": "2024-04-02T09:00:00"
+#             }
+#         ],
+#         "non_attending_users": []
+#     }
 # }        
 @app.route("/rsvp/optimize", methods=['POST'])
 def optimize_schedule():
