@@ -1,3 +1,5 @@
+#ALL WORKING
+
 from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
@@ -27,6 +29,10 @@ class UserSchedule(db.Model):
             "token": self.token
         }
 
+"""
+provide token in url
+http://localhost:5000/user_schedule?token=event123
+"""
 @app.route("/user_schedule", methods=['GET'])
 def get_user_schedule():
     # Making token mandatory for the query
@@ -37,10 +43,64 @@ def get_user_schedule():
     schedules = UserSchedule.query.filter_by(token=token).all()
 
     if schedules:
-        return jsonify({"schedules": [schedule.json() for schedule in schedules]}), 200
+        return jsonify({"sched_list": [schedule.json() for schedule in schedules]}), 200
     else:
         return jsonify({"message": "No schedules found for provided token."}), 404
 
+
+"""{
+  "sched_list": [
+    {
+      "scheduleID": 1,
+      "eventID": 1,
+      "userID": 101,
+      "start_time": "2024-04-01T00:00:00",
+      "end_time": "2024-04-01T10:00:00",
+      "token": "event123"
+    },
+    {
+      "scheduleID": 1,
+      "eventID": 1,
+      "userID": 102,
+      "start_time": "2024-04-01T00:00:00",
+      "end_time": "2024-04-01T23:59:00",
+      "token": "event123"
+    },
+    {
+      "scheduleID": 1,
+      "eventID": 1,
+      "userID": 103,
+      "start_time": "2024-04-01T08:00:00",
+      "end_time": "2024-04-01T11:00:00",
+      "token": "event123"
+    },
+    {
+      "scheduleID": 1,
+      "eventID": 1,
+      "userID": 101,
+      "start_time": "2024-04-02T08:00:00",
+      "end_time": "2024-04-02T11:00:00",
+      "token": "event123"
+    },
+    {
+      "scheduleID": 1,
+      "eventID": 1,
+      "userID": 102,
+      "start_time": "2024-04-02T09:00:00",
+      "end_time": "2024-04-02T11:30:00",
+      "token": "event123"
+    },
+    {
+      "scheduleID": 1,
+      "eventID": 1,
+      "userID": 103,
+      "start_time": "2024-04-02T09:00:00",
+      "end_time": "2024-04-02T09:30:00",
+      "token": "event123"
+    }
+  ]
+}
+"""
 @app.route("/user_schedule", methods=['POST'])
 def create_user_schedule():
     req = request.get_json()
@@ -72,6 +132,11 @@ def create_user_schedule():
             return jsonify({"error": "Failed to create schedule", "detail": str(e)}), 500
 
     return jsonify({"created_schedules": created_schedules}), 201
+
+
+"""
+
+"""
 
 @app.route("/user_schedule", methods=['DELETE'])
 def delete_user_schedule():
