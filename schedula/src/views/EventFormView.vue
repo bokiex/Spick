@@ -26,7 +26,7 @@
                             <b>Date & Time</b>
                         </div>
                     </div>
-                    <div class="step" :class="{ active: isActcurrentStep == 4 }">
+                    <div class="step" :class="{ active: currentStep == 4 }">
                         <div class="circle">4</div>
                         <div class="step-content">
                             <span>Step 4</span>
@@ -40,35 +40,75 @@
                     <!-- Content omitted for brevity -->
                     <div class="header">
                         <h1 class="title">Event Details</h1>
-                        <p class="exp">
+                        <div class="exp">
                             Please provide the event title, event description, and attendees.
-                        </p>
-                    </div>
-                    <form>
-                        <div class="label">
-                            <label for="title">Event Title</label>
-                            <p class="error">This Field Is Required</p>
                         </div>
-                        <input required type="text" id="title" placeholder="e.g. ESD Meeting" />
+                    </div>
+                    <form class="form">
                         <div class="label">
-                            <label for="description">Event Description</label>
-                            <p class="error">This Field Is Required</p>
+                            <label for="event_name">Event Title</label>
+                            <p class="error" :class="{ show: !selected.event_name }">
+                                This Field Is Required
+                            </p>
                         </div>
                         <input
                             required
                             type="text"
-                            id="description"
+                            v-model="selected.event_name"
+                            id="event_name"
+                            placeholder="e.g. ESD Meeting"
+                        />
+
+                        <div class="label">
+                            <label for="event_desc">Event Description</label>
+                            <p class="error" :class="{ show: !selected.event_desc }">
+                                This Field Is Required
+                            </p>
+                        </div>
+                        <input
+                            required
+                            type="text"
+                            v-model="selected.event_desc"
+                            id="event_desc"
                             placeholder="e.g. Deployment of site"
                         />
+
                         <div class="label">
-                            <label for="attendees">Event Attendees</label>
-                            <p class="error">This Field Is Required</p>
+                            <label for="invitees">Event Attendees</label>
+                            <p class="error" :class="{ show: selected.invitees.length === 0 }">
+                                This Field Is Required
+                            </p>
                         </div>
-                        <input required type="text" id="attendees" placeholder="e.g. Ben Tan" />
+                        <input
+                            required
+                            type="text"
+                            v-model.trim="newInvitee"
+                            @keydown.enter.prevent="addInvitee"
+                            id="invitees"
+                            placeholder="e.g. Ben Tan (Press Enter to add)"
+                        />
+                        <div class="invitees-list">
+                            <div class="row">
+                                <div
+                                    class="col-3"
+                                    v-for="(invitee, index) in selected.invitees"
+                                    :key="index"
+                                >
+                                    {{ invitee }}
+                                    <button @click="removeInvitee(index)" class="btn btn-danger">
+                                        x
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
                     </form>
 
                     <div class="btns">
-                        <button @click="nextStep" class="next-stp" type="button">Next Step</button>
+                        <form @submit.prevent="nextStep">
+                            <button @click="nextStep" class="next-stp" type="button">
+                                Next Step
+                            </button>
+                        </form>
                     </div>
                 </div>
 
@@ -81,33 +121,49 @@
                     </div>
                     <form>
                         <div class="box" data-id="1">
-                            <input type="checkbox" id="school" />
+                            <input
+                                type="radio"
+                                id="school"
+                                name="meeting_type"
+                                v-model="selected.category"
+                            />
                             <div class="description">
                                 <label for="school">School Meeting</label>
                                 <small>School project meeting done in school.</small>
                             </div>
                         </div>
                         <div class="box" data-id="2">
-                            <input type="checkbox" id="personal" />
+                            <input
+                                type="radio"
+                                id="personal"
+                                name="meeting_type"
+                                v-model="selected.category"
+                            />
                             <div class="description">
                                 <label for="personal">Personal</label>
                                 <small>Meeting with friends</small>
                             </div>
                         </div>
                         <div class="box" data-id="3">
-                            <input type="checkbox" id="celebrations" />
+                            <input
+                                type="radio"
+                                id="celebrations"
+                                name="meeting_type"
+                                v-model="selected.category"
+                            />
                             <div class="description">
                                 <label for="celebrations">Celebrations</label>
                                 <small>Custom celebrations such as birthday parties.</small>
                             </div>
                         </div>
                     </form>
+
                     <div class="btns">
                         <button class="prev-stp" @click="prevStep" type="button">Go Back</button>
                         <button
                             class="next-stp"
                             @click="nextStep"
-                            type="submit"
+                            type="button"
                             style="float: right"
                         >
                             Next Step
@@ -120,13 +176,40 @@
                     <div class="header">
                         <h1 class="title">Date and time.</h1>
                         <p class="exp">Select the date and time for the event.</p>
+                        <form>
+                            <div class="col-12">
+                                <label for="start_time">Start Time</label>
+                                <VueDatePicker v-model="selected.start_time" time-picker-inline />
+                            </div>
+                            <div class="col-12">
+                                <label for="end_time">End Time</label>
+                                <VueDatePicker v-model="selected.end_time" time-picker-inline />
+                            </div>
+                            <div class="col-12">
+                                <label for="time_out">Time Out</label>
+                                <VueDatePicker v-model="selected.time_out" time-picker-inline />
+                            </div>
+                            <div class="col-12">
+                                <div class="label">
+                                    <label for="township">Prefered Area</label>
+                                </div>
+                                <input
+                                    required
+                                    class="form-control"
+                                    type="text"
+                                    v-model="selected.township"
+                                    id="township"
+                                    placeholder="e.g. Marina Bay"
+                                />
+                            </div>
+                        </form>
                     </div>
                     <div class="btns">
                         <button class="prev-stp" @click="prevStep" type="button">Go Back</button>
                         <button
                             class="next-stp"
-                            @click="nextStep"
-                            type="submit"
+                            @click="submitForm"
+                            type="button"
                             style="float: right"
                         >
                             Next Step
@@ -151,8 +234,12 @@
 </template>
 
 <script>
+import VueDatePicker from '@vuepic/vue-datepicker'
 export default {
     userID: localStorage.getItem('userID'),
+    components: {
+        VueDatePicker
+    },
     data() {
         return {
             currentStep: 1,
@@ -161,15 +248,62 @@ export default {
                 { id: 2, label: 'Step 2', description: 'Type' },
                 { id: 3, label: 'Step 3', description: 'Date & Time' },
                 { id: 4, label: 'Step 4', description: 'End' }
-            ]
+            ],
+            selected: {
+                user_id: 'user1',
+                event_name: '',
+                event_desc: '',
+                start_time: '',
+                end_time: '',
+                time_out: '',
+                category: '',
+                township: 'Marina Bay',
+                invitees: []
+            },
+            newInvitee: ''
         }
     },
     methods: {
         nextStep() {
-            if (this.currentStep < this.steps.length) this.currentStep++
+            if (this.validateStep()) {
+                if (this.currentStep < this.steps.length) {
+                    this.currentStep++
+                }
+            }
         },
         prevStep() {
-            if (this.currentStep > 1) this.currentStep--
+            if (this.currentStep > 1) {
+                this.currentStep--
+            }
+        },
+        validateStep() {
+            if (this.currentStep === 1) {
+                if (
+                    !this.selected.event_name ||
+                    !this.selected.event_desc ||
+                    !this.selected.invitees.length
+                ) {
+                    return false
+                }
+            }
+            return true
+        },
+        submitForm() {
+            // Make sure all steps are validated before submitting
+            if (this.currentStep === 3) {
+                this.currentStep++
+                // Send the form data to your backend
+                console.log(this.selected)
+            }
+        },
+        addInvitee() {
+            if (this.newInvitee.trim() !== '') {
+                this.selected.invitees.push(this.newInvitee.trim())
+                this.newInvitee = '' // Clear the input field
+            }
+        },
+        removeInvitee(index) {
+            this.selected.invitees.splice(index, 1)
         }
     }
 }
@@ -226,7 +360,7 @@ img {
     background-color: hsl(0, 0%, 100%);
     border-radius: 1rem;
     box-shadow: 0px 0px 1px black;
-    height: 578px;
+    height: 600px;
 }
 .form-sidebar {
     padding: 2rem 1rem;
@@ -352,11 +486,16 @@ form input::placeholder {
 }
 form .error {
     display: none;
+    margin: 0px;
     color: hsl(354, 84%, 57%);
     font-size: 0.9rem;
     font-weight: 700;
 }
 
+form .error.show {
+    display: flex;
+    justify-content: end;
+}
 /* STEP 2 */
 .step-2 {
     width: 80%;

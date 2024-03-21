@@ -6,7 +6,7 @@ export default {
         return {
             user: {
                 userID: localStorage.getItem('userID'),
-                name: '',
+                name: '', 
                 password: '',
                 tele: '',
                 email: '',
@@ -29,29 +29,6 @@ export default {
                 })
                 .catch(error => console.error(error))
         },
-        // saveSettings() {
-        //     // Logic to save user settings
-        //     axios.post('http://localhost:5000/signup', {
-        //         name : document.getElementById("userName").value,
-        //         tele: document.getElementById("userTele").value,
-        //         email: document.getElementById("userEmail").value
-        //     });
-        //     console.log('Saved', this.user);
-        // },
-
-        // updatePassword() {
-        //     // Check if new password matches confirm password
-        //     if (this.newPwd !== this.confirmPwd) {
-        //         alert('New password and confirm password do not match');
-        //         return;
-        //     }
-        //     // Send a request to the microservice to update the password
-        //     axios.post('http://localhost:5000/signup', {
-        //         password: this.newPwd
-        //     });
-        //     console.log('Saved', this.user);
-        // }
-
         saveSettings() {
             // Logic to save user settings
             axios.put(`http://127.0.0.1:5000/user/${this.user.userID}`, {
@@ -61,6 +38,7 @@ export default {
             })
             .then(response => {
                 console.log('Settings saved', response.data);
+                alert("changed!")
                 // Additional logic upon success
             })
             .catch(error => console.error(error));
@@ -104,7 +82,7 @@ export default {
         <!-- Personal Information -->
         <div class="row justify-content-center" style="margin-top: 2rem;">
             <div class="col-lg-8 col-md-10">
-                <div class="card">
+                <div class="card" id="message">
                     <div class="card-body">
                         <h4>Account Settings</h4>
                         <p>Edit your account information here!</p>
