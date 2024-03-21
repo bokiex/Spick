@@ -8,6 +8,7 @@ import SignInSignUpView from '../views/SignInSignUpView.vue'
 import ProfileView from '../views/ProfileView.vue'
 import ReservationView from '@/views/ReservationView.vue'
 import RSVP from '../views/RSVP.vue'
+import EnterCode from '@/views/EnterCode.vue'
 const router = createRouter({
     history: createWebHistory(import.meta.env.BASE_URL),
     routes: [
@@ -55,6 +56,11 @@ const router = createRouter({
             path: '/RSVP',
             name: 'RSVP',
             component: RSVP
+        },
+        {
+            path: '/entercode',
+            name: 'entercode',
+            component: EnterCode,
         }
     ]
 });

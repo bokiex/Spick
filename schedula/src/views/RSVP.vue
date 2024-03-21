@@ -4,12 +4,6 @@ import VueCal from 'vue-cal';
 import 'vue-cal/dist/vuecal.css';
 import axios from 'axios';
 import { isProxy, toRaw } from 'vue';
-function onEventCreate (event, deleteEventFunction) {
-    // You can modify event here and return it.
-    // You can also return false to reject the event creation.
-    console.log(event)
-    return event
-}
 var eventID = 0
 var userID = 0
 export default{
