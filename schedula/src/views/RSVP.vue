@@ -37,8 +37,11 @@ export default{
             if (this.currentStep > 1) this.currentStep--
         },
         send(){
-          var url = ""
-          axios.get(url)
+          var url = "http://localhost:5100/rsvp/accept"
+          axios.post(
+            url, 
+            result
+          )
           .then(function (response){
 
           })  
