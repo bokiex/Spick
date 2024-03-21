@@ -14,7 +14,7 @@ def create_event(db: Session, event: schemas.Event):
     # if db.query(models.Event).filter(models.Event.event_name == event.event_name).first():
     #         return None
     event_data = event.dict(exclude={'invitees', 'recommendation'})
-    print(jsonable_encoder(event))
+ 
     db_event = models.Event(**event_data)
     db.add(db_event)
     db.flush()
@@ -39,10 +39,11 @@ def get_event_by_id(db: Session, event_id: int):
 def update_event(event_id:int, event: schemas.EventPut, db: Session ):
     db_event = db.query(models.Event).filter(models.Event.event_id == event_id).first()
     if not db_event:
+        
         return None
-    print(jsonable_encoder(db_event))
-    print(event.dict(exclude_unset=True).items())
+   
     for key, value in event.dict(exclude_unset=True).items():
+   
         setattr(db_event, key, value)
     db.commit()
     db.refresh(db_event)

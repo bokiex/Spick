@@ -16,6 +16,7 @@ class Recommend(BaseModel):
   
 
 class Event(BaseModel):
+    event_id: int
     event_name: str
     event_desc: str
     start_time: datetime
@@ -26,7 +27,8 @@ class Event(BaseModel):
     reservation_name: Optional[str] = None
     reservation_address: Optional[str] = None
 
-class EventPut(Event):
+class EventPut(BaseModel):
+
     event_name: Optional[str] = None
     event_desc: Optional[str] = None
     start_time: Optional[datetime] = None

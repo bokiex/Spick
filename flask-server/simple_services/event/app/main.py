@@ -32,7 +32,7 @@ async def get_event_by_id(event_id: int):
 # Update event
 @app.put("/event/{event_id}")
 async def update_event(event_id: int, event: schemas.EventPut, db: Session = Depends(get_db)):
-    print(event_id)
+  
     res = crud.update_event(event_id, event, db)
     if res == []:
         return jsonable_encoder({"message": "No event found."})
