@@ -8,7 +8,8 @@ class Recommend(BaseModel):
     event_desc: str
     start_time: datetime
     end_time: datetime
-    search: dict
+    category: str
+    township: str
     time_out: datetime
 
 class Event(BaseModel):
