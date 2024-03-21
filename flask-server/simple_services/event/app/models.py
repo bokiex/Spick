@@ -13,7 +13,8 @@ class Event(Base):
     time_out = Column(TIMESTAMP, nullable=True)
     event_location = Column(String(64), nullable=True)
     user_id = Column(Integer, nullable=False)
-    
+    reservation_name = Column(String(64), nullable=True)
+    reservation_address = Column(String(64), nullable=True)
     recommendation = relationship("Recommendation", back_populates="event")
 
   
