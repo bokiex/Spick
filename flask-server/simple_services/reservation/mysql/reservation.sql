@@ -10,8 +10,7 @@ DROP TABLE IF EXISTS `reservations`;
 CREATE TABLE IF NOT EXISTS `reservations` (
     `reservation_id` INT PRIMARY KEY AUTO_INCREMENT,
     `user_id` VARCHAR(64) NOT NULL,
-    `location_lat` FLOAT NOT NULL,
-    `location_long` FLOAT NOT NULL,
+    `address` VARCHAR(256) NOT NULL,
     `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
   
 )   ENGINE=InnoDB DEFAULT CHARSET=utf8;

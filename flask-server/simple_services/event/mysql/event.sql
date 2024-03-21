@@ -23,5 +23,16 @@ CREATE TABLE IF NOT EXISTS `invitee` (
     `event_id` INT,
     `user_id` INT,
     `status` varchar(64),
+    FOREIGN KEY (event_id) REFERENCES event(event_id)
     PRIMARY KEY (`event_id`, `user_id`)
 )   ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+DROP TABLE IF EXISTS `recommendation`;
+CREATE TABLE IF NOT EXISTS `recommendation` (
+    `recommendation_id` INT AUTO_INCREMENT PRIMARY KEY,
+    `recommendation_name` VARCHAR(64) NOT NULL,
+    `recommendation_address` VARCHAR(64) NOT NULL,
+    `event_id` INT NOT NULL,
+    FOREIGN KEY (event_id) REFERENCES event(event_id)
+
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;

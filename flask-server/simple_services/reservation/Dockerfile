@@ -6,7 +6,6 @@ ENV DB_PASSWORD=root
 
 COPY ./requirements.txt ./
 
-
 RUN pip install -r ./requirements.txt
 
 COPY ./app ./

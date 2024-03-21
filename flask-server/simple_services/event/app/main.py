@@ -15,11 +15,9 @@ def get_db():
         db.close()
 
 # Get all events
-@app.get("/event", response_model=list[schemas.Event])
+@app.get("/event", response_model=list[schemas.EventResponse])
 def get_events(db: Session = Depends(get_db)):
     res = crud.get_events(db)
-    if res == []:
-        return jsonable_encoder({"message": "No events found."})
     return jsonable_encoder(res)
 
 # Get event by ID
@@ -32,9 +30,9 @@ async def get_event_by_id(event_id: int):
 
 
 # Update event
-@app.put("/event")
-async def update_event(event: schemas.Event, db: Session = Depends(get_db)):
-    res = crud.update_event(db, event)
+@app.put("/event/{event_id}")
+async def update_event(event_id: int, event: schemas.Event, db: Session = Depends(get_db)):
+    res = crud.update_event(event_id, event, db)
     if res == []:
         return jsonable_encoder({"message": "No event found."})
     return jsonable_encoder(res)
@@ -60,6 +58,7 @@ async def delete_event(event_id: int):
 # Create event
 @app.post("/event")
 async def create_event(event: schemas.Event, db: Session = Depends(get_db)):
+
     res = crud.create_event(db, event)
     if res is None:
         return jsonable_encoder({"message": "An event with the same name already exists."})

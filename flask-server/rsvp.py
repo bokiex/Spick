@@ -37,7 +37,11 @@ def accept_invitation():
             schedule_response = requests.post(USER_SCHEDULE_SERVICE_URL, json={"sched_list": req_data.get('sched_list', [])})
             if schedule_response.status_code in [200, 201]:
                 check_and_trigger_optimization(req_data)
-                return jsonify({"status": "accepted", "message": "Acceptance processed and schedules posted successfully."}), 200
+                return jsonify({
+                    "eventID": req_data.get('token'),  # Assuming token is used as eventID
+                    "userID": req_data.get('userID'),
+                    "status": 'Y'  # 'Y' to indicate acceptance
+                }), 200
             else:
                 return jsonify({"error": "Failed to post schedules."}), schedule_response.status_code
         else:
@@ -63,7 +67,11 @@ def decline_invitation():
         status_response = requests.post(STATUS_UPDATE_URL, json=status_payload)
         if status_response.status_code in [200, 201]:
             check_and_trigger_optimization(req_data)
-            return jsonify({"status": "declined", "message": "Decline processed successfully."}), 200
+            return jsonify({
+                "eventID": req_data.get('token'),  # Assuming token is used as eventID
+                "userID": req_data.get('userID'),
+                "status": 'N'  # 'N' to indicate decline
+            }), 200
         else:
             return jsonify({"error": "Failed to update status to declined."}), status_response.status_code
     except requests.RequestException as e:
@@ -77,13 +85,23 @@ def check_and_trigger_optimization(data):
     token = data.get('token')
     if total_invitees == current_responses:
         try:
-            response = requests.post(OPTIMIZE_SCHEDULE_SERVICE_URL, json={"token": token})
+            response = requests.get(USER_SCHEDULE_SERVICE_URL, params={"token": token})
             if response.status_code == 200:
-                print("Optimization triggered successfully.")
+                payload = response.json()
+                print("Retrieved schedule successfully.")
+                try:
+                    
+                    opt = requests.post(OPTIMIZE_SCHEDULE_SERVICE_URL, json=payload)
+                    if opt.status_code ==200:
+                        print("Schedule optimized successfully.")
+                    else:
+                        print("Failed to optimize schedule.")
+                except requests.RequestException as e:
+                    print("Error connecting to Optimize Schedule service:", e)
             else:
-                print("Failed to trigger optimization.")
+                print("Failed to retrieve schedule.")
         except requests.RequestException as e:
-            print("Error connecting to Optimize Schedule service:", e)
+            print("Error connecting to User Schedule service:", e)
 
 
 
@@ -157,14 +175,32 @@ def delete_schedule():
 @app.route("/rsvp/optimize", methods=['POST'])
 def optimize_schedule():
     req_data = request.get_json()
+    token = req_data.get("token")  # Assuming the token is part of the request JSON
+
+    if not token:
+        return jsonify({"error": "Token is required."}), 400
+
     try:
-        response = requests.post(OPTIMIZE_SCHEDULE_SERVICE_URL, json=req_data)
+        # Fetch schedules from User Schedule service using the token
+        response = requests.get(f"{USER_SCHEDULE_SERVICE_URL}?token={token}")
         if response.status_code == 200:
-            return jsonify({"message": "Optimization successful", "optimized_timeslots": response.json()}), 200
+            schedule_data = response.json()  # Extract JSON data from the response
+
+            try:
+                # Post the fetched schedules to the Optimize Schedule service
+                opt_response = requests.post(OPTIMIZE_SCHEDULE_SERVICE_URL, json=schedule_data)  # Use extracted JSON data
+                if opt_response.status_code == 200:
+                    return jsonify({"message": "Optimization successful", "optimized_timeslots": opt_response.json()}), 200
+                else:
+                    return jsonify({"error": "Failed to optimize schedule."}), opt_response.status_code
+            except requests.RequestException as e:
+                return jsonify({"error": "Failed to connect to the Optimize Schedule service.", "detail": str(e)}), 502
         else:
-            return jsonify({"error": "Failed to optimize schedule."}), response.status_code
+            return jsonify({"error": "Failed to retrieve schedules from User Schedule service."}), response.status_code
     except requests.RequestException as e:
-        return jsonify({"error": "Failed to connect to the Optimize Schedule service.", "detail": str(e)}), 502
+        return jsonify({"error": "Failed to connect to the User Schedule service.", "detail": str(e)}), 502
+
+
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5100)

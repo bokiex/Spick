@@ -223,7 +223,7 @@ img {
     padding: 1rem;
     justify-content: center;
     width: 900px;
-    background-color: var(--White);
+    background-color: hsl(0, 0%, 100%);
     border-radius: 1rem;
     box-shadow: 0px 0px 1px black;
     height: 578px;
@@ -241,12 +241,12 @@ img {
 .circle {
     width: 40px;
     height: 40px;
-    border: 2px solid var(--White);
+    border: 2px solid hsl(0, 0%, 100%);
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    color: var(--White);
+    color: hsl(0, 0%, 100%);
     font-weight: 700;
 }
 .active .circle {
@@ -273,7 +273,7 @@ img {
 }
 .step-content b {
     text-transform: uppercase;
-    color: var(--White);
+    color: hsl(0, 0%, 100%);
 }
 .stp {
     display: flex;
