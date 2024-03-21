@@ -1,6 +1,5 @@
-
 import requests
-import  schemas
+import schemas
 import sys
 import amqp_connection
 import pika
@@ -12,7 +11,6 @@ from os import environ
 from contextlib import asynccontextmanager
 from sqlalchemy.orm import Session
 from fastapi.encoders import jsonable_encoder
-
 
 event_ms = environ.get('EVENT_URL') or "http://localhost:5000/event"
 notification_ms = environ.get("NOTIFICATION_URL") or "http://localhost:5005/notification"
