@@ -13,16 +13,18 @@ class Invitee(BaseModel):
 class Recommend(BaseModel):
     recommendation_name: str
     recommendation_address: str
+
+class Image(BaseModel):
+    
+    image_name: str
+    image_path: str
   
 
 class Event(BaseModel):
     event_id: int
     event_name: str
     event_desc: str
-    start_time: datetime
-    end_time: datetime
-    time_out: datetime
-    user_id: int
+    image: List[Image] = []
     recommendation: List[Recommend] = []
     reservation_name: Optional[str] = None
     reservation_address: Optional[str] = None

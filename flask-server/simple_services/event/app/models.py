@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, TIMESTAMP, String, ForeignKey
+from sqlalchemy import Column, Integer, TIMESTAMP, String, ForeignKey, LargeBinary
 from sqlalchemy.orm import relationship
 from database import Base
 
@@ -8,6 +8,7 @@ class Event(Base):
     event_id = Column(Integer, primary_key=True)
     event_name = Column(String(64), nullable=False)
     event_desc = Column(String(256), nullable=True)
+    
     start_time = Column(TIMESTAMP, nullable=True)
     end_time = Column(TIMESTAMP, nullable=True)
     time_out = Column(TIMESTAMP, nullable=True)
@@ -16,6 +17,8 @@ class Event(Base):
     reservation_name = Column(String(64), nullable=True)
     reservation_address = Column(String(64), nullable=True)
     recommendation = relationship("Recommendation", back_populates="event")
+    image = relationship("Image", back_populates="event")
+
 
   
 
@@ -34,3 +37,11 @@ class Recommendation(Base):
 
     event = relationship("Event", back_populates="recommendation")
 
+class Image(Base):
+    __tablename__ = 'image'
+    id = Column(Integer, primary_key=True, autoincrement=True, index=True)
+    image_name = Column(String(255), nullable=False)
+    image_path = Column(String(1024), nullable=False)
+    event_id = Column(Integer, ForeignKey('event.event_id'), nullable=False)
+
+    event = relationship("Event", back_populates="image")

@@ -1,152 +1,134 @@
-<script>
-    export default {
-        userID: localStorage.getItem('userID'),
+<script setup>
+import Card from '../components/Card.vue'
+import Avatar from '@/components/Avatar.vue'
+import { Calendar, Clock, MapPin, Pin } from 'lucide-vue-next'
+import Button from '@/components/Button.vue'
+import { useRouter, useRoute } from 'vue-router'
+import { onMounted, ref } from 'vue'
+import Skeleton from '@/components/Skeleton.vue'
+
+const router = useRouter()
+const route = useRoute()
+
+const event_id = route.params.id
+const event = ref(null)
+const loading = ref(true)
+
+onMounted(async () => {
+    try {
+        // Example API call - replace with your actual API call
+        const data = await fetch('http://localhost:3800/event' + `/${event_id}`).then((res) =>
+            res.json()
+        )
+
+        event.value = data
+        console.log(data)
+    } catch (error) {
+        console.error('Failed to fetch event data:', error)
+    } finally {
+        loading.value = false
     }
+})
+
+// const event = {
+//     title: 'Dinner Party',
+//     image: '/event.jpg',
+//     date: 'Saturday, Feb 23 2024',
+//     time: '5:00 PM - 11:00 PM',
+//     location: '5323 Gilroy St, Gilroy, CA',
+//     description:
+//         'We are hosting a dinner party just for our best clients. We are excited to see you there.',
+//     organizer: {
+//         name: 'American Bar',
+//         contact: 'Phone: (415)444-3434 | Email: info@americanbar.com'
+//     },
+//     attendees: [
+//         { id: 1, avatar: 'path-to-avatar1.jpg' },
+//         { id: 2, avatar: 'path-to-avatar2.jpg' }
+//         // More attendees...
+//     ]
+// }
 </script>
+
 <template>
-    <div class="event-page">
-        <!-- Event Header with Image and Title -->
-        <div class="event-header">
-            <img class="event-image" :src="event.image" alt="Header image of the event" />
-            <div class="event-card">
-                <EventCard
-                    :title="event.title"
-                    :date="event.date"
-                    :time="event.time"
-                    :location="event.location"
+    <div class="container mx-auto p-4">
+        <div class="bg-white rounded-lg overflow-hidden shadow-lg">
+            <div class="relative mb-8">
+                <Skeleton v-if="loading" class="h-64 w-full rounded-xl" />
+                <img
+                    v-else
+                    :src="event?.image[0].image_path"
+                    alt="Event banner"
+                    class="w-full h-64 object-cover"
                 />
-            </div>
-        </div>
 
-        <!-- Event Content Section -->
-        <div class="event-content">
-            <div class="event-details">
-                <h2 class="section-title">Events Details</h2>
-                <p>{{ event.description }}</p>
+                <Card
+                    class="absolute bottom-0 left-0 right-0 transform translate-y-1/2 mx-auto w-1/2"
+                    :click="() => {}"
+                >
+                    <div class="flex flex-col gap-y-1.5 p-6 space-y-1">
+                        <Skeleton v-if="loading" class="w-24 h-6" />
+                        <h3 v-else class="font-semibold tracking-tight text-2xl">
+                            {{ event?.event_name }}
+                        </h3>
+                        <div class="flex gap-x-1 text-muted-foreground">
+                            <Calendar class="flex-shrink-0" />
+                            <Skeleton v-if="loading" class="w-24 h-6" />
+                            <span v-else class="text-sm">
+                                {{ event?.event_date }}
+                            </span>
+                        </div>
+                        <div class="flex gap-x-1 text-muted-foreground">
+                            <Clock class="flex-shrink-0 " />
+                            <Skeleton v-if="loading" class="w-24 h-6" />
+                            <span class="text-sm">
+                                {{ event?.event_time }}
+                            </span>
+                        </div>
+                        <div class="flex gap-x-1 text-muted-foreground">
+                            <MapPin class="flex-shrink-0" />
+                            <Skeleton v-if="loading" class="w-24 h-6" />
+                            <span class="text-sm">
+                                {{ event?.reservation_address }}
+                            </span>
+                        </div>
+                    </div>
+                </Card>
             </div>
-
-            <!-- Sidebar for Additional Information -->
-            <div class="event-sidebar">
-                <div class="subscription-box">
-                    <h3>Subscribe Now</h3>
-                    <!-- Additional content like QR codes or calendar links would go here -->
+            <div class="grid grid-cols-5 mt-36 p-4">
+                <div class="col-span-3 p-4">
+                    <h3 class="font-semibold tracking-tight text-2xl">Event Description</h3>
+                    <Skeleton v-if="loading" class="w-24 h-6" />
+                    <div v-else class="text-muted-foreground">{{ event?.event_desc }}</div>
                 </div>
-                <div class="event-organizer">
-                    <h3>Event Organizer</h3>
-                    <p>{{ event.organizer.name }}</p>
-                    <p>{{ event.organizer.contact }}</p>
-                    <p>{{ event.organizer.email }}</p>
-                    <p>
-                        <a :href="event.organizer.website">{{ event.organizer.website }}</a>
-                    </p>
-                </div>
-            </div>
-        </div>
+                <div class="col-span-2 p-4">
+                    <div class="space-y-4 w-full">
+                        <Card>
+                            <div class="flex flex-col gap-y-1.5 p-4 space-y-1">
+                                <h3 class="text-lg font-semibold">RSVP now</h3>
+                                <p class="text-muted-foreground">Click to RSVP</p>
+                                <Button>Join</Button>
+                            </div>
+                        </Card>
+                        <Card>
+                            <div class="flex flex-col gap-y-1.5 p-4 space-y-1">
+                                <h3 class="text-lg font-semibold">Organizer</h3>
+                                <p>{{ event?.organizer.name }}</p>
+                                <p>{{ event?.organizer.contact }}</p>
+                            </div>
+                        </Card>
 
-        <!-- Event Media Section for Photos and Videos -->
-        <div class="event-media">
-            <h2 class="section-title">Event Photos and Videos</h2>
-            <div class="media-grid">
-                <div v-for="mediaItem in event.media" :key="mediaItem.id" class="media-item">
-                    <img
-                        v-if="mediaItem.type === 'image'"
-                        :src="mediaItem.url"
-                        :alt="mediaItem.alt"
-                    />
+                        <Card>
+                            <div class="flex flex-col gap-y-1.5 p-4 space-y-1">
+                                <h3 class="text-lg font-semibold">Attendees</h3>
+                                <div class="flex space-x-2 overflow-hidden">
+                                    <Avatar v-for="attendee in event?.invitees"> </Avatar>
+                                </div>
+                            </div>
+                        </Card>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 </template>
-
-<script>
-import EventCard from '@/components/EventCard.vue'
-export default {
-    name: 'EventPage',
-    data() {
-        return {
-            event: {
-                title: 'Dinner Party',
-                image: '../public/event.jpg',
-                date: 'Saturday, Feb 23, 2019',
-                time: '5:00 PM - 11:00 PM',
-                location: '5323 Gilroy St, Gilroy, CA',
-                description:
-                    'We are hosting a dinner party just for our best clients. We are excited to see you there.',
-                organizer: {
-                    name: 'American Bar',
-                    contact: '(415) 444-3434',
-                    email: 'info@americanbar.com',
-                    website: 'https://www.americanbar.com'
-                },
-                media: [
-                    { id: 1, type: 'image', url: 'path-to-photo.jpg', alt: 'Event photo' },
-                    { id: 2, type: 'video', url: 'path-to-video.mp4', mimeType: 'video/mp4' }
-                    // Add more media items as needed
-                ]
-            }
-        }
-    },
-    components: {
-        EventCard
-    }
-}
-</script>
-
-<style scoped>
-/* Basic styles, add more to match your design */
-.event-page {
-    margin: auto;
-}
-
-.event-header {
-    text-align: center;
-    color: white;
-    position: relative;
-    min-height: 500px;
-}
-
-.event-header-content {
-    bottom: 20px;
-    left: 20px;
-}
-
-.event-image {
-    width: 100%;
-    max-height: 300px;
-    object-fit: cover;
-    display: block;
-}
-
-.event-card {
-    position: absolute;
-    top: 50%;
-    color: white;
-    width: 100%;
-}
-
-.event-content {
-    margin:auto;
-    max-width: 900px;
-    display: grid;
-    grid-template-columns: 3fr 1fr;
-    gap: 20px;
-}
-.section-title {
-    font-size: 24px;
-    margin-bottom: 15px;
-}
-
-.media-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 10px;
-}
-
-.media-item {
-    border: 1px solid #ccc;
-    padding: 10px;
-}
-
-/* Add responsive design and other styles as required */
-</style>

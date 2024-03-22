@@ -1,10 +1,9 @@
-
 import requests
-import  schemas
-# import sys
-# import amqp_connection
-# import pika
-# import json
+import schemas
+import sys
+import amqp_connection
+import pika
+import json
 from fastapi import FastAPI, Depends
 from datetime import datetime
 # from invokes import invoke_http
@@ -13,13 +12,14 @@ from os import environ
 from sqlalchemy.orm import Session
 from fastapi.encoders import jsonable_encoder
 
-
-event_ms = environ.get('EVENT_URL') or "http://localhost:3600/event"
+event_ms = environ.get('EVENT_URL') or "http://localhost:5000/event"
 notification_ms = environ.get("NOTIFICATION_URL") or "http://localhost:5005/notification"
 recommendation_ms = environ.get('RECOMMENDATION_URL') or "http://localhost:3700/recommendation"
 
-# exchangename = "create_event_topic"
-# exchangetype = "topic"
+connection = None
+channel = None
+exchangename = "create_event_topic"
+exchangetype = "topic"
 
 # @asynccontextmanager
 # async def lifespan(app: FastAPI):
@@ -91,20 +91,34 @@ Sample event JSON output:
 
 @app.post("/create_event")
 def create_event(event: schemas.Recommend):
-
     event_dict = event.dict()
 
-
-    res= requests.post( recommendation_ms, json=jsonable_encoder(event.search))
-    result = res.json()[0:3]
-   
-   
-    if res.status_code not in range(200,300):
-        return {"message": "reservation failed"}
-    else:
-        event_dict["recommendation"] = result
+    # Get recommendation from recommendation microservice
+    recommendation_result = requests.post(recommendation_ms, json=jsonable_encoder({"category": event_dict["category"], "township": event_dict["township"]})).json()
     
-      
-        update_event = requests.post( event_ms, json=jsonable_encoder(event_dict))
+    if recommendation_result.status_code not in range(200,300):
+        channel.basic_publish(exchange=exchangename, routing_key="create_event.error",body=recommendation_result, properties=pika.BasicProperties(delivery_mode=2))
+        return recommendation_result
+    
+    # Create event through event microservice
+    event_dict["recommendation"] = recommendation_result[0:3]
+    event_result = requests.post(event_ms, json=jsonable_encoder(event_dict)).json()
 
-        return update_event.json()
+    if event_result.status_code not in range(200,300):
+        channel.basic_publish(exchange=exchangename, routing_key="create_event.error",body=event_result, properties=pika.BasicProperties(delivery_mode=2))
+        return event_result
+    
+    # Send notification to users
+    channel.basic_publish(exchange=exchangename, routing_key="create_event.notification",body=event_result, properties=pika.BasicProperties(delivery_mode=2))
+    
+    return event_result
+
+@app.delete("/delete_event/{event_id}")
+def delete_event(event_id: int):
+    event_result = requests.delete(event_ms + f"/{event_id}").json()
+    if event_result.status_code not in range(200,300):
+        channel.basic_publish(exchange=exchangename, routing_key="delete_event.error",body=event_result, properties=pika.BasicProperties(delivery_mode=2))
+        return event_result
+    
+    channel.basic_publish(exchange=exchangename, routing_key="delete_event.notification",body=event_result, properties=pika.BasicProperties(delivery_mode=2))
+    return event_result

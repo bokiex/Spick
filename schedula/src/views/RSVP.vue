@@ -2,12 +2,15 @@
 <script>
 import VueCal from 'vue-cal';
 import 'vue-cal/dist/vuecal.css';
+import { isProxy, toRaw } from 'vue';
 function onEventCreate (event, deleteEventFunction) {
     // You can modify event here and return it.
     // You can also return false to reject the event creation.
     console.log(event)
     return event
 }
+var eventID = 0
+var userID = 0
 export default{
     components:{VueCal},
     data() {
@@ -34,11 +37,41 @@ export default{
             if (this.currentStep > 1) this.currentStep--
         },
         send(){
-          axios.get()
+          var url = "http://localhost:5100/rsvp/accept"
+          axios.post(
+            url, 
+            result
+          )
           .then(function (response){
 
           })  
+        },
+        test(){
+          var events = toRaw(this.$refs.vuecal.mutableEvents)
+          var result = []
+          var index = 0
+          for (var timeslot of events){
+              var event = {
+              scheduleID : index,
+              eventID : eventID,
+              userID : userID,
+              start_time : timeslot.start.format('YYYY-MM-DD').concat("T", timeslot.start.formatTime('HH:mm:00')),
+              end_time : timeslot.end.format('YYYY-MM-DD').concat("T", timeslot.end.formatTime('HH:mm:00'))}
+              result.push(event)
+              index++
+          }
+          this.send(result)
         }
+        // onEvent (event, deleteEventFunction) {
+        //   var events = toRaw(this.$refs.vuecal.mutableEvents)
+        //   var start = event.start
+        //   var end = event.end
+        //   for (var timeslot of events){
+        //     if (timeslot.end >= event.start && event.start >= timeslot.start){
+        //       return false
+        //     }
+        //   }
+        // return event}
 
     }
 }
@@ -142,16 +175,18 @@ export default{
               <p class="exp">Select the date and time you are available.</p>
             </div>
             <div style="width:100%;height:65%;float:right;" >
-          <VueCal id = "calendar"
-         :time-from="10 * 60"
-         :time-to="23 * 60"
+          <vue-cal id = "calendar"
+          ref="vuecal"
+         :time-from="0 * 60"
+         :time-to="24 * 60"
          :disable-views="['years', 'year']"
          hide-view-selector
          :editable-events="{ title: false, drag: true, resize: true, delete: true, create: true }"
          :snap-to-time="15"
+         :events="events"
          class="vuecal--full-height-delete"
-         ></VueCal></div>
-            
+         ></vue-cal></div>
+
             <div class="btns">
               <button class="prev-stp" @click="prevStep" type="button">Go Back</button>
               <button class="next-stp" @click="test" type="submit" style="float: right">

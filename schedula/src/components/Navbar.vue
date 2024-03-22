@@ -1,46 +1,45 @@
 <script setup>
 import { CalendarDays, SquarePlus, UserRound, TentTree } from 'lucide-vue-next'
+import {
+    NavigationMenuContent,
+    NavigationMenuIndicator,
+    NavigationMenuItem,
+    NavigationMenuLink,
+    NavigationMenuList,
+    NavigationMenuRoot,
+    NavigationMenuTrigger,
+    NavigationMenuViewport
+} from 'radix-vue'
 </script>
 
 <template>
-    <nav class="navbar navbar-expand-lg navbar-light bg-light">
-        <div class="container-fluid">
-            <a class="navbar-brand" href="#">Spick</a>
-            <button
-                class="navbar-toggler"
-                type="button"
-                data-bs-toggle="collapse"
-                data-bs-target="#navbarSupportedContent"
-                aria-controls="navbarSupportedContent"
-                aria-expanded="false"
-                aria-label="Toggle navigation"
+    <NavigationMenuRoot class="flex w-full justify-center">
+        <NavigationMenuList class="center m-0 flex list-none rounded-[6px] bg-white p-1">
+            <NavigationMenuItem>
+                <NavigationMenuLink
+                    class="transition-colors hover:bg-accent hover:text-accent-foreground focus:outline-none focus:bg-accent focus:text-accent-foreground block select-none rounded-[4px] px-3 py-2 text-[15px] font-medium leading-none no-underline outline-none"
+                    href="/"
+                >
+                    Calendar
+                </NavigationMenuLink>
+            </NavigationMenuItem>
+
+            <NavigationMenuItem
+                class="transition-colors hover:bg-accent hover:text-accent-foreground focus:outline-none focus:bg-accent focus:text-accent-foreground block select-none rounded-[4px] px-3 py-2 text-[15px] font-medium leading-none no-underline outline-none"
             >
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarSupportedContent">
-                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                    <li class="nav-item">
-                        <RouterLink class="nav-link" to="/">
-                            <CalendarDays /><span>Calendar</span>
-                        </RouterLink>
-                    </li>
-                    <li class="nav-item">
-                        <RouterLink class="nav-link" to="/create">
-                            <SquarePlus /><span>Create</span>
-                        </RouterLink>
-                    </li>
-                    <li class="nav-item">
-                        <RouterLink class="nav-link" to="/events">
-                            <TentTree /><span>Events</span> </RouterLink
-                        >
-                    </li>
-                    <li class="nav-item">
-                        <RouterLink class="nav-link" to="/profile">
-                            <UserRound /><span>Profile</span>
-                        </RouterLink>
-                    </li>
-                </ul>
-            </div>
-        </div>
-    </nav>
+                <NavigationMenuLink href="/create"> Create </NavigationMenuLink>
+            </NavigationMenuItem>
+
+            <NavigationMenuItem
+                class="transition-colors hover:bg-accent hover:text-accent-foreground focus:outline-none focus:bg-accent focus:text-accent-foreground block select-none rounded-[4px] px-3 py-2 text-[15px] font-medium leading-none no-underline outline-none"
+            >
+                <NavigationMenuLink href="/events"> Events</NavigationMenuLink>
+            </NavigationMenuItem>
+            <NavigationMenuItem
+                class="transition-colors hover:bg-accent hover:text-accent-foreground focus:outline-none focus:bg-accent focus:text-accent-foreground block select-none rounded-[4px] px-3 py-2 text-[15px] font-medium leading-none no-underline outline-none"
+            >
+                <NavigationMenuLink href="/profile"> Profile</NavigationMenuLink>
+            </NavigationMenuItem>
+        </NavigationMenuList>
+    </NavigationMenuRoot>
 </template>

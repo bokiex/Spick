@@ -6,7 +6,8 @@ from fastapi.encoders import jsonable_encoder
 
 def get_events(db: Session):
   
-    res = db.query(models.Event).options(joinedload(models.Event.recommendation)).all()
+    res = db.query(models.Event).options(joinedload(models.Event.recommendation),
+joinedload(models.Event.image)).all()
    
     return res
 
@@ -33,8 +34,11 @@ def create_event(db: Session, event: schemas.Event):
     db.refresh(db_event)
     return db_event
 
-def get_event_by_id(db: Session, event_id: int):
-    return db.query(models.Event).filter(models.Event.event_id == event_id).first()
+def get_event_by_id(event_id: int,db: Session ):
+    res = db.query(models.Event).options(joinedload(models.Event.recommendation),
+joinedload(models.Event.image)).filter(models.Event.event_id == event_id).first()
+
+    return res
 
 def update_event(event_id:int, event: schemas.EventPut, db: Session ):
     db_event = db.query(models.Event).filter(models.Event.event_id == event_id).first()

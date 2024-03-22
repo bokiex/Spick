@@ -17,7 +17,7 @@ export default {
                 const response = await axios.post('http://127.0.0.1:5000/signup', {
                     username : this.username,
                     email: this.email,
-                    telegramtag: this.telegramHandle,
+                    telegram_tag: this.telegramHandle,
                     password: this.password,
                 });
                 console.log(response.data);

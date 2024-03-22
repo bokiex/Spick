@@ -5,17 +5,17 @@ from flask_cors import CORS
 
 app = Flask(__name__)
 CORS(app)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://root@localhost:3306/user'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://is213@localhost:8889/user'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
 class Auth(db.Model):
     __tablename__ = 'user'
-    userID = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
     password_hash = db.Column(db.String(128))
-    telegramtag = db.Column(db.String(64), nullable=False)
+    telegram_tag = db.Column(db.String(64), nullable=False)
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password, method='pbkdf2:sha256')
@@ -26,7 +26,7 @@ class Auth(db.Model):
 @app.route('/signup', methods=['POST'])
 def signup():
     data = request.get_json()
-    user = Auth(username=data['username'], email=data['email'], telegramtag=data['telegramtag'])
+    user = Auth(username=data['username'], email=data['email'], telegram_tag=data['telegram_tag'])
     user.set_password(data['password'])
     db.session.add(user)
     db.session.commit()
@@ -62,7 +62,7 @@ def login():
             status_code = 401
         else:
             response['message'] = "Login successful."
-            response['userID'] = user.userID
+            response['user_id'] = user.user_id
     except Exception as e:
         app.logger.error(f"Error during user lookup or password check: {e}")
         response['message'] = "An error occurred during login."
@@ -81,10 +81,10 @@ def user_details(user_id):
     if request.method == 'GET':
         # Return user details
         user_info = {
-            'userID': user.userID,
+            'user_id': user.user_id,
             'username': user.username,
             'email': user.email,
-            'telegramtag': user.telegramtag
+            'telegram_tag': user.telegram_tag
         }
         return jsonify(user_info), 200
 
@@ -93,7 +93,7 @@ def user_details(user_id):
         data = request.get_json()
         user.username = data.get('username', user.username)
         user.email = data.get('email', user.email)
-        user.telegramtag = data.get('telegramtag', user.telegramtag)
+        user.telegram_tag = data.get('telegram_tag', user.telegram_tag)
         db.session.commit()
         return jsonify({'message': 'User updated successfully'}), 200
 
@@ -132,7 +132,7 @@ if __name__ == '__main__':
 #     "username": "username",
 #     "email": "email",
 #     "password": "password",
-#     "telegramtag": "telegramtag"
+#     "telegram_tag": "telegram_tag"
 #}
 
 #SignIn / Login:
