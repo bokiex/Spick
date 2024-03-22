@@ -4,19 +4,11 @@ export default {
     name: "entercode",
     data() {
         return {
+            userID:0,
             code: ""
         }
     },
     methods: {
-        toRSVP() {
-            this.$router.push({
-                name: 'RSVP',
-                params: {
-                    userID: 1,
-                    eventID: this.code
-                }
-            });
-        }
     }
 }
 
@@ -64,13 +56,14 @@ export default {
                         <input type="text" class="form-control form-input" v-model="code" placeholder="Event Code"
                             aria-label="Event Code" aria-describedby="basic-addon2">
                         <div class="input-group-append">
-                            <button class="btn btn-go" @click="toRSVP" type="button">Go</button>
+                            <router-link class = "btn btn-go" :to="`/RSVP/${this.userID}/${this.code}`">Go</router-link>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+    
 </template>
 
 <style scoped>

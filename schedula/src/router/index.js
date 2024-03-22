@@ -53,7 +53,7 @@ const router = createRouter({
             component: ReservationView
         },
         {
-            path: '/RSVP',
+            path: '/RSVP/:userID/:eventToken',
             name: 'RSVP',
             component: RSVP
         },

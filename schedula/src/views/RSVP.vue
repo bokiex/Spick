@@ -4,12 +4,12 @@ import VueCal from 'vue-cal';
 import 'vue-cal/dist/vuecal.css';
 import axios from 'axios';
 import { isProxy, toRaw } from 'vue';
-var eventID = 0
-var userID = 0
 export default{
     components:{VueCal},
     data() {
         return {
+            userID:"",
+            eventToken:"",
             currentStep: 1,
             steps: [
                 { id: 1, label: 'Step 1', description: 'Acceptance' },
@@ -17,6 +17,15 @@ export default{
                 { id: 3, label: 'Step 3', description: 'End' }
             ]
         }    
+    },
+    created(){
+        this.userID = this.$route.params.userID;
+        this.eventToken = this.$route.params.eventToken;
+        axios.get(`localhost/entercode.json?userID=${this.userID}&eventToken=${this.eventToken}`)
+        .then (response=>{
+            console.log(this.userID)
+            console.log(this.eventToken)
+        })
     },
     computed: {
     // Get the Monday of the real time current week.
@@ -34,7 +43,14 @@ export default{
         sendAccept(){
           this.nextStep()
           var url = "http://localhost:5100/rsvp/accept"
-          var data = this.getEvents()
+          var events = this.getEvents()
+          var data = {
+            "userID": this.userID,
+            "token": this.eventToken,
+            "eventID": eventID,
+            "sched_list": events
+          }
+          console.log(data)
           axios.post(
             url, 
             data
@@ -46,16 +62,13 @@ export default{
         getEvents(){
           var events = toRaw(this.$refs.vuecal.mutableEvents)
           var result = []
-          var index = 0
           for (var timeslot of events){
               var event = {
-              scheduleID : index,
               eventID : eventID,
               userID : userID,
               start_time : timeslot.start.format('YYYY-MM-DD').concat("T", timeslot.start.formatTime('HH:mm:00')),
               end_time : timeslot.end.format('YYYY-MM-DD').concat("T", timeslot.end.formatTime('HH:mm:00'))}
               result.push(event)
-              index++
           }
           return result
         }
