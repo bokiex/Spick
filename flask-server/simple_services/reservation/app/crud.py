@@ -4,9 +4,9 @@ from fastapi.encoders import jsonable_encoder
 
 def get_reservations(db: Session):
     return db.query(models.Reservation).all()
-    
+
 def create_reservation(db: Session, reservation: schemas.Reservation):
-   
+    print(jsonable_encoder(reservation))
     db_reservation = models.Reservation(**reservation.dict())
     db.add(db_reservation)
     db.commit()

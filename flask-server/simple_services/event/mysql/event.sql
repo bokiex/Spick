@@ -36,3 +36,13 @@ CREATE TABLE IF NOT EXISTS `recommendation` (
     FOREIGN KEY (event_id) REFERENCES event(event_id)
 
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+DROP TABLE IF EXISTS `image`;
+CREATE TABLE IF NOT EXISTS `image` (
+    `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `image_path` VARCHAR(1024) NOT NULL,
+    `image_name` VARCHAR(255),
+    `image_type` VARCHAR(50),
+    `event_id` INT NOT NULL,
+    FOREIGN KEY (event_id) REFERENCES event(event_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;

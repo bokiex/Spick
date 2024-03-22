@@ -6,7 +6,7 @@ class Reservation(BaseModel):
 
     user_id: int
     event_id: int
-    address: str
+    reservation_address: str
     num_guests: int
     reservation_name: str
     start_time: datetime

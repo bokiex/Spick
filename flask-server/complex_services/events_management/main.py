@@ -6,34 +6,34 @@ import pika
 import json
 from fastapi import FastAPI, Depends
 from datetime import datetime
-from invokes import invoke_http
+# from invokes import invoke_http
 from os import environ
-from contextlib import asynccontextmanager
+# from contextlib import asynccontextmanager
 from sqlalchemy.orm import Session
 from fastapi.encoders import jsonable_encoder
 
 event_ms = environ.get('EVENT_URL') or "http://localhost:5000/event"
 notification_ms = environ.get("NOTIFICATION_URL") or "http://localhost:5005/notification"
-recommendation_ms = environ.get('RECOMMENDATION_URL') or "http://localhost:5100/recommendation"
+recommendation_ms = environ.get('RECOMMENDATION_URL') or "http://localhost:3700/recommendation"
 
 connection = None
 channel = None
 exchangename = "create_event_topic"
 exchangetype = "topic"
 
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    global connection, channel
-    connection = amqp_connection.create_connection()
-    channel = connection.channel()
-    if not amqp_connection.check_exchange(channel, exchangename, exchangetype):
-        print("\nCreate the 'Exchange' before running this microservice. \nExiting the program.")
-        sys.exit(0)
-    yield
-    connection.close()
+# @asynccontextmanager
+# async def lifespan(app: FastAPI):
+#     global connection, channel
+#     connection = amqp_connection.create_connection()
+#     channel = connection.channel()
+#     if not amqp_connection.check_exchange(channel, exchangename, exchangetype):
+#         print("\nCreate the 'Exchange' before running this microservice. \nExiting the program.")
+#         sys.exit(0)
+#     yield
+#     connection.close()
 
 # Initialize FastAPI app
-app = FastAPI(lifespan=lifespan)
+app = FastAPI()
 
 
 """
@@ -88,6 +88,7 @@ Sample event JSON output:
     }
 }
 """
+
 @app.post("/create_event")
 def create_event(event: schemas.Recommend):
     event_dict = event.dict()

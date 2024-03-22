@@ -9,7 +9,7 @@ from fastapi.encoders import jsonable_encoder
 app = FastAPI()
 
 reservation_ms = "http://0.0.0.0:3400/reservation"
-event_ms = "http://0.0.0.0:3600/events"
+event_ms = "http://0.0.0.0:3600/event"
 recommendation_ms = "http://0.0.0.0:"
 
 @app.get("/ping")
@@ -19,7 +19,6 @@ def ping():
 @app.post("/reserve")
 def reserve(reservation: schemas.Reservation):
 
-    
     reservation_details = {
         "user_id": reservation.user_id,
         "reservation_name": reservation.reservation_name,
@@ -28,6 +27,8 @@ def reserve(reservation: schemas.Reservation):
 
     res= requests.post( reservation_ms, json=reservation_details)
 
+
+  
     if res.status_code not in range(200,300):
         return {"message": "reservation failed"}
     else:
