@@ -55,9 +55,7 @@ export default {
                     <div class="input-group mb-3" style="float:right;">
                         <input type="text" class="form-control form-input" v-model="code" placeholder="Event Code"
                             aria-label="Event Code" aria-describedby="basic-addon2">
-                        <div class="input-group-append">
-                            <router-link class = "btn btn-go" :to="`/RSVP/${this.userID}/${this.code}`">Go</router-link>
-                        </div>
+                            <router-link class = "btn btn-go" type = "button" :to="`/RSVP/${this.userID}/${this.code}`">Go</router-link>
                     </div>
                 </div>
             </div>
@@ -70,7 +68,6 @@ export default {
 .form-input {
     padding: 1rem;
     border: 1px solid hsl(231, 11%, 63%);
-    border-radius: 7px;
     font-weight: 500;
     font-size: 1rem;
 }

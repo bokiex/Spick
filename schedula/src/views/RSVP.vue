@@ -4,6 +4,8 @@ import VueCal from 'vue-cal';
 import 'vue-cal/dist/vuecal.css';
 import axios from 'axios';
 import { isProxy, toRaw } from 'vue';
+// eventID placeholder
+var eventID = 0
 export default{
     components:{VueCal},
     data() {
@@ -56,19 +58,22 @@ export default{
             data
           )
           .then(function (response){
-            
+            this.$route.push({ path: '/calendarview' })
           })  
         },
         getEvents(){
           var events = toRaw(this.$refs.vuecal.mutableEvents)
           var result = []
+          var index = 0
           for (var timeslot of events){
               var event = {
-              eventID : eventID,
-              userID : userID,
+              scheduleID : this.index,
+              eventID : this.eventID,
+              userID : this.userID,
               start_time : timeslot.start.format('YYYY-MM-DD').concat("T", timeslot.start.formatTime('HH:mm:00')),
               end_time : timeslot.end.format('YYYY-MM-DD').concat("T", timeslot.end.formatTime('HH:mm:00'))}
               result.push(event)
+              index++
           }
           return result
         }
@@ -145,7 +150,8 @@ export default{
          :time-to="24 * 60"
          :disable-views="['years', 'year']"
          hide-view-selector
-         :editable-events="{ title: false, drag: true, resize: true, delete: true, create: true }"
+         resize-x
+         :editable-events="{ title: false, drag: false, resize: true, delete: true, create: true}"
          :snap-to-time="15"
          :events="events"
          class="vuecal--full-height-delete"
