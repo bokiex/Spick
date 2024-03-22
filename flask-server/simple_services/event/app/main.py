@@ -106,7 +106,7 @@ def get_invitee_responded(event_id: int, db: Session = Depends(get_db)):
 
 """
 {
-    "data": [
+    "all_invitees": [
         {
             "user_id": 1,
             "event_id": 1,
@@ -123,15 +123,34 @@ def get_invitee_responded(event_id: int, db: Session = Depends(get_db)):
             "status": "Y"
         }
     ],
+    "respondents": [
+        {
+            "user_id": 1,
+            "event_id": 1,
+            "status": "Y"
+        },
+        {
+            "user_id": 3,
+            "event_id": 1,
+            "status": "Y"
+        }
+    ],
+    "invitees_left": 1,
     "message": "Invitees found."
 }
 """
 @app.get("/event/invitee/{event_id}")
 def get_invitees(event_id:int, db: Session = Depends(get_db)):
-    res = crud.get_invitee(db, event_id)
-    if res == []:
+    all_invitees = crud.get_invitee(db, event_id)
+    if all_invitees == []:
         return jsonable_encoder({"message": "No invitees found."})
-    return jsonable_encoder({"data": res, "message": "Invitees found."})
+    
+    respondents = crud.get_invitee_responded(db, event_id)
+    if respondents == []:
+        return jsonable_encoder({"message": "No invitees found."})
+    
+    invitees_left = len(all_invitees) - len(respondents)
+    return jsonable_encoder({"all_invitees": all_invitees, "respondents": respondents, "invitees_left": invitees_left, "message": "Invitees found."})
 
 @app.put("/event/invitee")
 async def update_invitee(invitee: schemas.Invitee, db: Session = Depends(get_db)):

@@ -2,13 +2,8 @@
 <script>
 import VueCal from 'vue-cal';
 import 'vue-cal/dist/vuecal.css';
+import axios from 'axios';
 import { isProxy, toRaw } from 'vue';
-function onEventCreate (event, deleteEventFunction) {
-    // You can modify event here and return it.
-    // You can also return false to reject the event creation.
-    console.log(event)
-    return event
-}
 var eventID = 0
 var userID = 0
 export default{
@@ -36,17 +31,19 @@ export default{
         prevStep() {
             if (this.currentStep > 1) this.currentStep--
         },
-        send(){
+        sendAccept(){
+          this.nextStep()
           var url = "http://localhost:5100/rsvp/accept"
+          var data = this.getEvents()
           axios.post(
             url, 
-            result
+            data
           )
           .then(function (response){
-
+            
           })  
         },
-        test(){
+        getEvents(){
           var events = toRaw(this.$refs.vuecal.mutableEvents)
           var result = []
           var index = 0
@@ -60,7 +57,7 @@ export default{
               result.push(event)
               index++
           }
-          this.send(result)
+          return result
         }
         // onEvent (event, deleteEventFunction) {
         //   var events = toRaw(this.$refs.vuecal.mutableEvents)
@@ -79,53 +76,7 @@ export default{
 </script>
 
 <template>
-    <!-- Navbar Start-->
-    <nav class="navbar navbar-expand-md navbar-light bg-light m-1">
-      <div class="container-fluid m-0">
-        <a class="navbar-brand m-0" href="#">Schedular</a>
-        <button
-          class="navbar-toggler"
-          type="button"
-          data-toggle="collapse"
-          data-target="#navbarNav"
-          aria-controls="navbarNav"
-          aria-expanded="false"
-          aria-label="Toggle navigation"
-        >
-          <span class="navbar-toggler-icon"></span>
-        </button>
-        <div
-          class="collapse navbar-collapse justify-content-center"
-          id="navbarNav"
-        >
-          <!-- Added justify-content-center to center align the navbar links -->
-          <ul class="navbar-nav">
-            <li class="nav-item">
-              <a class="nav-link" href="#"
-                ><i class="bi bi-calendar"></i> Calendar</a
-              >
-            </li>
-            <li class="nav-item">
-              <a class="nav-link active" href="#"
-                ><i class="bi bi-plus-square"></i> Create</a
-              >
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="#"
-                ><i class="bi bi-currency-dollar"></i> Billing</a
-              >
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="#"
-                ><i class="bi bi-person-square"></i> Profile</a
-              >
-            </li>
-          </ul>
-        </div>
-      </div>
-    </nav>
-    <!-- Navbar End -->
-    <div class="container p-4">
+       <div class="container p-4">
       <div class="row justify-content-center">
         <!-- Form Start -->
         <div class="form-container">
@@ -189,7 +140,7 @@ export default{
 
             <div class="btns">
               <button class="prev-stp" @click="prevStep" type="button">Go Back</button>
-              <button class="next-stp" @click="test" type="submit" style="float: right">
+              <button class="next-stp" @click="sendAccept" type="submit" style="float: right">
                 Next Step
               </button>
             </div>
@@ -205,7 +156,7 @@ export default{
             </div>
             <div class = "btns">
             <button class="prev-stp" @click="prevStep" type="button">Go Back</button>
-            <button class="exit" id = "exit" @click="send" style="float: right">Exit</button>
+            <button class="exit" id = "exit" @click="exit" style="float: right">Exit</button>
             </div>
           </div>
           <!-- Step 3 end -->
