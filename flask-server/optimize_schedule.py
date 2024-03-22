@@ -1,68 +1,71 @@
-#ALL WORKING
 from flask import Flask, request, jsonify
 from datetime import datetime
 from collections import defaultdict
 
 app = Flask(__name__)
 
-def find_common_slots(schedules):
-    schedules_by_day = defaultdict(lambda: defaultdict(list))
+def find_overlapping_times(schedules):
+    # Organize schedules by day for processing
+    schedules_by_day = defaultdict(list)
     for schedule in schedules:
         start = datetime.strptime(schedule['start_time'], "%Y-%m-%dT%H:%M:%S")
         end = datetime.strptime(schedule['end_time'], "%Y-%m-%dT%H:%M:%S")
-        schedules_by_day[start.date()][schedule['userID']].append((start, end))
+        schedules_by_day[start.date()].append((start, end, schedule['userID']))
+    
+    optimized_schedules = {}
 
-    results = {}
-    for day, users_schedules in schedules_by_day.items():
+    for day, day_schedules in schedules_by_day.items():
+        # Sort by start time, then by end time
+        day_schedules.sort(key=lambda x: (x[0], x[1]))
+
+        # Finding overlapping times
         time_blocks = []
-        for times in users_schedules.values():
-            for start, end in times:
-                time_blocks.append((start, 'start'))
-                time_blocks.append((end, 'end'))
+        for schedule in day_schedules:
+            start, end, user_id = schedule
+            time_blocks.append((start, 'start', user_id))
+            time_blocks.append((end, 'end', user_id))
         time_blocks.sort()
 
-        common_times = []
-        current_attendees = 0
-        max_attendees = 0
-        current_start = None
-
-        for time, event in time_blocks:
+        attendees = defaultdict(int)
+        current_attendees = set()
+        best_overlap = 0
+        best_times = None
+        for time, event, user_id in time_blocks:
             if event == 'start':
-                current_attendees += 1
-                if current_attendees > max_attendees:
-                    max_attendees = current_attendees
-                    current_start = time
+                current_attendees.add(user_id)
+                if len(current_attendees) > best_overlap:
+                    best_overlap = len(current_attendees)
+                    best_times = (time, None)  # Update start time of best overlap
             else:
-                if current_attendees == max_attendees:
-                    common_times.append((current_start, time))
-                current_attendees -= 1
-        
-        attending_users = set()
-        for user_id, times in users_schedules.items():
-            for common_start, common_end in common_times:
-                if any(start <= common_start and end >= common_end for start, end in times):
+                if len(current_attendees) == best_overlap and best_times[1] is None:
+                    best_times = (best_times[0], time)  # Update end time of best overlap
+                current_attendees.remove(user_id)
+
+        if best_times:
+            # Identifying users who can attend the best overlapping time
+            attending_users = set()
+            non_attending_users = set()
+            for start, end, user_id in day_schedules:
+                if start <= best_times[0] and end >= best_times[1]:
                     attending_users.add(user_id)
-                    break
+                else:
+                    non_attending_users.add(user_id)
 
-        non_attending_users = set(users_schedules.keys()) - attending_users
+            optimized_schedules[str(day)] = {
+                'common_slot': {
+                    'start': best_times[0].strftime("%Y-%m-%dT%H:%M:%S"),
+                    'end': best_times[1].strftime("%Y-%m-%dT%H:%M:%S") if best_times[1] else None,
+                },
+                'attending_users': list(attending_users),
+                'non_attending_users': list(non_attending_users),
+            }
 
-        # Adjust common times if there is only one attending user
-        if len(attending_users) == 1:
-            user_id = next(iter(attending_users))
-            common_times = users_schedules[user_id]
-
-        results[str(day)] = {
-            'common_slots': [{'start': slot[0].strftime("%Y-%m-%dT%H:%M:%S"), 'end': slot[1].strftime("%Y-%m-%dT%H:%M:%S")} for slot in common_times],
-            'attending_users': list(attending_users),
-            'non_attending_users': list(non_attending_users)
-        }
-
-    return results
+    return optimized_schedules
 
 @app.route('/optimize_schedule', methods=['POST'])
 def optimize_schedule():
     sched_list = request.json.get('sched_list', [])
-    common_slots_by_day = find_common_slots(sched_list)
+    common_slots_by_day = find_overlapping_times(sched_list)
     return jsonify(common_slots_by_day)
 
 if __name__ == '__main__':
