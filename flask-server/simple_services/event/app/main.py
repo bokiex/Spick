@@ -3,9 +3,23 @@ from database import SessionLocal
 from fastapi.encoders import jsonable_encoder
 import crud, schemas
 from sqlalchemy.orm import Session
-
+from fastapi.middleware.cors import CORSMiddleware
 # Initialize FastAPI app
 app = FastAPI()
+origins = [
+    "http://localhost:5173",
+    "https://localhost.tiangolo.com",
+    "http://localhost",
+    "http://localhost:8080",
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 def get_db():
     db = SessionLocal()
@@ -21,9 +35,10 @@ def get_events(db: Session = Depends(get_db)):
     return jsonable_encoder(res)
 
 # Get event by ID
-@app.get("/event/{event_id}")
-async def get_event_by_id(event_id: int):
-    res = crud.get_event_by_id(event_id)
+@app.get("/event/{event_id}", response_model=schemas.EventResponse)
+async def get_event_by_id(event_id: int, db: Session = Depends(get_db)):
+ 
+    res = crud.get_event_by_id(event_id, db)
     if res == []:
         return jsonable_encoder({"message": "No event found."})
     return jsonable_encoder(res)
@@ -31,7 +46,8 @@ async def get_event_by_id(event_id: int):
 
 # Update event
 @app.put("/event/{event_id}")
-async def update_event(event_id: int, event: schemas.Event, db: Session = Depends(get_db)):
+async def update_event(event_id: int, event: schemas.EventPut, db: Session = Depends(get_db)):
+  
     res = crud.update_event(event_id, event, db)
     if res == []:
         return jsonable_encoder({"message": "No event found."})

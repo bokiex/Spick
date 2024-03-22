@@ -1,3 +1,129 @@
+<script setup>
+import VueDatePicker from '@vuepic/vue-datepicker'
+import Button from '@/components/Button.vue'
+import { Label, Separator } from 'radix-vue'
+import { ref, computed } from 'vue'
+import { useForm, useField } from 'vee-validate'
+import { toTypedSchema } from '@vee-validate/zod'
+import ShowAttendees from '@/components/ShowAttendees.vue'
+import Avatar from '@/components/Avatar.vue'
+import * as z from 'zod'
+
+const userID = localStorage.getItem('userID')
+const currentStep = ref(1)
+const steps = [
+    { id: 1, label: 'Step 1', description: 'Details' },
+    { id: 2, label: 'Step 2', description: 'Type' },
+    { id: 3, label: 'Step 3', description: 'Date & Time' },
+    { id: 4, label: 'Step 4', description: 'End' }
+]
+
+const event_detail_schema = toTypedSchema(
+    z.object({
+        event_name: z.string().min(1, { message: 'Event name is required' }),
+        event_desc: z.string().min(1, { message: 'Event description is required' }),
+        invitees: z.array(z.string()).min(1, { message: 'At least one invitee is required' })
+    })
+)
+
+const event_type_schema = toTypedSchema(
+    z.object({
+        category: z.string().min(1, { message: 'Event type is required' })
+    })
+)
+
+const date_time_schema = toTypedSchema(
+    z.object({
+        start_time: z.string().min(1, { message: 'Start time is required' }),
+        end_time: z.string().min(1, { message: 'End time is required' })
+    })
+)
+
+const schemas = [event_detail_schema, event_type_schema, date_time_schema]
+
+const { value: event_name } = useField('event_name')
+const { value: event_desc } = useField('event_desc')
+const { value: invitees } = useField('invitees', () => [])
+
+const { handleSubmit, validate } = useForm({
+    validationSchema: computed(() => schemas[currentStep.value - 1])
+})
+
+const nextStep = async () => {
+    const isValid = await validate()
+    console.log(isValid)
+    if (isValid) {
+        if (currentStep < steps.length) {
+            currentStep++
+            console.log(currentStep)
+            useForm({
+                validationSchema: schemas[currentStep.value - 1]
+            })
+        }
+    }
+}
+function prevStep() {
+    if (currentStep > 1) {
+        currentStep--
+    }
+}
+
+function submitForm() {
+    // Make sure all steps are validated before submitting
+    if (currentStep === 3) {
+        currentStep++
+        // Send the form data to your backend
+        console.log(selected)
+    }
+}
+function addInvitee(selected_friend) {
+    invitees.push(selected_friend)
+}
+
+function removeInvitee(index) {
+    invitees.splice(index, 1)
+}
+
+const friends = [
+    {
+        name: 'Colm Tuite',
+        avatar: 'https://images.unsplash.com/photo-1492633423870-43d1cd2775eb?&w=128&h=128&dpr=2&q=80'
+    },
+    {
+        name: 'Adam Wathan',
+        avatar: 'https://images.unsplash.com/photo-1492633423870-43d1cd2775eb?&w=128&h=128&dpr=2&q=80'
+    },
+    {
+        name: 'Sarah Drasner',
+        avatar: 'https://images.unsplash.com/photo-1492633423870-43d1cd2775eb?&w=128&h=128&dpr=2&q=80'
+    },
+    {
+        name: 'Cassidy Williams',
+        avatar: 'https://images.unsplash.com/photo-1492633423870-43d1cd2775eb?&w=128&h=128&dpr=2&q=80'
+    },
+    {
+        name: 'Evan You',
+        avatar: 'https://images.unsplash.com/photo-1492633423870-43d1cd2775eb?&w=128&h=128&dpr=2&q=80'
+    },
+    {
+        name: 'John Otander',
+        avatar: 'https://images.unsplash.com/photo-1492633423870-43d1cd2775eb?&w=128&h=128&dpr=2&q=80'
+    },
+    {
+        name: 'Sarah Dayan',
+        avatar: 'https://images.unsplash.com/photo-1492633423870-43d1cd2775eb?&w=128&h=128&dpr=2&q=80'
+    },
+    {
+        name: 'Tim Neutkens',
+        avatar: 'https://images.unsplash.com/photo-1492633423870-43d1cd2775eb?&w=128&h=128&dpr=2&q=80'
+    },
+    {
+        name: 'Chris Biscardi',
+        avatar: 'https://images.unsplash.com/photo-1492633423870-43d1cd2775eb?&w=128&h=128&dpr=2&q=80'
+    }
+]
+const selected_friend = ref(friends[0])
+</script>
 <template>
     <div class="container p-4">
         <div class="row justify-content-center">
@@ -36,278 +162,199 @@
                 </div>
                 <!-- Sidebar end -->
                 <!-- Step 1 start -->
-                <div v-if="currentStep === 1" class="stp step-1">
-                    <!-- Content omitted for brevity -->
-                    <div class="header">
-                        <h1 class="title">Event Details</h1>
-                        <div class="exp">
-                            Please provide the event title, event description, and attendees.
-                        </div>
-                    </div>
-                    <form class="form">
-                        <div class="label">
-                            <label for="event_name">Event Title</label>
-                            <p class="error" :class="{ show: !selected.event_name }">
-                                This Field Is Required
-                            </p>
-                        </div>
-                        <input
-                            required
-                            type="text"
-                            v-model="selected.event_name"
-                            id="event_name"
-                            placeholder="e.g. ESD Meeting"
-                        />
-
-                        <div class="label">
-                            <label for="event_desc">Event Description</label>
-                            <p class="error" :class="{ show: !selected.event_desc }">
-                                This Field Is Required
-                            </p>
-                        </div>
-                        <input
-                            required
-                            type="text"
-                            v-model="selected.event_desc"
-                            id="event_desc"
-                            placeholder="e.g. Deployment of site"
-                        />
-
-                        <div class="label">
-                            <label for="invitees">Event Attendees</label>
-                            <p class="error" :class="{ show: selected.invitees.length === 0 }">
-                                This Field Is Required
-                            </p>
-                        </div>
-                        <input
-                            required
-                            type="text"
-                            v-model.trim="newInvitee"
-                            @keydown.enter.prevent="addInvitee"
-                            id="invitees"
-                            placeholder="e.g. Ben Tan (Press Enter to add)"
-                        />
-                        <div class="invitees-list">
-                            <div class="row">
-                                <div
-                                    class="col-3"
-                                    v-for="(invitee, index) in selected.invitees"
-                                    :key="index"
-                                >
-                                    {{ invitee }}
-                                    <button @click="removeInvitee(index)" class="btn btn-danger">
-                                        x
-                                    </button>
-                                </div>
+                <form class="form" @submit.prevent="nextStep">
+                    <div v-if="currentStep === 1" class="stp step-1">
+                        <!-- Content omitted for brevity -->
+                        <div class="space-y-6">
+                            <div>
+                                <h3 class="text-lg font-medium">Event Details</h3>
+                                <p class="text-sm text-muted-foreground">
+                                    Please provide the event title, event description, and
+                                    attendees.
+                                </p>
                             </div>
-                        </div>
-                    </form>
-
-                    <div class="btns">
-                        <form @submit.prevent="nextStep">
-                            <button @click="nextStep" class="next-stp" type="button">
-                                Next Step
-                            </button>
-                        </form>
-                    </div>
-                </div>
-
-                <!-- Step 1 end -->
-                <!-- Step 2 start -->
-                <div v-if="currentStep === 2" class="stp step-2">
-                    <div class="header">
-                        <h1 class="title">Pick the type of event.</h1>
-                        <p class="exp">Select the type to get a venue recommendation.</p>
-                    </div>
-                    <form>
-                        <div class="box" data-id="1">
-                            <input
-                                type="radio"
-                                id="school"
-                                name="meeting_type"
-                                v-model="selected.category"
-                            />
-                            <div class="description">
-                                <label for="school">School Meeting</label>
-                                <small>School project meeting done in school.</small>
-                            </div>
-                        </div>
-                        <div class="box" data-id="2">
-                            <input
-                                type="radio"
-                                id="personal"
-                                name="meeting_type"
-                                v-model="selected.category"
-                            />
-                            <div class="description">
-                                <label for="personal">Personal</label>
-                                <small>Meeting with friends</small>
-                            </div>
-                        </div>
-                        <div class="box" data-id="3">
-                            <input
-                                type="radio"
-                                id="celebrations"
-                                name="meeting_type"
-                                v-model="selected.category"
-                            />
-                            <div class="description">
-                                <label for="celebrations">Celebrations</label>
-                                <small>Custom celebrations such as birthday parties.</small>
-                            </div>
-                        </div>
-                    </form>
-
-                    <div class="btns">
-                        <button class="prev-stp" @click="prevStep" type="button">Go Back</button>
-                        <button
-                            class="next-stp"
-                            @click="nextStep"
-                            type="button"
-                            style="float: right"
-                        >
-                            Next Step
-                        </button>
-                    </div>
-                </div>
-                <!-- Step 2 end -->
-                <!-- Step 3 Start -->
-                <div v-if="currentStep === 3" class="stp step-3">
-                    <div class="header">
-                        <h1 class="title">Date and time.</h1>
-                        <p class="exp">Select the date and time for the event.</p>
-                        <form>
-                            <div class="col-12">
-                                <label for="start_time">Start Time</label>
-                                <VueDatePicker v-model="selected.start_time" time-picker-inline />
-                            </div>
-                            <div class="col-12">
-                                <label for="end_time">End Time</label>
-                                <VueDatePicker v-model="selected.end_time" time-picker-inline />
-                            </div>
-                            <div class="col-12">
-                                <label for="time_out">Time Out</label>
-                                <VueDatePicker v-model="selected.time_out" time-picker-inline />
-                            </div>
-                            <div class="col-12">
-                                <div class="label">
-                                    <label for="township">Prefered Area</label>
-                                </div>
+                            <Separator class="shrink-0 bg-border h-px w-full" />
+                            <div class="space-y-2">
+                                <Label for="event_name">Event Title</Label>
                                 <input
+                                    name="event_name"
                                     required
-                                    class="form-control"
-                                    type="text"
-                                    v-model="selected.township"
-                                    id="township"
-                                    placeholder="e.g. Marina Bay"
+                                    id="event_name"
+                                    v-model="event_name"
+                                    class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                                    placeholder="e.g. ESD Meeting"
                                 />
                             </div>
+                            <div class="space-y-2">
+                                <Label for="event_desc">Event Description</Label>
+                                <input
+                                    name="event_desc"
+                                    required
+                                    id="event_desc"
+                                    v-model="event_desc"
+                                    class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                                    placeholder="e.g. Deployment of site"
+                                />
+                            </div>
+                            <div class="space-y-2">
+                                <Label for="invitees">Event Attendees</Label>
+
+                                <ShowAttendees
+                                    @update:selectedFriend="addInvitee"
+                                    :selected_friend="selected_friend"
+                                    :friends="friends"
+                                />
+                            </div>
+
+                            <div class="invitees-list">
+                                <div class="row">
+                                    <div
+                                        class="col-3"
+                                        v-for="(invitee, index) in invitees"
+                                        :key="index"
+                                    >
+                                        <Avatar />
+
+                                        <Button
+                                            @click="removeInvitee(index)"
+                                            class="btn btn-danger"
+                                        >
+                                            x
+                                        </Button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="flex justify-end">
+                                <Button @click="nextStep" type="button"> Next Step </Button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Step 1 end -->
+                    <!-- Step 2 start -->
+                    <div v-if="currentStep === 2" class="stp step-2">
+                        <div class="header">
+                            <h1 class="title">Pick the type of event.</h1>
+                            <p class="exp">Select the type to get a venue recommendation.</p>
+                        </div>
+                        <form>
+                            <div class="box" data-id="1">
+                                <input
+                                    type="radio"
+                                    id="school"
+                                    name="meeting_type"
+                                    v-model="category"
+                                />
+                                <div class="description">
+                                    <label for="school">School Meeting</label>
+                                    <small>School project meeting done in school.</small>
+                                </div>
+                            </div>
+                            <div class="box" data-id="2">
+                                <input
+                                    type="radio"
+                                    id="personal"
+                                    name="meeting_type"
+                                    v-model="category"
+                                />
+                                <div class="description">
+                                    <label for="personal">Personal</label>
+                                    <small>Meeting with friends</small>
+                                </div>
+                            </div>
+                            <div class="box" data-id="3">
+                                <input
+                                    type="radio"
+                                    id="celebrations"
+                                    name="meeting_type"
+                                    v-model="category"
+                                />
+                                <div class="description">
+                                    <label for="celebrations">Celebrations</label>
+                                    <small>Custom celebrations such as birthday parties.</small>
+                                </div>
+                            </div>
                         </form>
+
+                        <div class="btns">
+                            <Button class="prev-stp" @click="prevStep" type="button"
+                                >Go Back</Button
+                            >
+                            <Button
+                                class="next-stp"
+                                @click="nextStep"
+                                type="button"
+                                style="float: right"
+                            >
+                                Next Step
+                            </Button>
+                        </div>
                     </div>
-                    <div class="btns">
-                        <button class="prev-stp" @click="prevStep" type="button">Go Back</button>
-                        <button
-                            class="next-stp"
-                            @click="submitForm"
-                            type="button"
-                            style="float: right"
-                        >
-                            Next Step
-                        </button>
+                    <!-- Step 2 end -->
+                    <!-- Step 3 Start -->
+                    <div v-if="currentStep === 3" class="stp step-3">
+                        <div class="header">
+                            <h1 class="title">Date and time.</h1>
+                            <p class="exp">Select the date and time for the event.</p>
+                            <form>
+                                <div class="col-12">
+                                    <label for="start_time">Start Time</label>
+                                    <VueDatePicker v-model="start_time" time-picker-inline />
+                                </div>
+                                <div class="col-12">
+                                    <label for="end_time">End Time</label>
+                                    <VueDatePicker v-model="end_time" time-picker-inline />
+                                </div>
+                                <div class="col-12">
+                                    <label for="time_out">Time Out</label>
+                                    <VueDatePicker v-model="time_out" time-picker-inline />
+                                </div>
+                                <div class="col-12">
+                                    <div class="label">
+                                        <label for="township">Prefered Area</label>
+                                    </div>
+                                    <input
+                                        required
+                                        class="form-control"
+                                        type="text"
+                                        v-model="township"
+                                        id="township"
+                                        placeholder="e.g. Marina Bay"
+                                    />
+                                </div>
+                            </form>
+                        </div>
+                        <div class="btns">
+                            <Button class="prev-stp" @click="prevStep" type="button"
+                                >Go Back</Button
+                            >
+                            <Button
+                                class="next-stp"
+                                @click="submitForm"
+                                type="button"
+                                style="float: right"
+                            >
+                                Next Step
+                            </Button>
+                        </div>
                     </div>
-                </div>
-                <!-- Step 3 End-->
-                <!-- Step 4 start -->
-                <div v-if="currentStep === 4" class="stp step-4">
-                    <div class="header">
-                        <h1 class="title">Thank you!</h1>
-                        <p class="exp">
-                            Your event invite has been created and sent to the invitees.
-                        </p>
+                    <!-- Step 3 End-->
+                    <!-- Step 4 start -->
+                    <div v-if="currentStep === 4" class="stp step-4">
+                        <div class="header">
+                            <h1 class="title">Thank you!</h1>
+                            <p class="exp">
+                                Your event invite has been created and sent to the invitees.
+                            </p>
+                        </div>
+                        <Button class="next-stp"></Button>
                     </div>
-                    <button class="next-stp"></button>
-                </div>
-                <!-- Step 4 end -->
+                    <!-- Step 4 end -->
+                </form>
             </div>
         </div>
     </div>
 </template>
-
-<script>
-import VueDatePicker from '@vuepic/vue-datepicker'
-export default {
-    userID: localStorage.getItem('userID'),
-    components: {
-        VueDatePicker
-    },
-    data() {
-        return {
-            currentStep: 1,
-            steps: [
-                { id: 1, label: 'Step 1', description: 'Details' },
-                { id: 2, label: 'Step 2', description: 'Type' },
-                { id: 3, label: 'Step 3', description: 'Date & Time' },
-                { id: 4, label: 'Step 4', description: 'End' }
-            ],
-            selected: {
-                user_id: 'user1',
-                event_name: '',
-                event_desc: '',
-                start_time: '',
-                end_time: '',
-                time_out: '',
-                category: '',
-                township: 'Marina Bay',
-                invitees: []
-            },
-            newInvitee: ''
-        }
-    },
-    methods: {
-        nextStep() {
-            if (this.validateStep()) {
-                if (this.currentStep < this.steps.length) {
-                    this.currentStep++
-                }
-            }
-        },
-        prevStep() {
-            if (this.currentStep > 1) {
-                this.currentStep--
-            }
-        },
-        validateStep() {
-            if (this.currentStep === 1) {
-                if (
-                    !this.selected.event_name ||
-                    !this.selected.event_desc ||
-                    !this.selected.invitees.length
-                ) {
-                    return false
-                }
-            }
-            return true
-        },
-        submitForm() {
-            // Make sure all steps are validated before submitting
-            if (this.currentStep === 3) {
-                this.currentStep++
-                // Send the form data to your backend
-                console.log(this.selected)
-            }
-        },
-        addInvitee() {
-            if (this.newInvitee.trim() !== '') {
-                this.selected.invitees.push(this.newInvitee.trim())
-                this.newInvitee = '' // Clear the input field
-            }
-        },
-        removeInvitee(index) {
-            this.selected.invitees.splice(index, 1)
-        }
-    }
-}
-</script>
 
 <style scoped>
 nav {

@@ -2,9 +2,8 @@
 import FullCalendar from '@fullcalendar/vue3'
 import dayGridPlugin from '@fullcalendar/daygrid'
 import timeGridPlugin from '@fullcalendar/timegrid'
-import interactionPlugin from '@fullcalendar/interaction'
 import bootstrap5Plugin from '@fullcalendar/bootstrap5'
-import { Modal } from 'bootstrap'
+import interactionPlugin from '@fullcalendar/interaction'
 import VueDatePicker from '@vuepic/vue-datepicker'
 import '@vuepic/vue-datepicker/dist/main.css'
 import axios from 'axios'
@@ -138,7 +137,7 @@ export default {
             </template></FullCalendar
         >
         <!-- Modal -->
-        <div
+        <!-- <div
             class="modal fade"
             id="createEventForm"
             tabindex="-1"
@@ -218,6 +217,6 @@ export default {
                     </div>
                 </div>
             </div>
-        </div>
+        </div> -->
     </div>
 </template>

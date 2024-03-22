@@ -5,7 +5,9 @@ from fastapi.encoders import jsonable_encoder
 
 
 def get_events(db: Session):
-    res = db.query(models.Event).options(joinedload(models.Event.recommendation)).all()
+  
+    res = db.query(models.Event).options(joinedload(models.Event.recommendation),
+joinedload(models.Event.image)).all()
    
     return res
 
@@ -13,7 +15,7 @@ def create_event(db: Session, event: schemas.Event):
     # if db.query(models.Event).filter(models.Event.event_name == event.event_name).first():
     #         return None
     event_data = event.dict(exclude={'invitees', 'recommendation'})
-    print(jsonable_encoder(event))
+ 
     db_event = models.Event(**event_data)
     db.add(db_event)
     db.flush()
@@ -32,18 +34,23 @@ def create_event(db: Session, event: schemas.Event):
     db.refresh(db_event)
     return db_event
 
-def get_event_by_id(db: Session, event_id: int):
-    return db.query(models.Event).filter(models.Event.event_id == event_id).first()
+def get_event_by_id(event_id: int,db: Session ):
+    res = db.query(models.Event).options(joinedload(models.Event.recommendation),
+joinedload(models.Event.image)).filter(models.Event.event_id == event_id).first()
 
-def update_event(db: Session, event_id:int, event: schemas.Event):
+    return res
+
+def update_event(event_id:int, event: schemas.EventPut, db: Session ):
     db_event = db.query(models.Event).filter(models.Event.event_id == event_id).first()
-    if db_event:
-        db_event.event_name = event.event_name
-        db_event.start_time = event.start_time
-        db_event.end_time = event.end_time
-        db_event.event_location = event.event_location
-        db.commit()
-        db.refresh(db_event)
+    if not db_event:
+        
+        return None
+   
+    for key, value in event.dict(exclude_unset=True).items():
+   
+        setattr(db_event, key, value)
+    db.commit()
+    db.refresh(db_event)
     return db_event
 
 def delete_event(db: Session, event_id: int):
