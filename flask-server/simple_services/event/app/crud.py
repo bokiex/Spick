@@ -19,7 +19,6 @@ def create_event(db: Session, event: schemas.Event):
     db_event = models.Event(**event_data)
     db.add(db_event)
     db.flush()
- 
     
     # for invitee in event.invitees:
     #     db_invitee = models.Invitee(**invitee.dict(), event_id=db_event.event_id)

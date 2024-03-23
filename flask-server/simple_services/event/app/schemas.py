@@ -21,16 +21,16 @@ class Image(BaseModel):
   
 
 class Event(BaseModel):
-    event_id: int
     event_name: str
     event_desc: str
+    range_start: datetime
+    range_end: datetime
     image: List[Image] = []
     recommendation: List[Recommend] = []
     reservation_name: Optional[str] = None
     reservation_address: Optional[str] = None
 
 class EventPut(BaseModel):
-
     event_name: Optional[str] = None
     event_desc: Optional[str] = None
     start_time: Optional[datetime] = None
