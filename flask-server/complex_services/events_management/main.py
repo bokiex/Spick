@@ -4,13 +4,16 @@ import sys
 import amqp_connection
 import pika
 import json
+import apscheduler
 from fastapi import FastAPI, Depends
 from datetime import datetime
-# from invokes import invoke_http
+from invokes import invoke_http
 from os import environ
-# from contextlib import asynccontextmanager
+from contextlib import asynccontextmanager
 from sqlalchemy.orm import Session
 from fastapi.encoders import jsonable_encoder
+from apscheduler.schedulers.background import BackgroundScheduler
+from apscheduler.jobstores.sqlalchemy import SQLAlchemyJobStore
 
 event_ms = environ.get('EVENT_URL') or "http://localhost:5000/event"
 notification_ms = environ.get("NOTIFICATION_URL") or "http://localhost:5005/notification"
@@ -20,17 +23,23 @@ connection = None
 channel = None
 exchangename = "create_event_topic"
 exchangetype = "topic"
+scheduler = BackgroundScheduler()
 
-# @asynccontextmanager
-# async def lifespan(app: FastAPI):
-#     global connection, channel
-#     connection = amqp_connection.create_connection()
-#     channel = connection.channel()
-#     if not amqp_connection.check_exchange(channel, exchangename, exchangetype):
-#         print("\nCreate the 'Exchange' before running this microservice. \nExiting the program.")
-#         sys.exit(0)
-#     yield
-#     connection.close()
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    global connection, channel
+    connection = amqp_connection.create_connection()
+    channel = connection.channel()
+    if not amqp_connection.check_exchange(channel, exchangename, exchangetype):
+        print("\nCreate the 'Exchange' before running this microservice. \nExiting the program.")
+        sys.exit(0)
+
+    scheduler.configure(jobstores={'default': SQLAlchemyJobStore(url='mysql+mysqlconnector://is213@localhost:3306/')})
+    scheduler.start()
+
+    yield
+    connection.close()
+    scheduler.shutdown()
 
 # Initialize FastAPI app
 app = FastAPI()
@@ -41,8 +50,8 @@ Sample event JSON input:
 {
     "event_name": "Picnic",
     "event_desc": "Picnic at Marina Bay",
-    "start_time": "2021-10-01 15:00:00",
-    "end_time": "2021-10-01 18:00:00",
+    "range_start": "2021-10-01 15:00:00",
+    "range_end": "2021-10-01 18:00:00",
     "time_out": "2021-09-30 23:59:59",
     "category": "Picnic",
     "township": "Marina Bay",
@@ -111,6 +120,9 @@ def create_event(event: schemas.Recommend):
     # Send notification to users
     channel.basic_publish(exchange=exchangename, routing_key="create_event.notification",body=event_result, properties=pika.BasicProperties(delivery_mode=2))
     
+    # Start scheduler for event time out
+    scheduler.add_job(delete_event, 'date', run_date=event_result["time_out"], args=[event_result["event_id"]])
+    scheduler.print_jobs()
     return event_result
 
 @app.delete("/delete_event/{event_id}")
