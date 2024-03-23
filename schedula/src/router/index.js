@@ -33,8 +33,7 @@ const router = createRouter({
         {
             path: '/create',
             name: 'create',
-            component: EventFormView,
-            meta: { requiresAuth: true }
+            component: EventFormView
         },
         {
             path: '/profile',
@@ -45,7 +44,7 @@ const router = createRouter({
         {
             path: '/SignInSignUp',
             name: 'SignInSignUp',
-            component: SignInSignUpView,
+            component: SignInSignUpView
         },
         {
             path: '/reservation',
@@ -60,23 +59,23 @@ const router = createRouter({
         {
             path: '/entercode',
             name: 'entercode',
-            component: EnterCode,
+            component: EnterCode
         }
     ]
-});
+})
 router.beforeEach((to, from, next) => {
     // Check if the route requires the user to be logged in
-    if (to.matched.some(record => record.meta.requiresAuth)) {
-        const userID = localStorage.getItem('userID');
+    if (to.matched.some((record) => record.meta.requiresAuth)) {
+        const userID = localStorage.getItem('userID')
         if (!userID) {
             // If no userid, redirect to the SignInSignUp page
-            next({ name: 'SignInSignUp', query: { redirect: to.fullPath } });
+            next({ name: 'SignInSignUp', query: { redirect: to.fullPath } })
         } else {
-            next(); // if userid is found, proceed to the route
+            next() // if userid is found, proceed to the route
         }
     } else {
-        next(); // if the route does not require auth, proceed
+        next() // if the route does not require auth, proceed
     }
-});
+})
 
 export default router

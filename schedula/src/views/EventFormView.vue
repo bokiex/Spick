@@ -1,90 +1,12 @@
-<script setup>
+<script>
 import VueDatePicker from '@vuepic/vue-datepicker'
 import Button from '@/components/Button.vue'
 import { Label, Separator } from 'radix-vue'
-import { ref, computed } from 'vue'
-import { useForm, useField } from 'vee-validate'
-import { toTypedSchema } from '@vee-validate/zod'
 import ShowAttendees from '@/components/ShowAttendees.vue'
 import Avatar from '@/components/Avatar.vue'
-import * as z from 'zod'
+import Navbar from '@/components/Navbar.vue'
 
-const userID = localStorage.getItem('userID')
-const currentStep = ref(1)
-const steps = [
-    { id: 1, label: 'Step 1', description: 'Details' },
-    { id: 2, label: 'Step 2', description: 'Type' },
-    { id: 3, label: 'Step 3', description: 'Date & Time' },
-    { id: 4, label: 'Step 4', description: 'End' }
-]
-
-const event_detail_schema = toTypedSchema(
-    z.object({
-        event_name: z.string().min(1, { message: 'Event name is required' }),
-        event_desc: z.string().min(1, { message: 'Event description is required' }),
-        invitees: z.array(z.string()).min(1, { message: 'At least one invitee is required' })
-    })
-)
-
-const event_type_schema = toTypedSchema(
-    z.object({
-        category: z.string().min(1, { message: 'Event type is required' })
-    })
-)
-
-const date_time_schema = toTypedSchema(
-    z.object({
-        start_time: z.string().min(1, { message: 'Start time is required' }),
-        end_time: z.string().min(1, { message: 'End time is required' })
-    })
-)
-
-const schemas = [event_detail_schema, event_type_schema, date_time_schema]
-
-const { value: event_name } = useField('event_name')
-const { value: event_desc } = useField('event_desc')
-const { value: invitees } = useField('invitees', () => [])
-
-const { handleSubmit, validate } = useForm({
-    validationSchema: computed(() => schemas[currentStep.value - 1])
-})
-
-const nextStep = async () => {
-    const isValid = await validate()
-    console.log(isValid)
-    if (isValid) {
-        if (currentStep < steps.length) {
-            currentStep++
-            console.log(currentStep)
-            useForm({
-                validationSchema: schemas[currentStep.value - 1]
-            })
-        }
-    }
-}
-function prevStep() {
-    if (currentStep > 1) {
-        currentStep--
-    }
-}
-
-function submitForm() {
-    // Make sure all steps are validated before submitting
-    if (currentStep === 3) {
-        currentStep++
-        // Send the form data to your backend
-        console.log(selected)
-    }
-}
-function addInvitee(selected_friend) {
-    invitees.push(selected_friend)
-}
-
-function removeInvitee(index) {
-    invitees.splice(index, 1)
-}
-
-const friends = [
+let friends = [
     {
         name: 'Colm Tuite',
         avatar: 'https://images.unsplash.com/photo-1492633423870-43d1cd2775eb?&w=128&h=128&dpr=2&q=80'
@@ -92,40 +14,72 @@ const friends = [
     {
         name: 'Adam Wathan',
         avatar: 'https://images.unsplash.com/photo-1492633423870-43d1cd2775eb?&w=128&h=128&dpr=2&q=80'
-    },
-    {
-        name: 'Sarah Drasner',
-        avatar: 'https://images.unsplash.com/photo-1492633423870-43d1cd2775eb?&w=128&h=128&dpr=2&q=80'
-    },
-    {
-        name: 'Cassidy Williams',
-        avatar: 'https://images.unsplash.com/photo-1492633423870-43d1cd2775eb?&w=128&h=128&dpr=2&q=80'
-    },
-    {
-        name: 'Evan You',
-        avatar: 'https://images.unsplash.com/photo-1492633423870-43d1cd2775eb?&w=128&h=128&dpr=2&q=80'
-    },
-    {
-        name: 'John Otander',
-        avatar: 'https://images.unsplash.com/photo-1492633423870-43d1cd2775eb?&w=128&h=128&dpr=2&q=80'
-    },
-    {
-        name: 'Sarah Dayan',
-        avatar: 'https://images.unsplash.com/photo-1492633423870-43d1cd2775eb?&w=128&h=128&dpr=2&q=80'
-    },
-    {
-        name: 'Tim Neutkens',
-        avatar: 'https://images.unsplash.com/photo-1492633423870-43d1cd2775eb?&w=128&h=128&dpr=2&q=80'
-    },
-    {
-        name: 'Chris Biscardi',
-        avatar: 'https://images.unsplash.com/photo-1492633423870-43d1cd2775eb?&w=128&h=128&dpr=2&q=80'
     }
 ]
-const selected_friend = ref(friends[0])
+export default {
+    components: {
+        VueDatePicker,
+        Navbar,
+        Button,
+        Label,
+        Separator,
+        ShowAttendees,
+        Avatar
+    },
+    data() {
+        return {
+            currentStep: 1,
+            steps: [
+                { id: 1, label: 'Step 1', description: 'Details' },
+                { id: 2, label: 'Step 2', description: 'Type' },
+                { id: 3, label: 'Step 3', description: 'Date & Time' },
+                { id: 4, label: 'Step 4', description: 'End' }
+            ],
+            event: {
+                event_name: '',
+                event_desc: '',
+                invitees: [],
+                category: '',
+                range_start: '',
+                range_end: '',
+                township: '',
+                time_out: ''
+            },
+            selected_friend: '',
+            user_id: localStorage.getItem('userID')
+        }
+    },
+    methods: {
+        nextStep() {
+            if (this.currentStep < this.steps.length) {
+                this.currentStep++
+            }
+        },
+        prevStep() {
+            if (this.currentStep > 1) {
+                this.currentStep--
+            }
+        },
+        submitForm() {
+            // Make sure all steps are validated before submitting
+            if (this.currentStep === 3) {
+                this.currentStep++
+                // Send the form data to your backend
+                console.log(this.selected)
+            }
+        },
+        addInvitee(selected_friend) {
+            this.event.invitees.push(selected_friend)
+        },
+        removeInvitee(index) {
+            this.event.invitees.splice(index, 1)
+        }
+    }
+}
 </script>
 <template>
-    <div class="container p-4">
+    <Navbar />
+    <div class="flex flex-wrap justify-around gap-4 items-center p-4">
         <div class="row justify-content-center">
             <!-- Form Start -->
             <div class="form-container">

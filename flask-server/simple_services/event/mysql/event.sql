@@ -7,6 +7,7 @@ USE `event`;
 --                              EVENT TABLE                         --
 -- ---------------------------------------------------------------- --
 DROP TABLE IF EXISTS `invitee`;
+DROP TABLE IF EXISTS `image`;
 DROP TABLE IF EXISTS `recommendation`;
 DROP TABLE IF EXISTS `event`;
 CREATE TABLE IF NOT EXISTS `event` (
@@ -42,7 +43,6 @@ CREATE TABLE IF NOT EXISTS `recommendation` (
 
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-DROP TABLE IF EXISTS `image`;
 CREATE TABLE IF NOT EXISTS `image` (
     `id` INT AUTO_INCREMENT PRIMARY KEY,
     `image_path` VARCHAR(1024) NOT NULL,

@@ -121,7 +121,7 @@ def create_event(event: schemas.Recommend):
     channel.basic_publish(exchange=exchangename, routing_key="create_event.notification",body=event_result, properties=pika.BasicProperties(delivery_mode=2))
     
     # Start scheduler for event time out
-    scheduler.add_job(delete_event, 'date', run_date=event_result["time_out"], args=[event_result["event_id"]])
+    scheduler.add_job(on_timeout, 'date', run_date=event_result["time_out"], args=[event_result["event_id"]])
     scheduler.print_jobs()
     return event_result
 
@@ -134,3 +134,20 @@ def delete_event(event_id: int):
     
     channel.basic_publish(exchange=exchangename, routing_key="delete_event.notification",body=event_result, properties=pika.BasicProperties(delivery_mode=2))
     return event_result
+
+def on_timeout(event_id: int):
+    event_result = requests.get(event_ms + f"/{event_id}").json()
+    if event_result.status_code not in range(200,300):
+        channel.basic_publish(exchange=exchangename, routing_key="timeout.error",body=event_result, properties=pika.BasicProperties(delivery_mode=2))
+        return event_result
+    
+    # Update event timeout to null
+    event_result["time_out"] = None
+    event_result = requests.put(event_ms + f"/{event_id}", json=jsonable_encoder(event_result)).json()
+    if event_result.status_code not in range(200,300):
+        channel.basic_publish(exchange=exchangename, routing_key="timeout.error",body=event_result, properties=pika.BasicProperties(delivery_mode=2))
+        return event_result
+    
+    # Send notification to host and invitees that event has timed out
+    # Notification check if timeout == null, if it is send to host only else send to invitees
+    channel.basic_publish(exchange=exchangename, routing_key="timeout.notification",body=event_result, properties=pika.BasicProperties(delivery_mode=2))
