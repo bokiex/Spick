@@ -7,9 +7,10 @@ USE `event`;
 --                              EVENT TABLE                         --
 -- ---------------------------------------------------------------- --
 DROP TABLE IF EXISTS `invitee`;
+DROP TABLE IF EXISTS `recommendation`;
 DROP TABLE IF EXISTS `event`;
 CREATE TABLE IF NOT EXISTS `event` (
-    `event_id` INT PRIMARY KEY AUTO_INCREMENT,
+    `event_id` varchar(6) PRIMARY KEY,
     `event_name` varchar(64) NOT NULL,
     `event_desc` varchar(256),
     `start_time` timestamp,
@@ -20,19 +21,19 @@ CREATE TABLE IF NOT EXISTS `event` (
 )   ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE IF NOT EXISTS `invitee` (
-    `event_id` INT,
+    `event_id` varchar(6) NOT NULL,
     `user_id` INT,
     `status` varchar(64),
     FOREIGN KEY (event_id) REFERENCES event(event_id),
     PRIMARY KEY (`event_id`, `user_id`)
 )   ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-DROP TABLE IF EXISTS `recommendation`;
+
 CREATE TABLE IF NOT EXISTS `recommendation` (
     `recommendation_id` INT AUTO_INCREMENT PRIMARY KEY,
     `recommendation_name` VARCHAR(64) NOT NULL,
     `recommendation_address` VARCHAR(64) NOT NULL,
-    `event_id` INT NOT NULL,
+    `event_id` varchar(6) NOT NULL,
     FOREIGN KEY (event_id) REFERENCES event(event_id)
 
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
@@ -43,6 +44,6 @@ CREATE TABLE IF NOT EXISTS `image` (
     `image_path` VARCHAR(1024) NOT NULL,
     `image_name` VARCHAR(255),
     `image_type` VARCHAR(50),
-    `event_id` INT NOT NULL,
+    `event_id` varchar(6) NOT NULL,
     FOREIGN KEY (event_id) REFERENCES event(event_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
