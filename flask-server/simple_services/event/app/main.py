@@ -139,7 +139,7 @@ def get_invitee_responded(event_id: int, db: Session = Depends(get_db)):
     "message": "Invitees found."
 }
 """
-@app.get("/event/invitee/{event_id}")
+@app.get("/invitee/{event_id}")
 def get_invitees(event_id:int, db: Session = Depends(get_db)):
     all_invitees = crud.get_invitee(db, event_id)
     if all_invitees == []:
@@ -152,7 +152,7 @@ def get_invitees(event_id:int, db: Session = Depends(get_db)):
     invitees_left = len(all_invitees) - len(respondents)
     return jsonable_encoder({"all_invitees": all_invitees, "respondents": respondents, "invitees_left": invitees_left, "message": "Invitees found."})
 
-@app.put("/event/invitee")
+@app.put("/invitee")
 async def update_invitee(invitee: schemas.Invitee, db: Session = Depends(get_db)):
     res = crud.update_invitee(db, invitee)
     if res is None:
@@ -166,7 +166,7 @@ async def update_invitee(invitee: schemas.Invitee, db: Session = Depends(get_db)
     "user_id": 1
 }
 """
-@app.post("/event/invitee")
+@app.post("/invitee")
 async def create_invitees(invitee: schemas.Invitee, db: Session = Depends(get_db)):
     
     res = crud.create_invitee(db, invitee)
@@ -177,13 +177,3 @@ async def create_invitees(invitee: schemas.Invitee, db: Session = Depends(get_db
 #!/usr/bin/env python3
 # The above shebang (#!) operator tells Unix-like environments
 # to run this file as a python3 script
-
-
-
-
-
-
-
-
-
-    

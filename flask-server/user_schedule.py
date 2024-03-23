@@ -36,11 +36,11 @@ http://localhost:5000/user_schedule?token=event123
 @app.route("/user_schedule", methods=['GET'])
 def get_user_schedule():
     # Making token mandatory for the query
-    token = request.args.get('token')
+    token = request.args.get('eventID')
     if not token:
-        return jsonify({"message": "Token parameter is required."}), 400
+        return jsonify({"message": "EventID parameter is required."}), 400
 
-    schedules = UserSchedule.query.filter_by(token=token).all()
+    schedules = UserSchedule.query.filter_by(eventID=token).all()
 
     if schedules:
         return jsonify({"sched_list": [schedule.json() for schedule in schedules]}), 200
@@ -141,7 +141,7 @@ def create_user_schedule():
 @app.route("/user_schedule", methods=['DELETE'])
 def delete_user_schedule():
     req = request.get_json()
-    token = req.get('token')
+    token = req.get('eventID')
     userID = req.get('userID')
     scheduleID = req.get('scheduleID')
 

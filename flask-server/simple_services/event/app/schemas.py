@@ -8,7 +8,7 @@ from typing import List, Optional
 class Invitee(BaseModel):
     event_id: int
     user_id: int
-    status: str
+    status: str | None = None
 
 class Recommend(BaseModel):
     recommendation_name: str
