@@ -15,13 +15,11 @@ class Recommend(BaseModel):
     recommendation_address: str
 
 class Image(BaseModel):
-    
     image_name: str
     image_path: str
   
 
 class Event(BaseModel):
-
     event_name: str
     event_desc: str
     datetime_start: datetime
