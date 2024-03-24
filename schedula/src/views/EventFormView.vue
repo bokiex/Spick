@@ -2,7 +2,7 @@
 import VueDatePicker from '@vuepic/vue-datepicker'
 import Button from '@/components/Button.vue'
 import { RadioGroupIndicator, RadioGroupItem, RadioGroupRoot, Separator } from 'radix-vue'
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useForm, useField } from 'vee-validate'
 import { toTypedSchema } from '@vee-validate/zod'
 import ShowAttendees from '@/components/ShowAttendees.vue'
@@ -11,7 +11,27 @@ import * as z from 'zod'
 import { CircleX } from 'lucide-vue-next'
 import Label from '@/components/Label.vue'
 
-const userID = localStorage.getItem('userID')
+const event_ms = 'http://localhost:3600/create_event'
+const user_ms = 'http://0.0.0.0:3000/users'
+
+const user_id = localStorage.getItem('userID')
+const friends = ref([])
+const selected_friend = ref(null)
+onMounted(async () => {
+    try {
+        // Example API call - replace with your actual API call
+        const data = await fetch(user_ms).then((res) => res.json())
+
+        friends.value = data
+        selected_friend.value = friends.value[0]
+        console.log(selected_friend.value)
+    } catch (error) {
+        console.error('Failed to fetch event data:', error)
+    } finally {
+        loading.value = false
+    }
+})
+
 const currentStep = ref(1)
 const steps = [
     { id: 1, label: 'Step 1', description: 'Details' },
@@ -36,8 +56,8 @@ const event_type_schema = toTypedSchema(
 
 const date_time_schema = toTypedSchema(
     z.object({
-        start_time: z.string().min(1, { message: 'Start time is required' }),
-        end_time: z.string().min(1, { message: 'End time is required' })
+        datetime_start: z.string().min(1, { message: 'Start time is required' }),
+        datetime_end: z.string().min(1, { message: 'End time is required' })
     })
 )
 
@@ -51,8 +71,10 @@ const { handleSubmit, validate } = useForm({
         image: '',
         invitees: [],
         type: '',
-        start_time: '',
-        end_time: ''
+        township: '',
+        datetime_start: '',
+        datetime_end: '',
+        time_out: ''
     }
 })
 
@@ -61,8 +83,10 @@ const { value: event_desc } = useField('event_desc')
 const { value: image } = useField('image')
 const { value: invitees } = useField('invitees')
 const { value: type } = useField('type')
-const { value: start_time } = useField('start_time')
-const { value: end_time } = useField('end_time')
+const { value: datetime_start } = useField('datetime_start')
+const { value: datetime_end } = useField('datetime_end')
+const { value: time_out } = useField('time_out')
+const { value: township } = useField('township')
 
 const nextStep = async () => {
     if (currentStep.value < steps.length) {
@@ -88,73 +112,45 @@ function previewFile(event) {
     }
 }
 
-function submitForm() {
+async function submitForm() {
     // Make sure all steps are validated before submitting
     if (currentStep.value === 3) {
-        console.log(
-            event_name.value,
-            event_desc.value,
-            invitees.value,
-            type.value,
-            start_time.value,
-            end_time.value
-        )
-        currentStep++
         // Send the form data to your backend
-        create_event = {
+        const create_event = {
+            user_id: 1,
             event_name: event_name.value,
             event_desc: event_desc.value,
             invitees: invitees.value,
             type: type.value,
-            start_time: start_time.value,
-            end_time: end_time.value
+            township: township.value,
+            datetime_start: datetime_start.value,
+            datetime_end: datetime_end.value,
+            time_out: time_out.value
+        }
+        console.log(create_event)
+
+        try {
+            const res = await fetch(event_ms, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(create_event)
+            })
+
+            if (!res.ok) {
+                throw new Error(`HTTP error! status: ${res.status}`)
+            }
+
+            const data = await res.json()
+        } catch (error) {
+            console.error('Error fetching data: ', error)
         }
     }
 }
-
-const friends = [
-    {
-        name: 'Colm Tuite',
-        avatar: 'https://images.unsplash.com/photo-1492633423870-43d1cd2775eb?&w=128&h=128&dpr=2&q=80'
-    },
-    {
-        name: 'Adam Wathan',
-        avatar: 'https://images.unsplash.com/photo-1492633423870-43d1cd2775eb?&w=128&h=128&dpr=2&q=80'
-    },
-    {
-        name: 'Sarah Drasner',
-        avatar: 'https://images.unsplash.com/photo-1492633423870-43d1cd2775eb?&w=128&h=128&dpr=2&q=80'
-    },
-    {
-        name: 'Cassidy Williams',
-        avatar: 'https://images.unsplash.com/photo-1492633423870-43d1cd2775eb?&w=128&h=128&dpr=2&q=80'
-    },
-    {
-        name: 'Evan You',
-        avatar: 'https://images.unsplash.com/photo-1492633423870-43d1cd2775eb?&w=128&h=128&dpr=2&q=80'
-    },
-    {
-        name: 'John Otander',
-        avatar: 'https://images.unsplash.com/photo-1492633423870-43d1cd2775eb?&w=128&h=128&dpr=2&q=80'
-    },
-    {
-        name: 'Sarah Dayan',
-        avatar: 'https://images.unsplash.com/photo-1492633423870-43d1cd2775eb?&w=128&h=128&dpr=2&q=80'
-    },
-    {
-        name: 'Tim Neutkens',
-        avatar: 'https://images.unsplash.com/photo-1492633423870-43d1cd2775eb?&w=128&h=128&dpr=2&q=80'
-    },
-    {
-        name: 'Chris Biscardi',
-        avatar: 'https://images.unsplash.com/photo-1492633423870-43d1cd2775eb?&w=128&h=128&dpr=2&q=80'
-    }
-]
-const selected_friend = ref(friends[0])
 </script>
 <template>
-    <Navbar />
-    <div class="flex flex-wrap justify-around gap-4 items-center p-4">
+    <div class="mx-auto p-4">
         <div class="row justify-content-center">
             <!-- Form Start -->
             <div class="form-container">
@@ -378,12 +374,12 @@ const selected_friend = ref(friends[0])
                             <Separator class="shrink-0 bg-border h-px w-full" />
 
                             <div class="space-y-2">
-                                <Label for="start_time">Start Time</Label>
-                                <VueDatePicker v-model="start_time" time-picker-inline />
+                                <Label for="datetime_start">Start Time</Label>
+                                <VueDatePicker v-model="datetime_start" time-picker-inline />
                             </div>
                             <div class="space-y-2">
-                                <Label for="end_time">End Time</Label>
-                                <VueDatePicker v-model="end_time" time-picker-inline />
+                                <Label for="datetime_end">End Time</Label>
+                                <VueDatePicker v-model="datetime_end" time-picker-inline />
                             </div>
                             <div class="space-y-2">
                                 <Label for="time_out">Time Out</Label>

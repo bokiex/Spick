@@ -12,5 +12,6 @@ CREATE TABLE IF NOT EXISTS `user` (
   `username` VARCHAR(64) UNIQUE NOT NULL,
   `email` VARCHAR(120) UNIQUE NOT NULL,
   `password_hash` VARCHAR(128),
-  `telegram_tag` varchar(64) NOT NULL
+  `telegram_tag` varchar(64) NOT NULL,
+  `image` VARCHAR(256) NOT NULL
   ) ENGINE=InnoDB DEFAULT CHARSET=utf8;

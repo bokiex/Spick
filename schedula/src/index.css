@@ -2,6 +2,13 @@
 @tailwind components;
 @tailwind utilities;
 
+@font-face {
+    font-family: 'Geist Sans';
+    src: url('../public/GeistVariableVF.woff2') format('woff2');
+    font-weight: normal;
+    font-style: normal;
+}
+
 @layer base {
     :root {
         --background: 0 0% 100%;
@@ -34,6 +41,8 @@
         --ring: 240 10% 3.9%;
 
         --radius: 0.5rem;
+
+        --font-geist-sans: 'Geist Sans', Arial, sans-serif;
     }
 
     .dark {

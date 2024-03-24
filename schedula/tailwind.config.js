@@ -1,9 +1,14 @@
 /** @type {import('tailwindcss').Config} */
+
+import defaultTheme from 'tailwindcss/defaultTheme'
 export default {
     purge: ['./index.html', './src/**/*.{vue,js,ts,jsx,tsx}'],
     content: [],
     theme: {
         extend: {
+            fontFamily: {
+                sans: ['var(--font-geist-sans)', ...defaultTheme.fontFamily.sans],
+              },
             colors: {
                 border: 'hsl(var(--border))',
                 input: 'hsl(var(--input))',

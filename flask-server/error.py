@@ -7,6 +7,7 @@ e_queue_name = environ.get('Error') or "Error" #Error
 
 def receiveError(channel):
     try:
+        print("Error microservice: Receiving error messages")
         channel.basic_consume(queue=e_queue_name, on_message_callback=callback, auto_ack=True)
         print('Error microservice: Consuming from queue:', e_queue_name)
         channel.start_consuming()

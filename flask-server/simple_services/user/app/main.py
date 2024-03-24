@@ -3,10 +3,23 @@ from database import SessionLocal
 from fastapi.encoders import jsonable_encoder
 import crud, schemas
 from sqlalchemy.orm import Session
-
+from fastapi.middleware.cors import CORSMiddleware
 # Initialize FastAPI app
 app = FastAPI()
+origins = [
+    "http://localhost:5173",
+    "https://localhost.tiangolo.com",
+    "http://localhost",
+    "http://localhost:8080",
+]
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 def get_db():
     db = SessionLocal()
     try:
@@ -14,16 +27,13 @@ def get_db():
     finally:
         db.close()
 
-from fastapi import FastAPI
-
-# Initialize FastAPI app
-app = FastAPI()
 
 
 # Get all users
 @app.get("/users", response_model=list[schemas.UserResponse])
 async def get_all_users(db: Session = Depends(get_db)):
-    return jsonable_encoder(crud.get_users(db))
+    res = jsonable_encoder(crud.get_users(db))
+    return res
 
 # Create user
 @app.post("/users")

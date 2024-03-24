@@ -57,7 +57,7 @@ onMounted(async () => {
                 <Skeleton v-if="loading" class="h-64 w-full rounded-xl" />
                 <img
                     v-else
-                    :src="event?.image[0].image_path"
+                    :src="event?.image[0]?.image_path"
                     alt="Event banner"
                     class="w-full h-64 object-cover"
                 />

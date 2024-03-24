@@ -58,9 +58,9 @@ def create_error_queue(channel):
 
 def create_notification_queue(channel):
     print('amqp_setup:create_notification_queue')
-    channel.queue_declare(queue=e_queue_name, durable=True) # 'durable' makes the queue survive broker restarts
+    channel.queue_declare(queue=n_queue_name, durable=True) # 'durable' makes the queue survive broker restarts
     #bind Notification queue
-    channel.queue_bind(exchange=exchangename, queue=e_queue_name, routing_key='*.notification') 
+    channel.queue_bind(exchange=exchangename, queue=n_queue_name, routing_key='*.notification') 
         # bind the queue to the exchange via the key 'notification'
             
 if __name__ == "__main__":  # execute this program only if it is run as a script (not by 'import')   
