@@ -15,29 +15,36 @@ const code = ref(null)
 
 <template>
     <NavigationMenuRoot class="flex w-full justify-center">
-        <NavigationMenuList class="center m-0 flex list-none rounded-[6px] bg-white p-1">
-            <NavigationMenuItem
-                class="flex items-center transition-colors hover:bg-accent hover:text-accent-foreground focus:outline-none focus:bg-accent focus:text-accent-foreground block select-none rounded-[4px] px-3 py-2 text-[15px] font-medium leading-none no-underline outline-none"
-            >
-                <NavigationMenuLink href="/"> Calendar </NavigationMenuLink>
-            </NavigationMenuItem>
+        <div
+            class="flex w-full justify-center m-0 list-none rounded-[6px] bg-white p-1"
+        >
+        <div class="flex-grow"></div>
+            <div class="flex justify-center gap-4 ">
+                <NavigationMenuItem
+                    class="flex items-center transition-colors hover:bg-accent hover:text-accent-foreground focus:outline-none focus:bg-accent focus:text-accent-foreground block select-none rounded-[4px] px-3 py-2 text-[15px] font-medium leading-none no-underline outline-none"
+                >
+                    <NavigationMenuLink href="/"> Calendar </NavigationMenuLink>
+                </NavigationMenuItem>
 
-            <NavigationMenuItem
-                class="flex items-center transition-colors hover:bg-accent hover:text-accent-foreground focus:outline-none focus:bg-accent focus:text-accent-foreground block select-none rounded-[4px] px-3 py-2 text-[15px] font-medium leading-none no-underline outline-none"
-            >
-                <NavigationMenuLink href="/create"> Create </NavigationMenuLink>
-            </NavigationMenuItem>
+                <NavigationMenuItem
+                    class="flex items-center transition-colors hover:bg-accent hover:text-accent-foreground focus:outline-none focus:bg-accent focus:text-accent-foreground block select-none rounded-[4px] px-3 py-2 text-[15px] font-medium leading-none no-underline outline-none"
+                >
+                    <NavigationMenuLink href="/create"> Create </NavigationMenuLink>
+                </NavigationMenuItem>
 
-            <NavigationMenuItem
-                class="flex items-center transition-colors hover:bg-accent hover:text-accent-foreground focus:outline-none focus:bg-accent focus:text-accent-foreground block select-none rounded-[4px] px-3 py-2 text-[15px] font-medium leading-none no-underline outline-none"
-            >
-                <NavigationMenuLink href="/events"> Events</NavigationMenuLink>
-            </NavigationMenuItem>
-            <NavigationMenuItem
-                class="flex items-center transition-colors hover:bg-accent hover:text-accent-foreground focus:outline-none focus:bg-accent focus:text-accent-foreground block select-none rounded-[4px] px-3 py-2 text-[15px] font-medium leading-none no-underline outline-none"
-            >
-                <NavigationMenuLink href="/profile"> Profile</NavigationMenuLink>
-            </NavigationMenuItem>
+                <NavigationMenuItem
+                    class="flex items-center transition-colors hover:bg-accent hover:text-accent-foreground focus:outline-none focus:bg-accent focus:text-accent-foreground block select-none rounded-[4px] px-3 py-2 text-[15px] font-medium leading-none no-underline outline-none"
+                >
+                    <NavigationMenuLink href="/events"> Events</NavigationMenuLink>
+                </NavigationMenuItem>
+                <NavigationMenuItem
+                    class="flex items-center transition-colors hover:bg-accent hover:text-accent-foreground focus:outline-none focus:bg-accent focus:text-accent-foreground block select-none rounded-[4px] px-3 py-2 text-[15px] font-medium leading-none no-underline outline-none"
+                >
+                    <NavigationMenuLink href="/profile"> Profile</NavigationMenuLink>
+                </NavigationMenuItem>
+            </div>
+            <div class="flex-grow"></div>
+
             <NavigationMenuItem
                 class="items-center flex gap-1.5 transition-colors focus:outline-none focus:bg-accent focus:text-accent-foreground block select-none rounded-[4px] px-3 py-2 text-[15px] font-medium leading-none no-underline outline-none"
             >
@@ -52,6 +59,7 @@ const code = ref(null)
                 />
                 <Button type="button"> <SendHorizonal /> </Button>
             </NavigationMenuItem>
-        </NavigationMenuList>
+            <div class="flex-grow-0"></div>
+        </div>
     </NavigationMenuRoot>
 </template>
