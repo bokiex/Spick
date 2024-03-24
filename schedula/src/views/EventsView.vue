@@ -47,12 +47,12 @@ const navigate = (id) => {
             @click="navigate(event?.event_id)"
         >
             <div class="space-y-2">
-                <img :src="event?.image[0].image_path" alt="" />
+                <img :src="event?.image[0]?.image_path" alt="" />
                 <div class="flex flex-col gap-y-1.5">
                     <h1>{{ event?.event_name }}</h1>
                 </div>
                 <div class="text-sm text-muted-foreground">
-                    <p>{{ event?.date }}</p>
+                    <p>{{ event?.datetime_start }}</p>
                     <p>{{ event?.event_desc }}</p>
                 </div>
             </div>

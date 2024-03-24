@@ -34,7 +34,7 @@ const open = ref(false)
                 role="combobox"
                 aria-expanded="open"
                 class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                >{{ props.selected_friend.name
+                >{{ props.selected_friend?.username
                 }}<CaretSortIcon class="ml-auto h-4 w-4 shrink-0 opacity-50"
             /></Button>
         </PopoverTrigger>
@@ -62,8 +62,8 @@ const open = ref(false)
                                 class="overflow-hidden p-1 text-foreground [&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-1.5 [&_[cmdk-group-heading]]:text-xs [&_[cmdk-group-heading]]:font-medium [&_[cmdk-group-heading]]:text-muted-foreground"
                             >
                                 <ComboboxItem
-                                    v-for="friend in props.friends"
-                                    :value="friend.name"
+                                    v-for="friend in props?.friends"
+                                    :value="friend?.username"
                                     @select="
                                         () => {
                                             emit('update:selectedFriend', friend)
@@ -71,14 +71,14 @@ const open = ref(false)
                                             open = false
                                         }
                                     "
-                                    :key="friend.name"
+                                    :key="friend?.username"
                                     class="relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none data-[highlighted]:bg-accent data-[disabled]:pointer-events-none data-[disabled]:opacity-50"
                                 >
                                     <Avatar
-                                        :src="friend.avatar"
+                                        :src="friend?.image"
                                         class="mr-2 w-6 h-6 rounded-full"
                                     />
-                                    <span>{{ friend.name }}</span>
+                                    <span>{{ friend?.username }}</span>
                                 </ComboboxItem>
                             </ComboboxGroup>
                         </div>

@@ -14,6 +14,7 @@ from sqlalchemy.orm import Session
 from fastapi.encoders import jsonable_encoder
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.jobstores.sqlalchemy import SQLAlchemyJobStore
+from fastapi.middleware.cors import CORSMiddleware
 
 
 event_ms = environ.get('EVENT_URL') or "http://localhost:3800/event"
@@ -31,7 +32,7 @@ async def lifespan(app: FastAPI):
     global connection, channel
     connection = amqp_connection.create_connection()
     channel = connection.channel()
-    print("channel established")
+
     if not amqp_connection.check_exchange(channel, exchangename, exchangetype):
         print("\nCreate the 'Exchange' before running this microservice. \nExiting the program.")
         sys.exit(0)
@@ -46,6 +47,20 @@ async def lifespan(app: FastAPI):
 # Initialize FastAPI app
 app = FastAPI(lifespan=lifespan)
 
+origins = [
+    "http://localhost:5173",
+    "https://localhost.tiangolo.com",
+    "http://localhost",
+    "http://localhost:8080",
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 """
 Sample event JSON input:
 {
@@ -101,22 +116,25 @@ Sample event JSON output:
 
 @app.post("/create_event")
 def create_event(event: schemas.Recommend):
+
     event_dict = event.dict()
 
     # Get recommendation from recommendation microservice
+
     recommendation_result = requests.post(recommendation_ms, json=jsonable_encoder({"type": event_dict["type"], "township": event_dict["township"]}))
-
-
+    
+    print(recommendation_result.json())
+    message = json.dumps(recommendation_result.json())
     if recommendation_result.status_code not in range(200,300):
-      
-        channel.basic_publish(exchange=exchangename, routing_key="create_event.error",body=recommendation_result.json(), properties=pika.BasicProperties(delivery_mode=2))
+
+        channel.basic_publish(exchange=exchangename, routing_key="create_event.error",body=message, properties=pika.BasicProperties(delivery_mode=2))
      
-        return recommendation_result
+        return recommendation_result.json()
 
     # Create event through event microservice
-  
+   
     event_dict["recommendation"] = recommendation_result.json()[0:3]
-    print(event_dict)
+  
     event_result = requests.post(event_ms, json=jsonable_encoder(event_dict))
 
     if event_result.status_code not in range(200,300):
@@ -126,8 +144,8 @@ def create_event(event: schemas.Recommend):
     # Send notification to users
     channel.basic_publish(exchange=exchangename, routing_key="create_event.notification",body=event_result.json(), properties=pika.BasicProperties(delivery_mode=2))
     
-    # Start scheduler for event time out
-    scheduler.add_job(on_timeout, 'date', run_date=event_result["time_out"], args=[event_result["event_id"]])
+    # # Start scheduler for event time out
+    scheduler.add_job(on_timeout, 'date', run_date=event_result.json()["data"]["time_out"], args=[event_result.json()["data"]["event_id"]])
     scheduler.print_jobs()
   
 
