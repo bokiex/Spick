@@ -1,7 +1,22 @@
 <script setup>
 import VueDatePicker from '@vuepic/vue-datepicker'
 import Button from '@/components/Button.vue'
-import { RadioGroupIndicator, RadioGroupItem, RadioGroupRoot, Separator } from 'radix-vue'
+import {
+    DialogClose,
+    DialogContent,
+    DialogDescription,
+    DialogOverlay,
+    DialogPortal,
+    DialogRoot,
+    DialogTitle,
+    DialogTrigger,
+    ProgressIndicator,
+    ProgressRoot,
+    RadioGroupIndicator,
+    RadioGroupItem,
+    RadioGroupRoot,
+    Separator
+} from 'radix-vue'
 import { ref, computed, onMounted } from 'vue'
 import { useForm, useField } from 'vee-validate'
 import { toTypedSchema } from '@vee-validate/zod'
@@ -17,6 +32,7 @@ const user_ms = 'http://0.0.0.0:3000/users'
 const user_id = localStorage.getItem('userID')
 const friends = ref([])
 const selected_friend = ref(null)
+const loading = ref(true)
 onMounted(async () => {
     try {
         // Example API call - replace with your actual API call
@@ -32,7 +48,7 @@ onMounted(async () => {
     }
 })
 
-const currentStep = ref(1)
+const currentStep = ref(0)
 const steps = [
     { id: 1, label: 'Step 1', description: 'Details' },
     { id: 2, label: 'Step 2', description: 'Type' },
@@ -89,15 +105,11 @@ const { value: time_out } = useField('time_out')
 const { value: township } = useField('township')
 
 const nextStep = async () => {
-    if (currentStep.value < steps.length) {
-        currentStep.value++
-        console.log(currentStep)
-    }
+    currentStep.value += 33
+    console.log(currentStep)
 }
 function prevStep() {
-    if (currentStep.value > 1) {
-        currentStep.value--
-    }
+    currentStep.value -= 33
 }
 
 function previewFile(event) {
@@ -114,7 +126,8 @@ function previewFile(event) {
 
 async function submitForm() {
     // Make sure all steps are validated before submitting
-    if (currentStep.value === 3) {
+    currentStep.value += 33
+    if (currentStep.value === 99) {
         // Send the form data to your backend
         const create_event = {
             user_id: 1,
@@ -150,278 +163,262 @@ async function submitForm() {
 }
 </script>
 <template>
-    <div class="mx-auto p-4">
-        <div class="row justify-content-center">
-            <!-- Form Start -->
-            <div class="form-container">
-                <!-- Sidebar start -->
-                <div class="form-sidebar">
-                    <div class="step" :class="{ active: currentStep == 1 }">
-                        <div class="circle">1</div>
-                        <div class="step-content">
-                            <span>Step 1</span>
-                            <b>Details</b>
+    <div class="m-auto relative w-full h-screen space-y-6 sm:w-[450px]">
+        <div class="my-10 relative h-[700px] space-y-6">
+            <ProgressRoot
+                v-model="currentStep"
+                class="relative h-4 w-full overflow-hidden rounded-full bg-secondary"
+            >
+                <ProgressIndicator
+                    class="h-full w-full flex-1 bg-primary transition-all"
+                    :style="`transform: translateX(-${100 - (currentStep ?? 0)}%);`"
+                />
+            </ProgressRoot>
+            <form class="form" @submit.prevent="nextStep">
+                <div v-if="currentStep === 0" class="h-full">
+                    <!-- Content omitted for brevity -->
+                    <div class="space-y-6">
+                        <div>
+                            <h3 class="text-lg font-medium">Event Details</h3>
+                            <p class="text-sm text-muted-foreground">
+                                Please provide the event title, event description, and attendees.
+                            </p>
                         </div>
-                    </div>
-                    <div class="step" :class="{ active: currentStep == 2 }">
-                        <div class="circle">2</div>
-                        <div class="step-content">
-                            <span>Step 2</span>
-                            <b>Type</b>
+                        <Separator class="shrink-0 bg-border h-px w-full" />
+                        <div class="space-y-2">
+                            <Label for="event_name">Event Title</Label>
+                            <input
+                                name="event_name"
+                                required
+                                id="event_name"
+                                v-model="event_name"
+                                class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                                placeholder="e.g. ESD Meeting"
+                            />
                         </div>
-                    </div>
-                    <div class="step" :class="{ active: currentStep == 3 }">
-                        <div class="circle">3</div>
-                        <div class="step-content">
-                            <span>Step 3</span>
-                            <b>Date & Time</b>
+                        <div class="space-y-2">
+                            <Label for="event_desc">Event Description</Label>
+                            <input
+                                name="event_desc"
+                                required
+                                id="event_desc"
+                                v-model="event_desc"
+                                class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                                placeholder="e.g. Deployment of site"
+                            />
                         </div>
-                    </div>
-                    <div class="step" :class="{ active: currentStep == 4 }">
-                        <div class="circle">4</div>
-                        <div class="step-content">
-                            <span>Step 4</span>
-                            <b>End</b>
+                        <div class="space-y-2">
+                            <Label for="image">Image</Label>
+                            <input
+                                name="image"
+                                type="file"
+                                @change="(event) => previewFile(event)"
+                                required
+                                id="image"
+                                class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                                placeholder="e.g. Deployment of site"
+                            />
+                        </div>
+                        <div class="space-y-2">
+                            <Label for="invitees">Event Attendees</Label>
+
+                            <ShowAttendees
+                                @update:selectedFriend="
+                                    (selected_friend) => invitees.push(selected_friend)
+                                "
+                                :selected_friend="selected_friend"
+                                :friends="friends"
+                            />
+                        </div>
+
+                        <div class="flex gap-5">
+                            <div v-for="(invitee, index) in invitees" :key="index" class="relative">
+                                <Avatar />
+
+                                <CircleX
+                                    class="absolute -top-2 -right-2 cursor-pointer hover:text-destructive transition-colors duration-150"
+                                    @click="() => invitees.splice(index, 1)"
+                                />
+                            </div>
+                        </div>
+
+                        <div class="flex justify-end">
+                            <Button @click="nextStep" type="button"> Next Step </Button>
                         </div>
                     </div>
                 </div>
-                <!-- Sidebar end -->
-                <!-- Step 1 start -->
-                <form class="form" @submit.prevent="nextStep">
-                    <div v-if="currentStep === 1" class="stp step-1">
-                        <!-- Content omitted for brevity -->
-                        <div class="space-y-6">
-                            <div>
-                                <h3 class="text-lg font-medium">Event Details</h3>
-                                <p class="text-sm text-muted-foreground">
-                                    Please provide the event title, event description, and
-                                    attendees.
-                                </p>
-                            </div>
-                            <Separator class="shrink-0 bg-border h-px w-full" />
-                            <div class="space-y-2">
-                                <Label for="event_name">Event Title</Label>
-                                <input
-                                    name="event_name"
-                                    required
-                                    id="event_name"
-                                    v-model="event_name"
-                                    class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                                    placeholder="e.g. ESD Meeting"
-                                />
-                            </div>
-                            <div class="space-y-2">
-                                <Label for="event_desc">Event Description</Label>
-                                <input
-                                    name="event_desc"
-                                    required
-                                    id="event_desc"
-                                    v-model="event_desc"
-                                    class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                                    placeholder="e.g. Deployment of site"
-                                />
-                            </div>
-                            <div class="space-y-2">
-                                <Label for="image">Image</Label>
-                                <input
-                                    name="image"
-                                    type="file"
-                                    @change="(event) => previewFile(event)"
-                                    required
-                                    id="image"
-                                    class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                                    placeholder="e.g. Deployment of site"
-                                />
-                            </div>
-                            <div class="space-y-2">
-                                <Label for="invitees">Event Attendees</Label>
 
-                                <ShowAttendees
-                                    @update:selectedFriend="
-                                        (selected_friend) => invitees.push(selected_friend)
-                                    "
-                                    :selected_friend="selected_friend"
-                                    :friends="friends"
-                                />
-                            </div>
-
-                            <div class="flex gap-5">
-                                <div
-                                    v-for="(invitee, index) in invitees"
-                                    :key="index"
-                                    class="relative"
-                                >
-                                    <Avatar />
-
-                                    <CircleX
-                                        class="absolute -top-2 -right-2 cursor-pointer hover:text-destructive transition-colors duration-150"
-                                        @click="() => invitees.splice(index, 1)"
-                                    />
-                                </div>
-                            </div>
-
-                            <div class="flex justify-end">
-                                <Button @click="nextStep" type="button"> Next Step </Button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Step 1 end -->
-                    <!-- Step 2 start -->
-                    <div v-if="currentStep === 2" class="stp step-2">
-                        <div class="space-y-6">
-                            <div>
-                                <h3 class="text-lg font-medium">Pick the type of event.</h3>
-                                <p class="text-sm text-muted-foreground">
-                                    Select the type to get a venue recommendation.
-                                </p>
-                            </div>
-                            <Separator class="shrink-0 bg-border h-px w-full" />
-
-                            <RadioGroupRoot default-value="school" v-model="type">
-                                <div class="grid grid-row-3 gap-4">
-                                    <Label
-                                        for="school"
-                                        class="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary"
-                                    >
-                                        <RadioGroupItem
-                                            id="school"
-                                            value="school"
-                                            class="peer sr-only aspect-square h-4 w-4 rounded-full border border-primary text-primary ring-offset-background focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                                        >
-                                            <RadioGroupIndicator
-                                                class="flex items-center justify-center"
-                                            >
-                                                <Circle
-                                                    class="h-2.5 w-2.5 fill-current text-current"
-                                                />
-                                            </RadioGroupIndicator>
-                                        </RadioGroupItem>
-
-                                        <p class="text-sm font-medium leading-none">
-                                            School Meeting
-                                        </p>
-                                        <p class="text-sm text-muted-foreground">
-                                            School project meeting done in school.
-                                        </p>
-                                    </Label>
-                                    <Label
-                                        for="personal"
-                                        class="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary"
-                                    >
-                                        <RadioGroupItem
-                                            id="personal"
-                                            value="personal"
-                                            class="peer sr-only aspect-square h-4 w-4 rounded-full border border-primary text-primary ring-offset-background focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                                        >
-                                            <RadioGroupIndicator
-                                                class="flex items-center justify-center"
-                                            >
-                                                <Circle
-                                                    class="h-2.5 w-2.5 fill-current text-current"
-                                                />
-                                            </RadioGroupIndicator>
-                                        </RadioGroupItem>
-                                        <p class="text-sm font-medium leading-none">Personal</p>
-                                        <p class="text-sm text-muted-foreground">
-                                            Meeting with friends
-                                        </p>
-                                    </Label>
-                                    <Label
-                                        for="celebration"
-                                        class="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary"
-                                    >
-                                        <RadioGroupItem
-                                            id="celebration"
-                                            value="celebration"
-                                            class="peer sr-only aspect-square h-4 w-4 rounded-full border border-primary text-primary ring-offset-background focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                                        >
-                                            <RadioGroupIndicator
-                                                class="flex items-center justify-center"
-                                            >
-                                                <Circle
-                                                    class="h-2.5 w-2.5 fill-current text-current"
-                                                />
-                                            </RadioGroupIndicator>
-                                        </RadioGroupItem>
-                                        <p class="text-sm font-medium leading-none">Celebrations</p>
-                                        <p class="text-sm text-muted-foreground">
-                                            Custom celebrations such as birthday parties.
-                                        </p>
-                                    </Label>
-                                </div>
-                            </RadioGroupRoot>
-                        </div>
-                        <div class="m-5">
-                            <Button variant="outline" @click="prevStep" type="button"
-                                >Go Back</Button
-                            >
-                            <Button @click="nextStep" type="button" style="float: right">
-                                Next Step
-                            </Button>
-                        </div>
-                    </div>
-                    <!-- Step 2 end -->
-                    <!-- Step 3 Start -->
-                    <div v-if="currentStep === 3" class="stp step-3">
-                        <div class="space-y-6">
-                            <div>
-                                <h3 class="text-lg font-medium">Pick the type of event.</h3>
-                                <p class="text-sm text-muted-foreground">
-                                    Select the type to get a venue recommendation.
-                                </p>
-                            </div>
-                            <Separator class="shrink-0 bg-border h-px w-full" />
-
-                            <div class="space-y-2">
-                                <Label for="datetime_start">Start Time</Label>
-                                <VueDatePicker v-model="datetime_start" time-picker-inline />
-                            </div>
-                            <div class="space-y-2">
-                                <Label for="datetime_end">End Time</Label>
-                                <VueDatePicker v-model="datetime_end" time-picker-inline />
-                            </div>
-                            <div class="space-y-2">
-                                <Label for="time_out">Time Out</Label>
-                                <VueDatePicker v-model="time_out" time-picker-inline />
-                            </div>
-                            <div class="space-y-2">
-                                <div class="label">
-                                    <label for="township">Prefered Area</label>
-                                </div>
-                                <input
-                                    required
-                                    class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                                    type="text"
-                                    v-model="township"
-                                    id="township"
-                                    placeholder="e.g. Marina Bay"
-                                />
-                            </div>
-                        </div>
-                        <div class="m-5">
-                            <Button variant="outline" @click="prevStep" type="button"
-                                >Go Back</Button
-                            >
-                            <Button @click="submitForm" type="button" style="float: right">
-                                Submit
-                            </Button>
-                        </div>
-                    </div>
-                    <!-- Step 3 End-->
-                    <!-- Step 4 start -->
-                    <div v-if="currentStep === 4" class="stp step-4">
-                        <div class="header">
-                            <h1 class="title">Thank you!</h1>
-                            <p class="exp">
-                                Your event invite has been created and sent to the invitees.
+                <!-- Step 1 end -->
+                <!-- Step 2 start -->
+                <div v-if="currentStep === 33" class="h-full">
+                    <div class="space-y-6">
+                        <div>
+                            <h3 class="text-lg font-medium">Pick the type of event.</h3>
+                            <p class="text-sm text-muted-foreground">
+                                Select the type to get a venue recommendation.
                             </p>
                         </div>
-                        <Button class="mt-5 mx-auto">Return</Button>
+                        <Separator class="shrink-0 bg-border h-px w-full" />
+
+                        <RadioGroupRoot default-value="school" v-model="type">
+                            <div class="grid grid-row-3 gap-7 space-y-2">
+                                <Label
+                                    for="school"
+                                    class="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary"
+                                >
+                                    <RadioGroupItem
+                                        id="school"
+                                        value="school"
+                                        class="peer sr-only aspect-square h-4 w-4 rounded-full border border-primary text-primary ring-offset-background focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                                    >
+                                        <RadioGroupIndicator
+                                            class="flex items-center justify-center"
+                                        >
+                                            <Circle class="h-2.5 w-2.5 fill-current text-current" />
+                                        </RadioGroupIndicator>
+                                    </RadioGroupItem>
+
+                                    <p class="text-sm font-medium leading-none">School Meeting</p>
+                                    <p class="text-sm text-muted-foreground">
+                                        School project meeting done in school.
+                                    </p>
+                                </Label>
+                                <Label
+                                    for="personal"
+                                    class="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary"
+                                >
+                                    <RadioGroupItem
+                                        id="personal"
+                                        value="personal"
+                                        class="peer sr-only aspect-square h-4 w-4 rounded-full border border-primary text-primary ring-offset-background focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                                    >
+                                        <RadioGroupIndicator
+                                            class="flex items-center justify-center"
+                                        >
+                                            <Circle class="h-2.5 w-2.5 fill-current text-current" />
+                                        </RadioGroupIndicator>
+                                    </RadioGroupItem>
+                                    <p class="text-sm font-medium leading-none">Personal</p>
+                                    <p class="text-sm text-muted-foreground">
+                                        Meeting with friends
+                                    </p>
+                                </Label>
+                                <Label
+                                    for="celebration"
+                                    class="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary"
+                                >
+                                    <RadioGroupItem
+                                        id="celebration"
+                                        value="celebration"
+                                        class="peer sr-only aspect-square h-4 w-4 rounded-full border border-primary text-primary ring-offset-background focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                                    >
+                                        <RadioGroupIndicator
+                                            class="flex items-center justify-center"
+                                        >
+                                            <Circle class="h-2.5 w-2.5 fill-current text-current" />
+                                        </RadioGroupIndicator>
+                                    </RadioGroupItem>
+                                    <p class="text-sm font-medium leading-none">Celebrations</p>
+                                    <p class="text-sm text-muted-foreground">
+                                        Custom celebrations such as birthday parties.
+                                    </p>
+                                </Label>
+                            </div>
+                        </RadioGroupRoot>
                     </div>
-                    <!-- Step 4 end -->
-                </form>
-            </div>
+                    <div class="m-5">
+                        <Button variant="outline" @click="prevStep" type="button">Go Back</Button>
+                        <Button @click="nextStep" type="button" style="float: right">
+                            Next Step
+                        </Button>
+                    </div>
+                </div>
+                <!-- Step 2 end -->
+                <!-- Step 3 Start -->
+                <div v-if="currentStep >= 66" class="">
+                    <div class="space-y-6">
+                        <div>
+                            <h3 class="text-lg font-medium">Pick the type of event.</h3>
+                            <p class="text-sm text-muted-foreground">
+                                Select the type to get a venue recommendation.
+                            </p>
+                        </div>
+                        <Separator class="shrink-0 bg-border h-px w-full" />
+
+                        <div class="space-y-2">
+                            <Label for="datetime_start">Start Time</Label>
+                            <VueDatePicker v-model="datetime_start" time-picker-inline />
+                        </div>
+                        <div class="space-y-2">
+                            <Label for="datetime_end">End Time</Label>
+                            <VueDatePicker v-model="datetime_end" time-picker-inline />
+                        </div>
+                        <div class="space-y-2">
+                            <Label for="time_out">Time Out</Label>
+                            <VueDatePicker v-model="time_out" time-picker-inline />
+                        </div>
+                        <div class="space-y-2">
+                            <div class="label">
+                                <label for="township">Prefered Area</label>
+                            </div>
+                            <input
+                                required
+                                class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                                type="text"
+                                v-model="township"
+                                id="township"
+                                placeholder="e.g. Marina Bay"
+                            />
+                        </div>
+                    </div>
+                    <div class="flex justify-between m-5">
+                        <Button variant="outline" @click="prevStep" type="button">Go Back</Button>
+
+                        <DialogRoot>
+                            <DialogTrigger>
+                                <Button @click="submitForm" type="button"> Submit </Button>
+                            </DialogTrigger>
+                            <DialogPortal>
+                                <DialogOverlay
+                                    class="fixed inset-0 z-50 bg-black/80 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0"
+                                />
+                                <DialogContent
+                                    class="data-[state=open]:animate-contentShow fixed top-[50%] left-[50%] max-h-[85vh] w-[90vw] max-w-[450px] translate-x-[-50%] translate-y-[-50%] rounded-[6px] bg-white p-[25px] shadow-[hsl(206_22%_7%_/_35%)_0px_10px_38px_-10px,_hsl(206_22%_7%_/_20%)_0px_10px_20px_-15px] focus:outline-none z-[100]"
+                                >
+                                    <DialogTitle class="text-mauve12 m-0 text-[17px] font-semibold">
+                                        Thank you!
+                                    </DialogTitle>
+                                    <DialogDescription
+                                        class="text-mauve11 mt-[10px] mb-5 text-[15px] leading-normal"
+                                    >
+                                        Your event invite has been created and sent to the invitees.
+                                    </DialogDescription>
+
+                                    <div class="mt-[25px] flex justify-end">
+                                        <DialogClose as-child>
+                                            <button
+                                                class="bg-green4 text-green11 hover:bg-green5 focus:shadow-green7 inline-flex h-[35px] items-center justify-center rounded-[4px] px-[15px] font-semibold leading-none focus:shadow-[0_0_0_2px] focus:outline-none"
+                                            >
+                                                View Event
+                                            </button>
+                                        </DialogClose>
+                                    </div>
+                                    <DialogClose
+                                        class="text-grass11 hover:bg-green4 focus:shadow-green7 absolute top-[10px] right-[10px] inline-flex h-[25px] w-[25px] appearance-none items-center justify-center rounded-full focus:shadow-[0_0_0_2px] focus:outline-none"
+                                        aria-label="Close"
+                                    >
+                                        <Icon icon="lucide:x" />
+                                    </DialogClose>
+                                </DialogContent>
+                            </DialogPortal>
+                        </DialogRoot>
+                    </div>
+                </div>
+                <!-- Step 3 End-->
+                <!-- Step 4 start -->
+
+                <!-- Step 4 end -->
+            </form>
         </div>
     </div>
 </template>
