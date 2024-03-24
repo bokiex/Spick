@@ -3,15 +3,7 @@ import Card from '@/components/Card.vue'
 
 import Button from '@/components/Button.vue'
 import { useRouter, useRoute } from 'vue-router'
-import {
-    SelectContent,
-    SelectGroup,
-    SelectItem,
-    SelectLabel,
-    SelectRoot,
-    SelectTrigger,
-    SelectValue
-} from 'radix-vue'
+
 import { ref, onMounted } from 'vue'
 
 const router = useRouter()
@@ -23,7 +15,7 @@ const events = ref(null)
 onMounted(async () => {
     try {
         // Example API call - replace with your actual API call
-        const data = await fetch('http://localhost:8000/event').then((res) => res.json())
+        const data = await fetch('http://localhost:3800/event').then((res) => res.json())
 
         events.value = data
         console.log(data)

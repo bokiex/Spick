@@ -1,141 +1,43 @@
-<script>
-import FullCalendar from '@fullcalendar/vue3'
-import dayGridPlugin from '@fullcalendar/daygrid'
-import timeGridPlugin from '@fullcalendar/timegrid'
-import bootstrap5Plugin from '@fullcalendar/bootstrap5'
-import interactionPlugin from '@fullcalendar/interaction'
-import VueDatePicker from '@vuepic/vue-datepicker'
+<script setup>
+import VueCal from 'vue-cal'
+import 'vue-cal/dist/vuecal.css'
 import '@vuepic/vue-datepicker/dist/main.css'
-import axios from 'axios'
-import Navbar from '@/components/Navbar.vue'
+import { ref, onMounted } from 'vue'
 
-let INITIAL_EVENTS = [
-    {
-        id: 1,
-        title: 'All-day event',
-        start: new Date().toISOString().replace(/T.*$/, '')
-    },
-    {
-        id: 2,
-        title: 'Timed event',
-        start: new Date().toISOString().replace(/T.*$/, '') + 'T12:00:00'
+const events = ref([])
+onMounted(async () => {
+    try {
+        // Example API call - replace with your actual API call
+        const data = await fetch('http://localhost:3800/event').then((res) => res.json())
+        console.log(data)
+        events = data.map((event) => ({
+            start: event.range_start,
+            end: event.range_end,
+            title: event.event_name,
+            desc: event.event_desc,
+            // Add other custom fields as needed
+            images: event.image,
+            recommendations: event.recommendation
+        }))
+    } catch (error) {
+        console.error('Failed to fetch event data:', error)
+    } finally {
+        loading.value = false
     }
-]
+})
 
-export default {
-    userID: localStorage.getItem('userID'),
-    components: {
-        FullCalendar, // make the <FullCalendar> tag available
-        VueDatePicker,
-        Navbar
-    },
-    data() {
-        return {
-            calendarOptions: {
-                plugins: [dayGridPlugin, interactionPlugin, timeGridPlugin, bootstrap5Plugin],
-                themeSystem: 'bootstrap5',
-                initialView: 'timeGridWeek',
-                headerToolbar: {
-                    left: 'prev,next today',
-                    center: 'title',
-                    right: 'timeGridWeek,timeGridDay'
-                },
-                initialEvents: INITIAL_EVENTS, // alternatively, use the `events` setting to fetch from a feed
-                editable: true,
-                selectable: true,
-                selectMirror: true,
-                dayMaxEvents: true,
-                weekends: true,
-                select: this.handleDateSelect,
-                eventClick: this.handleEventClick,
-                eventsSet: this.handleEvents,
-                nowIndicator: true
-            },
-            selected: {
-                startTime: '',
-                endTime: '',
-                typeOfEvent: '',
-                township: ''
-            },
-            calendar: null,
-            locations: [
-                'Orchard Road',
-                'Sentosa',
-                'Marina Bay',
-                'Chinatown',
-                'Little India',
-                'Jurong East'
-            ]
-        }
-    },
-    methods: {
-        handleWeekendsToggle() {
-            this.calendarOptions.weekends = !this.calendarOptions.weekends // update a property
-        },
-        handleDateSelect(selectInfo) {
-            console.log(selectInfo)
-            let modal = new Modal('#createEventForm')
-            modal.show()
-            let calendarApi = selectInfo.view.calendar
-            calendarApi.unselect() // clear date selection
-            this.selected.startTime = selectInfo.startStr
-            this.selected.endTime = selectInfo.endStr
-            this.calendar = calendarApi
-        },
-        handleEventClick(clickInfo) {
-            if (confirm(`Are you sure you want to delete the event '${clickInfo.event.title}'`)) {
-                clickInfo.event.remove()
-            }
-        },
-        handleEvents(events) {
-            this.currentEvents = events
-        },
-        handleEventTypeSelect(event) {
-            this.selected.typeOfEvent = event.target.value
-        },
-        handleTownshipSelect(event) {
-            this.selected.township = event.target.value
-        },
-        async createEvent() {
-            if (this.calendar) {
-                this.calendar.addEvent({
-                    title: document.getElementById('eventName').value,
-                    start: this.selected.startTime,
-                    end: this.selected.endTime
-                })
-
-                await axios
-                    .post(
-                        'http://localhost:5000/event',
-                        {
-                            eventName: document.getElementById('eventName').value,
-                            eventLocation: 'Garden of Eden',
-                            start: this.selected.startTime,
-                            end: this.selected.endTime
-                        },
-                        {
-                            headers: {}
-                        }
-                    )
-                    .then((response) => {
-                        console.log(response)
-                        let modal = Modal.getInstance(document.getElementById('createEventForm'))
-                        modal.hide()
-                    })
-            }
-        }
-    }
-}
+const userID = localStorage.getItem('userID')
 </script>
 <template>
-    <div class="container">
-        <FullCalendar :options="calendarOptions">
-            <template v-slot:eventContent="arg">
-                <b>{{ arg.timeText }}</b>
-                <br />
-                <p>{{ arg.event.title }}</p>
-            </template></FullCalendar
-        >
+    <div class="">
+        <vue-cal
+            selected-date="2024-03-19"
+            :time-from="9 * 60"
+            :time-to="23 * 60"
+            :disable-views="['years']"
+            events-count-on-year-view
+            :events="events"
+        ></vue-cal>
         <!-- Modal -->
         <!-- <div
             class="modal fade"

@@ -54,7 +54,8 @@ const router = createRouter({
         {
             path: '/RSVP/:userID/:eventToken',
             name: 'RSVP',
-            component: RSVP
+            component: RSVP,
+            meta: { hideNavbar: true },
         },
         {
             path: '/entercode',

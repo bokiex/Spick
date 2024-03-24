@@ -75,7 +75,7 @@ onMounted(async () => {
                             <Calendar class="flex-shrink-0" />
                             <Skeleton v-if="loading" class="w-24 h-6" />
                             <span v-else class="text-sm">
-                                {{ event?.event_date }}
+                                {{ event?.event_time }}
                             </span>
                         </div>
                         <div class="flex gap-x-1 text-muted-foreground">

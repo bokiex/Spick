@@ -1,12 +1,97 @@
-<script>
+<script setup>
 import VueDatePicker from '@vuepic/vue-datepicker'
 import Button from '@/components/Button.vue'
-import { Label, Separator } from 'radix-vue'
+import { RadioGroupIndicator, RadioGroupItem, RadioGroupRoot, Separator } from 'radix-vue'
+import { ref, computed } from 'vue'
+import { useForm, useField, useFieldArray } from 'vee-validate'
+import { toTypedSchema } from '@vee-validate/zod'
 import ShowAttendees from '@/components/ShowAttendees.vue'
 import Avatar from '@/components/Avatar.vue'
-import Navbar from '@/components/Navbar.vue'
+import * as z from 'zod'
+import { CircleX } from 'lucide-vue-next'
+import Label from '@/components/Label.vue'
 
-let friends = [
+const userID = localStorage.getItem('userID')
+const currentStep = ref(1)
+const steps = [
+    { id: 1, label: 'Step 1', description: 'Details' },
+    { id: 2, label: 'Step 2', description: 'Type' },
+    { id: 3, label: 'Step 3', description: 'Date & Time' },
+    { id: 4, label: 'Step 4', description: 'End' }
+]
+
+const event_detail_schema = toTypedSchema(
+    z.object({
+        event_name: z.string().min(1, { message: 'Event name is required' }),
+        event_desc: z.string().min(1, { message: 'Event description is required' })
+        // invitees: z.array(z.string()).min(1, { message: 'At least one invitee is required' })
+    })
+)
+
+const event_type_schema = toTypedSchema(
+    z.object({
+        category: z.string().min(1, { message: 'Event type is required' })
+    })
+)
+
+const date_time_schema = toTypedSchema(
+    z.object({
+        start_time: z.string().min(1, { message: 'Start time is required' }),
+        end_time: z.string().min(1, { message: 'End time is required' })
+    })
+)
+
+const schemas = [event_detail_schema, event_type_schema, date_time_schema]
+
+const { handleSubmit, validate } = useForm({
+    validationSchema: computed(() => schemas[currentStep.value - 1]),
+    initialValues: {
+        event_name: '',
+        event_desc: '',
+        invitees: [],
+        category: '',
+        start_time: '',
+        end_time: ''
+    }
+})
+
+const { value: event_name } = useField('event_name')
+const { value: event_desc } = useField('event_desc')
+const { value: invitees } = useField('invitees')
+const { value: category } = useField('category')
+const { value: start_time } = useField('start_time')
+const { value: end_time } = useField('end_time')
+
+const nextStep = async () => {
+    if (currentStep.value < steps.length) {
+        currentStep.value++
+        console.log(currentStep)
+    }
+}
+function prevStep() {
+    if (currentStep.value > 1) {
+        currentStep.value--
+    }
+}
+
+function submitForm() {
+    // Make sure all steps are validated before submitting
+    if (currentStep.value === 3) {
+        console.log(
+            event_name.value,
+            event_desc.value,
+            invitees.value,
+            category.value,
+            start_time.value,
+            end_time.value
+        )
+        currentStep++
+        // Send the form data to your backend
+        console.log(selected)
+    }
+}
+
+const friends = [
     {
         name: 'Colm Tuite',
         avatar: 'https://images.unsplash.com/photo-1492633423870-43d1cd2775eb?&w=128&h=128&dpr=2&q=80'
@@ -14,68 +99,37 @@ let friends = [
     {
         name: 'Adam Wathan',
         avatar: 'https://images.unsplash.com/photo-1492633423870-43d1cd2775eb?&w=128&h=128&dpr=2&q=80'
+    },
+    {
+        name: 'Sarah Drasner',
+        avatar: 'https://images.unsplash.com/photo-1492633423870-43d1cd2775eb?&w=128&h=128&dpr=2&q=80'
+    },
+    {
+        name: 'Cassidy Williams',
+        avatar: 'https://images.unsplash.com/photo-1492633423870-43d1cd2775eb?&w=128&h=128&dpr=2&q=80'
+    },
+    {
+        name: 'Evan You',
+        avatar: 'https://images.unsplash.com/photo-1492633423870-43d1cd2775eb?&w=128&h=128&dpr=2&q=80'
+    },
+    {
+        name: 'John Otander',
+        avatar: 'https://images.unsplash.com/photo-1492633423870-43d1cd2775eb?&w=128&h=128&dpr=2&q=80'
+    },
+    {
+        name: 'Sarah Dayan',
+        avatar: 'https://images.unsplash.com/photo-1492633423870-43d1cd2775eb?&w=128&h=128&dpr=2&q=80'
+    },
+    {
+        name: 'Tim Neutkens',
+        avatar: 'https://images.unsplash.com/photo-1492633423870-43d1cd2775eb?&w=128&h=128&dpr=2&q=80'
+    },
+    {
+        name: 'Chris Biscardi',
+        avatar: 'https://images.unsplash.com/photo-1492633423870-43d1cd2775eb?&w=128&h=128&dpr=2&q=80'
     }
 ]
-export default {
-    components: {
-        VueDatePicker,
-        Navbar,
-        Button,
-        Label,
-        Separator,
-        ShowAttendees,
-        Avatar
-    },
-    data() {
-        return {
-            currentStep: 1,
-            steps: [
-                { id: 1, label: 'Step 1', description: 'Details' },
-                { id: 2, label: 'Step 2', description: 'Type' },
-                { id: 3, label: 'Step 3', description: 'Date & Time' },
-                { id: 4, label: 'Step 4', description: 'End' }
-            ],
-            event: {
-                event_name: '',
-                event_desc: '',
-                invitees: [],
-                category: '',
-                range_start: '',
-                range_end: '',
-                township: '',
-                time_out: ''
-            },
-            selected_friend: '',
-            user_id: localStorage.getItem('userID')
-        }
-    },
-    methods: {
-        nextStep() {
-            if (this.currentStep < this.steps.length) {
-                this.currentStep++
-            }
-        },
-        prevStep() {
-            if (this.currentStep > 1) {
-                this.currentStep--
-            }
-        },
-        submitForm() {
-            // Make sure all steps are validated before submitting
-            if (this.currentStep === 3) {
-                this.currentStep++
-                // Send the form data to your backend
-                console.log(this.selected)
-            }
-        },
-        addInvitee(selected_friend) {
-            this.event.invitees.push(selected_friend)
-        },
-        removeInvitee(index) {
-            this.event.invitees.splice(index, 1)
-        }
-    }
-}
+const selected_friend = ref(friends[0])
 </script>
 <template>
     <Navbar />
@@ -154,30 +208,29 @@ export default {
                                 <Label for="invitees">Event Attendees</Label>
 
                                 <ShowAttendees
-                                    @update:selectedFriend="addInvitee"
+                                    @update:selectedFriend="
+                                        (selected_friend) => invitees.push(selected_friend)
+                                    "
                                     :selected_friend="selected_friend"
                                     :friends="friends"
                                 />
                             </div>
 
-                            <div class="invitees-list">
-                                <div class="row">
-                                    <div
-                                        class="col-3"
-                                        v-for="(invitee, index) in invitees"
-                                        :key="index"
-                                    >
-                                        <Avatar />
+                            <div class="flex gap-5">
+                                <div
+                                    v-for="(invitee, index) in invitees"
+                                    :key="index"
+                                    class="relative"
+                                >
+                                    <Avatar />
 
-                                        <Button
-                                            @click="removeInvitee(index)"
-                                            class="btn btn-danger"
-                                        >
-                                            x
-                                        </Button>
-                                    </div>
+                                    <CircleX
+                                        class="absolute -top-2 -right-2 cursor-pointer hover:text-destructive transition-colors duration-150"
+                                        @click="() => invitees.splice(index, 1)"
+                                    />
                                 </div>
                             </div>
+
                             <div class="flex justify-end">
                                 <Button @click="nextStep" type="button"> Next Step </Button>
                             </div>
@@ -187,59 +240,94 @@ export default {
                     <!-- Step 1 end -->
                     <!-- Step 2 start -->
                     <div v-if="currentStep === 2" class="stp step-2">
-                        <div class="header">
-                            <h1 class="title">Pick the type of event.</h1>
-                            <p class="exp">Select the type to get a venue recommendation.</p>
-                        </div>
-                        <form>
-                            <div class="box" data-id="1">
-                                <input
-                                    type="radio"
-                                    id="school"
-                                    name="meeting_type"
-                                    v-model="category"
-                                />
-                                <div class="description">
-                                    <label for="school">School Meeting</label>
-                                    <small>School project meeting done in school.</small>
-                                </div>
+                        <div class="space-y-6">
+                            <div>
+                                <h3 class="text-lg font-medium">Pick the type of event.</h3>
+                                <p class="text-sm text-muted-foreground">
+                                    Select the type to get a venue recommendation.
+                                </p>
                             </div>
-                            <div class="box" data-id="2">
-                                <input
-                                    type="radio"
-                                    id="personal"
-                                    name="meeting_type"
-                                    v-model="category"
-                                />
-                                <div class="description">
-                                    <label for="personal">Personal</label>
-                                    <small>Meeting with friends</small>
-                                </div>
-                            </div>
-                            <div class="box" data-id="3">
-                                <input
-                                    type="radio"
-                                    id="celebrations"
-                                    name="meeting_type"
-                                    v-model="category"
-                                />
-                                <div class="description">
-                                    <label for="celebrations">Celebrations</label>
-                                    <small>Custom celebrations such as birthday parties.</small>
-                                </div>
-                            </div>
-                        </form>
+                            <Separator class="shrink-0 bg-border h-px w-full" />
 
-                        <div class="btns">
-                            <Button class="prev-stp" @click="prevStep" type="button"
+                            <RadioGroupRoot default-value="school" v-model="category">
+                                <div class="grid grid-row-3 gap-4">
+                                    <Label
+                                        for="school"
+                                        class="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary"
+                                    >
+                                        <RadioGroupItem
+                                            id="school"
+                                            value="school"
+                                            class="peer sr-only aspect-square h-4 w-4 rounded-full border border-primary text-primary ring-offset-background focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                                        >
+                                            <RadioGroupIndicator
+                                                class="flex items-center justify-center"
+                                            >
+                                                <Circle
+                                                    class="h-2.5 w-2.5 fill-current text-current"
+                                                />
+                                            </RadioGroupIndicator>
+                                        </RadioGroupItem>
+
+                                        <p class="text-sm font-medium leading-none">
+                                            School Meeting
+                                        </p>
+                                        <p class="text-sm text-muted-foreground">
+                                            School project meeting done in school.
+                                        </p>
+                                    </Label>
+                                    <Label
+                                        for="personal"
+                                        class="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary"
+                                    >
+                                        <RadioGroupItem
+                                            id="personal"
+                                            value="personal"
+                                            class="peer sr-only aspect-square h-4 w-4 rounded-full border border-primary text-primary ring-offset-background focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                                        >
+                                            <RadioGroupIndicator
+                                                class="flex items-center justify-center"
+                                            >
+                                                <Circle
+                                                    class="h-2.5 w-2.5 fill-current text-current"
+                                                />
+                                            </RadioGroupIndicator>
+                                        </RadioGroupItem>
+                                        <p class="text-sm font-medium leading-none">Personal</p>
+                                        <p class="text-sm text-muted-foreground">
+                                            Meeting with friends
+                                        </p>
+                                    </Label>
+                                    <Label
+                                        for="celebration"
+                                        class="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary"
+                                    >
+                                        <RadioGroupItem
+                                            id="celebration"
+                                            value="celebration"
+                                            class="peer sr-only aspect-square h-4 w-4 rounded-full border border-primary text-primary ring-offset-background focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                                        >
+                                            <RadioGroupIndicator
+                                                class="flex items-center justify-center"
+                                            >
+                                                <Circle
+                                                    class="h-2.5 w-2.5 fill-current text-current"
+                                                />
+                                            </RadioGroupIndicator>
+                                        </RadioGroupItem>
+                                        <p class="text-sm font-medium leading-none">Celebrations</p>
+                                        <p class="text-sm text-muted-foreground">
+                                            Custom celebrations such as birthday parties.
+                                        </p>
+                                    </Label>
+                                </div>
+                            </RadioGroupRoot>
+                        </div>
+                        <div class="m-5">
+                            <Button variant="outline" @click="prevStep" type="button"
                                 >Go Back</Button
                             >
-                            <Button
-                                class="next-stp"
-                                @click="nextStep"
-                                type="button"
-                                style="float: right"
-                            >
+                            <Button @click="nextStep" type="button" style="float: right">
                                 Next Step
                             </Button>
                         </div>
@@ -247,48 +335,47 @@ export default {
                     <!-- Step 2 end -->
                     <!-- Step 3 Start -->
                     <div v-if="currentStep === 3" class="stp step-3">
-                        <div class="header">
-                            <h1 class="title">Date and time.</h1>
-                            <p class="exp">Select the date and time for the event.</p>
-                            <form>
-                                <div class="col-12">
-                                    <label for="start_time">Start Time</label>
-                                    <VueDatePicker v-model="start_time" time-picker-inline />
+                        <div class="space-y-6">
+                            <div>
+                                <h3 class="text-lg font-medium">Pick the type of event.</h3>
+                                <p class="text-sm text-muted-foreground">
+                                    Select the type to get a venue recommendation.
+                                </p>
+                            </div>
+                            <Separator class="shrink-0 bg-border h-px w-full" />
+
+                            <div class="space-y-2">
+                                <Label for="start_time">Start Time</Label>
+                                <VueDatePicker v-model="start_time" time-picker-inline />
+                            </div>
+                            <div class="space-y-2">
+                                <Label for="end_time">End Time</Label>
+                                <VueDatePicker v-model="end_time" time-picker-inline />
+                            </div>
+                            <div class="space-y-2">
+                                <Label for="time_out">Time Out</Label>
+                                <VueDatePicker v-model="time_out" time-picker-inline />
+                            </div>
+                            <div class="space-y-2">
+                                <div class="label">
+                                    <label for="township">Prefered Area</label>
                                 </div>
-                                <div class="col-12">
-                                    <label for="end_time">End Time</label>
-                                    <VueDatePicker v-model="end_time" time-picker-inline />
-                                </div>
-                                <div class="col-12">
-                                    <label for="time_out">Time Out</label>
-                                    <VueDatePicker v-model="time_out" time-picker-inline />
-                                </div>
-                                <div class="col-12">
-                                    <div class="label">
-                                        <label for="township">Prefered Area</label>
-                                    </div>
-                                    <input
-                                        required
-                                        class="form-control"
-                                        type="text"
-                                        v-model="township"
-                                        id="township"
-                                        placeholder="e.g. Marina Bay"
-                                    />
-                                </div>
-                            </form>
+                                <input
+                                    required
+                                    class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                                    type="text"
+                                    v-model="township"
+                                    id="township"
+                                    placeholder="e.g. Marina Bay"
+                                />
+                            </div>
                         </div>
-                        <div class="btns">
-                            <Button class="prev-stp" @click="prevStep" type="button"
+                        <div class="m-5">
+                            <Button variant="outline" @click="prevStep" type="button"
                                 >Go Back</Button
                             >
-                            <Button
-                                class="next-stp"
-                                @click="submitForm"
-                                type="button"
-                                style="float: right"
-                            >
-                                Next Step
+                            <Button @click="submitForm" type="button" style="float: right">
+                                Submit
                             </Button>
                         </div>
                     </div>
@@ -301,7 +388,7 @@ export default {
                                 Your event invite has been created and sent to the invitees.
                             </p>
                         </div>
-                        <Button class="next-stp"></Button>
+                        <Button class="mt-5 mx-auto">Return</Button>
                     </div>
                     <!-- Step 4 end -->
                 </form>
