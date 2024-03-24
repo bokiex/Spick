@@ -85,9 +85,7 @@ function previewFile(event) {
     }
     if (file) {
         reader.readAsDataURL(file)
-        
     }
-
 }
 
 function submitForm() {
@@ -109,12 +107,9 @@ function submitForm() {
             invitees: invitees.value,
             type: type.value,
             start_time: start_time.value,
-            end_time: end_time.value}
-        submit = fetch("http://localhost:5000/api/events", {
-            method: "POST",
+            end_time: end_time.value
+        }
     }
-    
-
 }
 
 const friends = [
