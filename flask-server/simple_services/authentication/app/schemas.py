@@ -2,9 +2,13 @@ from pydantic import BaseModel
 from datetime import datetime
 
 class User(BaseModel):
-    user_id: int
     username: str
     email: str
-    password_hash: str
+    password: str
+    password_hash: str | None = None
     telegram_id: str | None = None
-    telegramtag: str
+    telegram_tag: str
+
+class LoginUser(BaseModel):
+    username: str
+    password: str

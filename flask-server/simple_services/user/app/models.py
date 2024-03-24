@@ -7,7 +7,7 @@ class User(Base):
     user_id = Column(Integer, primary_key=True)
     username = Column(String(64), nullable=False)
     email = Column(String(64), nullable=False)
-    password = Column(String(64), nullable=False)
+    password_hash = Column(String(64), nullable=False)
     telegram_id = Column(String(64), nullable=True)
     telegram_tag = Column(String(64), nullable=True)
 

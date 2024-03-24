@@ -6,14 +6,19 @@ def get_users(db: Session):
     return db.query(models.User).all()
 
 def create_user(db: Session, user: schemas.User):
-    db_user = models.User(**user.dict())
+    db_user = models.User(**user.model_dump(exclude=['password']))
+    if db.query(models.User).filter(models.User.email == db_user.email).first() is not None:
+        return None
     db.add(db_user)
     db.commit()
     db.refresh(db_user)
     return db_user
 
-def get_user(db: Session, user_id: int):
-    return db.query(models.User).filter(models.User.user_id == user_id).first()
+def get_user_by_username(db: Session, username: str):
+    db_user = db.query(models.User).filter(models.User.username == username).first()
+    if db_user is None:
+        return None
+    return db_user
 
 def update_user(db: Session, user: schemas.User):
     db_user = db.query(models.User).filter(models.User.user_id == user.user_id).first()

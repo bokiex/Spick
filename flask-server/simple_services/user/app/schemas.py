@@ -7,6 +7,7 @@ class User(BaseModel):
     username: str
     email: str
     password: str
+    password_hash: str
     telegram_id : str | None = None
     telegram_tag: str | None = None
 
@@ -14,6 +15,6 @@ class UserResponse(BaseModel):
     user_id: int
     username: str
     email: str
-    password: str
+    password_hash: str
     telegram_id : str | None = None
     telegram_tag: str | None = None
