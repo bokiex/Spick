@@ -6,7 +6,7 @@ import json
 
 app = Flask(__name__)
 CORS(app)
-api_key = "AIzaSyBVwaHGbGTnc-cQHpIM6qqMbGIb7C-xKVA"
+api_key = ""
 @app.route("/recommend", methods=['POST'])
 def getrecc():
     # Simple check of input format and data of the request are JSON
@@ -53,6 +53,7 @@ def processSearch(search):
     print('search_result:', response)
     
     try:
+        code = response["places"]
         return {
             "code": 201,
             "data": response
