@@ -8,9 +8,9 @@ import { isProxy, toRaw } from 'vue';
 var eventID = 0
 export default{
     components:{VueCal},
+    userID: localStorage.getItem('userID'),
     data() {
         return {
-            userID:"",
             eventToken:"",
             currentStep: 1,
             steps: [
@@ -21,9 +21,8 @@ export default{
         }    
     },
     created(){
-        this.userID = this.$route.params.userID;
         this.eventToken = this.$route.params.eventToken;
-        axios.get(`localhost/entercode.json?userID=${this.userID}&eventToken=${this.eventToken}`)
+        axios.get(`localhost/entercode.json?&eventToken=${this.eventToken}`)
         .then (response=>{
             console.log(this.userID)
             console.log(this.eventToken)
