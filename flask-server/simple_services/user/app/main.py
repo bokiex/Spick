@@ -44,10 +44,18 @@ async def create_user(user: schemas.User, db: Session = Depends(get_db)):
     return result
 
 
-# Get user by email
+# Get user by username
 @app.get("/users/{username}", response_model=schemas.UserResponse)
 async def get_user_by_username(username: str, db: Session = Depends(get_db)):
     result = crud.get_user_by_username(db, username)
+    if result is None:
+        raise HTTPException(status_code=404, detail="User not found.")
+    return jsonable_encoder(result)
+
+# Get user by telegram tag
+@app.get("/users/{telegram_tag}", response_model=schemas.UserResponse)
+async def get_user_by_telegram_tag(telegram_tag: str, db: Session = Depends(get_db)):
+    result = crud.get_user_by_telegram_tag(db, telegram_tag)
     if result is None:
         raise HTTPException(status_code=404, detail="User not found.")
     return jsonable_encoder(result)
