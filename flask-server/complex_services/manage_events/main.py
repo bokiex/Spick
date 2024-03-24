@@ -26,10 +26,6 @@ exchangename = "create_event_topic"
 exchangetype = "topic"
 scheduler = BackgroundScheduler()
 
-
-
-
-
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     global connection, channel

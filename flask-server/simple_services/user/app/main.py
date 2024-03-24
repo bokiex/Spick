@@ -32,12 +32,12 @@ async def create_user(user: schemas.User, db: Session = Depends(get_db)):
 
 
 # Get user by ID
-@app.get("/users/{user_id}")
-async def get_user_by_id(user_id: int):
-    return {"user_id": user_id}
+@app.get("/users/{user_id}", response_model=list[schemas.UserResponse])
+async def get_user_by_id(user_id: int, db: Session = Depends(get_db)):
+    return jsonable_encoder(crud.get_user(user_id))
 
 # Update user
-@app.put("/users/{user_id}")
-async def update_user(user_id: int):
-    return {"user_id": user_id}
+@app.put("/users")
+async def update_user(user: schemas.User, db: Session = Depends(get_db)):
+    return crud.update_user(db, user)
 

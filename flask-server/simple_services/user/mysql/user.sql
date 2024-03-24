@@ -12,6 +12,7 @@ CREATE TABLE IF NOT EXISTS `user` (
   `username` VARCHAR(64) UNIQUE NOT NULL,
   `email` VARCHAR(120) UNIQUE NOT NULL,
   `password` VARCHAR(128),
+  `telegram_id` VARCHAR(64) UNIQUE
   `telegram_tag` varchar(64) NOT NULL
   -- PRIMARY KEY (`chatid`)
   ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
