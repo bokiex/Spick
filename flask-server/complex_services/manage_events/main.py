@@ -22,7 +22,7 @@ recommendation_ms = environ.get('RECOMMENDATION_URL') or "http://localhost:3700/
 
 connection = None
 channel = None
-exchangename = "create_event_topic"
+exchangename = "generic_topic"
 exchangetype = "topic"
 scheduler = BackgroundScheduler()
 

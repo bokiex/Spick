@@ -4,8 +4,8 @@ import os
 
 hostname = os.getenv('HOSTNAME') or "localhost" #localhost
 port = os.getenv('HOST_PORT') or 5672         #5672
-exchangename = os.getenv('EXCHANGE_NAME') or "create_event_topic" #order_topic
-exchangetype = os.getenv('EXCHANGE_TYPE') or "topic" #topic
+exchange_topic = os.getenv('EXCHANGE_TOPIC') or "generic_topic"
+exchange_type = os.getenv('EXCHANGE_TYPE') or "topic" 
 e_queue_name = os.getenv('ERROR_QUEUE_NAME') or "Error"
 n_queue_name = os.getenv('NOTI_QUEUE_NAME') or "Notification"
 
@@ -35,7 +35,7 @@ def create_connection(max_retries=12, retry_interval=5):
     
     return connection
 
-def create_channel(connection):
+def create_channel(connection, exchangename, exchangetype):
     print('amqp_setup:create_channel')
     channel = connection.channel()
     # Set up the exchange if the exchange doesn't exist
@@ -46,25 +46,26 @@ def create_channel(connection):
 #function to create queues
 def create_queues(channel):
     print('amqp_setup:create queues')
-    create_error_queue(channel)
-    create_notification_queue(channel)
+    create_error_queue(channel, exchange_topic)
+    create_notification_queue(channel, exchange_topic)
     
-def create_error_queue(channel):
+def create_error_queue(channel, exchangename):
     print('amqp_setup:create_error_queue')
     channel.queue_declare(queue=e_queue_name, durable=True) # 'durable' makes the queue survive broker restarts
     #bind Error queue
     channel.queue_bind(exchange=exchangename, queue=e_queue_name, routing_key='*.error') 
         # bind the queue to the exchange via the key 'error'
 
-def create_notification_queue(channel):
+def create_notification_queue(channel, exchangename):
     print('amqp_setup:create_notification_queue')
     channel.queue_declare(queue=e_queue_name, durable=True) # 'durable' makes the queue survive broker restarts
     #bind Notification queue
     channel.queue_bind(exchange=exchangename, queue=e_queue_name, routing_key='*.notification') 
         # bind the queue to the exchange via the key 'notification'
-            
+
 if __name__ == "__main__":  # execute this program only if it is run as a script (not by 'import')   
     connection = create_connection()
-    channel = create_channel(connection)
+    channel = create_channel(connection, exchange_topic, exchange_type)
+
     create_queues(channel)
     

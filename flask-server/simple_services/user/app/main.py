@@ -14,12 +14,6 @@ def get_db():
     finally:
         db.close()
 
-from fastapi import FastAPI
-
-# Initialize FastAPI app
-app = FastAPI()
-
-
 # Get all users
 @app.get("/users", response_model=list[schemas.UserResponse])
 async def get_all_users(db: Session = Depends(get_db)):
