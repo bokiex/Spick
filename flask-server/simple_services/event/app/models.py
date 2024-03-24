@@ -12,10 +12,9 @@ class Event(Base):
     event_id = Column(String(6), primary_key=True, default=generate_random_event_id)
     event_name = Column(String(64), nullable=False)
     event_desc = Column(String(256), nullable=True)
-    range_start = Column(TIMESTAMP, nullable=True)
-    range_end = Column(TIMESTAMP, nullable=True)
-    start_time = Column(TIMESTAMP, nullable=True)
-    end_time = Column(TIMESTAMP, nullable=True)
+    datetime_start = Column(TIMESTAMP, nullable=True)
+    datetime_end = Column(TIMESTAMP, nullable=True)
+   
     time_out = Column(TIMESTAMP, nullable=True)
     event_location = Column(String(64), nullable=True)
     user_id = Column(Integer, nullable=False)

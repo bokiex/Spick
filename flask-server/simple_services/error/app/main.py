@@ -1,6 +1,3 @@
-import requests
-import schemas
-import sys
 import amqp_connection
 import json
 import pika

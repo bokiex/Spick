@@ -21,10 +21,11 @@ class Image(BaseModel):
   
 
 class Event(BaseModel):
+    event_id: int
     event_name: str
     event_desc: str
-    range_start: datetime
-    range_end: datetime
+    datetime_start: datetime
+    datetime_end: datetime
     image: List[Image] = []
     recommendation: List[Recommend] = []
     reservation_name: Optional[str] = None
@@ -33,8 +34,8 @@ class Event(BaseModel):
 class EventPut(BaseModel):
     event_name: Optional[str] = None
     event_desc: Optional[str] = None
-    start_time: Optional[datetime] = None
-    end_time: Optional[datetime] = None
+    datetime_start: Optional[datetime] = None
+    datetime_end: Optional[datetime] = None
     time_out: Optional[datetime] = None
     user_id: Optional[int] = None
     recommendation: Optional[List[Recommend]] = None
