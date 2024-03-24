@@ -13,7 +13,7 @@ load_dotenv()
 app = Flask(__name__)
 # app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://root:root@localhost:3306/notification'  #For Mac
 # for windows
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://is213@localhost:3306/notification'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://is213@localhost:8889/notification'
 #USE FOR DOCKER ONLY. UNCOMMENT THIS AND COMMENT OUT THE is213@localhost DATABASE URL WHEN USING DOCKER-------------------
 #from os import environ
 #app.config['SQLALCHEMY_DATABASE_URI'] = environ.get('dbURL')
@@ -194,7 +194,7 @@ def processNotification(event):
 
 
 if __name__ == '__main__':
-    app.run(host="0.0.0.0",  port=5000, debug=True)
+    app.run(host="0.0.0.0",  port=4100, debug=True)
     print("Notification microservice: Getting Connection")
     connection = amqp_connection.create_connection()
     print("Notification microservice: Connection established successfully")

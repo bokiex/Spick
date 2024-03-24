@@ -36,8 +36,8 @@ CREATE TABLE IF NOT EXISTS `invitee` (
 
 CREATE TABLE IF NOT EXISTS `recommendation` (
     `recommendation_id` INT AUTO_INCREMENT PRIMARY KEY,
-    `recommendation_name` VARCHAR(64) NOT NULL,
-    `recommendation_address` VARCHAR(64) NOT NULL,
+    `recommendation_name` VARCHAR(256) NOT NULL,
+    `recommendation_address` VARCHAR(256) NOT NULL,
     `event_id` varchar(6) NOT NULL,
     FOREIGN KEY (event_id) REFERENCES event(event_id)
 

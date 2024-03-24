@@ -18,6 +18,7 @@ def create_event(db: Session, event: schemas.Event):
  
     db_event = models.Event(**event_data)
     db.add(db_event)
+  
     db.flush()
     
     # for invitee in event.invitees:
@@ -25,8 +26,9 @@ def create_event(db: Session, event: schemas.Event):
     #     db.add(db_invitee)
     
     for recommend in event.recommendation:
-   
+       
         db_recommend = models.Recommendation(**recommend.dict(), event_id=db_event.event_id)
+        
         db.add(db_recommend)
 
     db.commit()

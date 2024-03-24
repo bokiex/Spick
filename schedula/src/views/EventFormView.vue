@@ -3,7 +3,7 @@ import VueDatePicker from '@vuepic/vue-datepicker'
 import Button from '@/components/Button.vue'
 import { RadioGroupIndicator, RadioGroupItem, RadioGroupRoot, Separator } from 'radix-vue'
 import { ref, computed } from 'vue'
-import { useForm, useField, useFieldArray } from 'vee-validate'
+import { useForm, useField } from 'vee-validate'
 import { toTypedSchema } from '@vee-validate/zod'
 import ShowAttendees from '@/components/ShowAttendees.vue'
 import Avatar from '@/components/Avatar.vue'
@@ -30,7 +30,7 @@ const event_detail_schema = toTypedSchema(
 
 const event_type_schema = toTypedSchema(
     z.object({
-        category: z.string().min(1, { message: 'Event type is required' })
+        type: z.string().min(1, { message: 'Event type is required' })
     })
 )
 
@@ -48,8 +48,9 @@ const { handleSubmit, validate } = useForm({
     initialValues: {
         event_name: '',
         event_desc: '',
+        image: '',
         invitees: [],
-        category: '',
+        type: '',
         start_time: '',
         end_time: ''
     }
@@ -57,8 +58,9 @@ const { handleSubmit, validate } = useForm({
 
 const { value: event_name } = useField('event_name')
 const { value: event_desc } = useField('event_desc')
+const { value: image } = useField('image')
 const { value: invitees } = useField('invitees')
-const { value: category } = useField('category')
+const { value: type } = useField('type')
 const { value: start_time } = useField('start_time')
 const { value: end_time } = useField('end_time')
 
@@ -74,6 +76,20 @@ function prevStep() {
     }
 }
 
+function previewFile(event) {
+    const file = image.value
+    console.log(event.target.files[0])
+    const reader = new FileReader()
+    reader.onloadend = () => {
+        selected.value = reader.result
+    }
+    if (file) {
+        reader.readAsDataURL(file)
+        
+    }
+
+}
+
 function submitForm() {
     // Make sure all steps are validated before submitting
     if (currentStep.value === 3) {
@@ -81,14 +97,24 @@ function submitForm() {
             event_name.value,
             event_desc.value,
             invitees.value,
-            category.value,
+            type.value,
             start_time.value,
             end_time.value
         )
         currentStep++
         // Send the form data to your backend
-        console.log(selected)
+        create_event = {
+            event_name: event_name.value,
+            event_desc: event_desc.value,
+            invitees: invitees.value,
+            type: type.value,
+            start_time: start_time.value,
+            end_time: end_time.value}
+        submit = fetch("http://localhost:5000/api/events", {
+            method: "POST",
     }
+    
+
 }
 
 const friends = [
@@ -205,6 +231,18 @@ const selected_friend = ref(friends[0])
                                 />
                             </div>
                             <div class="space-y-2">
+                                <Label for="image">Image</Label>
+                                <input
+                                    name="image"
+                                    type="file"
+                                    @change="(event) => previewFile(event)"
+                                    required
+                                    id="image"
+                                    class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                                    placeholder="e.g. Deployment of site"
+                                />
+                            </div>
+                            <div class="space-y-2">
                                 <Label for="invitees">Event Attendees</Label>
 
                                 <ShowAttendees
@@ -249,7 +287,7 @@ const selected_friend = ref(friends[0])
                             </div>
                             <Separator class="shrink-0 bg-border h-px w-full" />
 
-                            <RadioGroupRoot default-value="school" v-model="category">
+                            <RadioGroupRoot default-value="school" v-model="type">
                                 <div class="grid grid-row-3 gap-4">
                                     <Label
                                         for="school"

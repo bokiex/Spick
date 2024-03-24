@@ -7,7 +7,7 @@ import json
 import apscheduler
 from fastapi import FastAPI, Depends
 from datetime import datetime
-from invokes import invoke_http
+from fastapi.responses import JSONResponse
 from os import environ
 from contextlib import asynccontextmanager
 from sqlalchemy.orm import Session
@@ -15,7 +15,8 @@ from fastapi.encoders import jsonable_encoder
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.jobstores.sqlalchemy import SQLAlchemyJobStore
 
-event_ms = environ.get('EVENT_URL') or "http://localhost:5000/event"
+
+event_ms = environ.get('EVENT_URL') or "http://localhost:3800/event"
 notification_ms = environ.get("NOTIFICATION_URL") or "http://localhost:5005/notification"
 recommendation_ms = environ.get('RECOMMENDATION_URL') or "http://localhost:3700/recommendation"
 
@@ -25,16 +26,21 @@ exchangename = "create_event_topic"
 exchangetype = "topic"
 scheduler = BackgroundScheduler()
 
+
+
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     global connection, channel
     connection = amqp_connection.create_connection()
     channel = connection.channel()
+    print("channel established")
     if not amqp_connection.check_exchange(channel, exchangename, exchangetype):
         print("\nCreate the 'Exchange' before running this microservice. \nExiting the program.")
         sys.exit(0)
 
-    scheduler.configure(jobstores={'default': SQLAlchemyJobStore(url='mysql+mysqlconnector://is213@localhost:3306/')})
+    scheduler.configure(jobstores={'default': SQLAlchemyJobStore(url='mysql+mysqlconnector://root:root@localhost:8889/scheduler')})
     scheduler.start()
 
     yield
@@ -42,8 +48,7 @@ async def lifespan(app: FastAPI):
     scheduler.shutdown()
 
 # Initialize FastAPI app
-app = FastAPI()
-
+app = FastAPI(lifespan=lifespan)
 
 """
 Sample event JSON input:
@@ -103,27 +108,32 @@ def create_event(event: schemas.Recommend):
     event_dict = event.dict()
 
     # Get recommendation from recommendation microservice
-    recommendation_result = requests.post(recommendation_ms, json=jsonable_encoder({"category": event_dict["category"], "township": event_dict["township"]})).json()
-    
+    recommendation_result = requests.post(recommendation_ms, json=jsonable_encoder({"type": event_dict["type"], "township": event_dict["township"]}))
+
+
     if recommendation_result.status_code not in range(200,300):
-        channel.basic_publish(exchange=exchangename, routing_key="create_event.error",body=recommendation_result, properties=pika.BasicProperties(delivery_mode=2))
+      
+        channel.basic_publish(exchange=exchangename, routing_key="create_event.error",body=recommendation_result.json(), properties=pika.BasicProperties(delivery_mode=2))
+     
         return recommendation_result
-    
+
     # Create event through event microservice
-    event_dict["recommendation"] = recommendation_result[0:3]
-    event_result = requests.post(event_ms, json=jsonable_encoder(event_dict)).json()
+  
+    event_dict["recommendation"] = recommendation_result.json()[0:3]
+    print(event_dict)
+    event_result = requests.post(event_ms, json=jsonable_encoder(event_dict))
 
     if event_result.status_code not in range(200,300):
-        channel.basic_publish(exchange=exchangename, routing_key="create_event.error",body=event_result, properties=pika.BasicProperties(delivery_mode=2))
+        channel.basic_publish(exchange=exchangename, routing_key="create_event.error",body=event_result.json(), properties=pika.BasicProperties(delivery_mode=2))
         return event_result
     
     # Send notification to users
-    channel.basic_publish(exchange=exchangename, routing_key="create_event.notification",body=event_result, properties=pika.BasicProperties(delivery_mode=2))
+    channel.basic_publish(exchange=exchangename, routing_key="create_event.notification",body=event_result.json(), properties=pika.BasicProperties(delivery_mode=2))
     
     # Start scheduler for event time out
     scheduler.add_job(on_timeout, 'date', run_date=event_result["time_out"], args=[event_result["event_id"]])
     scheduler.print_jobs()
-    return event_result
+  
 
 @app.delete("/delete_event/{event_id}")
 def delete_event(event_id: int):

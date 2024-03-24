@@ -14,7 +14,6 @@ class Event(Base):
     event_desc = Column(String(256), nullable=True)
     datetime_start = Column(TIMESTAMP, nullable=True)
     datetime_end = Column(TIMESTAMP, nullable=True)
-   
     time_out = Column(TIMESTAMP, nullable=True)
     event_location = Column(String(64), nullable=True)
     user_id = Column(Integer, nullable=False)

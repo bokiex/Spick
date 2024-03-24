@@ -44,7 +44,8 @@ const router = createRouter({
         {
             path: '/SignInSignUp',
             name: 'SignInSignUp',
-            component: SignInSignUpView
+            component: SignInSignUpView,
+            meta: { hideNavbar: true }
         },
         {
             path: '/reservation',
@@ -52,10 +53,10 @@ const router = createRouter({
             component: ReservationView
         },
         {
-            path: '/RSVP/:eventToken',
+            path: '/RSVP',
             name: 'RSVP',
             component: RSVP,
-            meta: { hideNavbar: true },
+            meta: { hideNavbar: true }
         },
         {
             path: '/entercode',

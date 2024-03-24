@@ -6,7 +6,7 @@ from typing import List, Optional
 
 
 class Invitee(BaseModel):
-    event_id: int
+    event_id: str
     user_id: int
     status: str | None = None
 
@@ -21,12 +21,14 @@ class Image(BaseModel):
   
 
 class Event(BaseModel):
-    event_id: int
+
     event_name: str
     event_desc: str
     datetime_start: datetime
     datetime_end: datetime
-    image: List[Image] = []
+    time_out: datetime
+    user_id: int
+    image: Optional[List[Image]] = []
     recommendation: List[Recommend] = []
     reservation_name: Optional[str] = None
     reservation_address: Optional[str] = None
