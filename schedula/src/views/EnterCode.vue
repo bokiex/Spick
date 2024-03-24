@@ -4,7 +4,7 @@ export default {
     name: "entercode",
     data() {
         return {
-            userID:0,
+            user_id:0,
             code: ""
         }
     },
@@ -55,7 +55,7 @@ export default {
                     <div class="input-group mb-3" style="float:right;">
                         <input type="text" class="form-control form-input" v-model="code" placeholder="Event Code"
                             aria-label="Event Code" aria-describedby="basic-addon2">
-                            <router-link class = "btn btn-go" type = "button" :to="`/RSVP/${this.userID}/${this.code}`">Go</router-link>
+                            <router-link class = "btn btn-go" type = "button" :to="`/RSVP/${this.user_id}/${this.code}`">Go</router-link>
                     </div>
                 </div>
             </div>

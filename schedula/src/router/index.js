@@ -52,7 +52,7 @@ const router = createRouter({
             component: ReservationView
         },
         {
-            path: '/RSVP/:userID/:eventToken',
+            path: '/RSVP/:user_id/:eventToken',
             name: 'RSVP',
             component: RSVP
         },
@@ -66,12 +66,12 @@ const router = createRouter({
 router.beforeEach((to, from, next) => {
     // Check if the route requires the user to be logged in
     if (to.matched.some((record) => record.meta.requiresAuth)) {
-        const userID = localStorage.getItem('userID')
-        if (!userID) {
-            // If no userid, redirect to the SignInSignUp page
+        const user_id = localStorage.getItem('user_id')
+        if (!user_id) {
+            // If no user_id, redirect to the SignInSignUp page
             next({ name: 'SignInSignUp', query: { redirect: to.fullPath } })
         } else {
-            next() // if userid is found, proceed to the route
+            next() // if user_id is found, proceed to the route
         }
     } else {
         next() // if the route does not require auth, proceed

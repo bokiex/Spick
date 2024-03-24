@@ -1,6 +1,6 @@
 <script>
 export default {
-  userID: localStorage.getItem('userID'),
+  user_id: localStorage.getItem('user_id'),
   selectedTimeslot: "",
   data() {
       return {

@@ -10,7 +10,7 @@ DROP TABLE IF EXISTS `user_schedule`;
 CREATE TABLE IF NOT EXISTS `user_schedule` (
   `scheduleID` INT AUTO_INCREMENT PRIMARY KEY,
   `eventID` INT NOT NULL,
-  `userID` INT NOT NULL,
+  `user_id` INT NOT NULL,
   `start_time` DATETIME NOT NULL,
   `end_time` DATETIME NOT NULL,
   `reason` VARCHAR(255),

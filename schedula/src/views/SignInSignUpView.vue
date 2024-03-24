@@ -33,8 +33,8 @@ export default {
                     password: this.password,
                 });
                 console.log(response.data);
-                localStorage.setItem('userID', response.data.userID);
-                // console.log(response.data.userID)
+                localStorage.setItem('user_id', response.data.user_id);
+                // console.log(response.data.user_id)
                 router.push('/');
             }catch(error){
                 console.log(error.response.data);

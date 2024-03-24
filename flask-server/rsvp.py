@@ -16,11 +16,11 @@ VALUE_RETRIEVE_URL = "http://127.0.0.1:8000/invitee/"
 
 # Sample Input for /rsvp/accept:
 # {
-#     "userID": 2,
+#     "user_id": 2,
 #     "token": "event123",
 #     "eventID": 1,
 #     "sched_list": [
-#         {"eventID": 1, "userID": 2, "start_time": "2023-12-01T09:00:00", "end_time": "2023-12-01T10:00:00", "token": "event123"}
+#         {"eventID": 1, "user_id": 2, "start_time": "2023-12-01T09:00:00", "end_time": "2023-12-01T10:00:00", "token": "event123"}
 #     ]
 # }
 # Sample Output for /rsvp/accept:
@@ -37,7 +37,7 @@ def accept_invitation():
     # Constructing the payload for the FastAPI service
     update_payload = {
         "event_id": req_data.get('eventID'),  # Make sure the field names match the FastAPI's expected schema
-        "user_id": req_data.get('userID'),    # You might need to adjust field names to match the schema exactly
+        "user_id": req_data.get('user_id'),    # You might need to adjust field names to match the schema exactly
         "status": "Y"  # Directly setting status to "Y"
     }
     
@@ -71,7 +71,7 @@ def accept_invitation():
 
 # Sample Input for /rsvp/decline:
 # {
-#     "userID": 123,
+#     "user_id": 123,
 #     "token": "event123"
 # }
 # Sample Output for /rsvp/decline:
@@ -98,7 +98,7 @@ def decline_invitation():
     req_data = request.get_json()
     update_payload = {
         "event_id": req_data.get('eventID'),  # Ensure these match the FastAPI schema
-        "user_id": req_data.get('userID'),    # Adjust if necessary to match the schema
+        "user_id": req_data.get('user_id'),    # Adjust if necessary to match the schema
         "status": "N"  # Setting status to "N" for decline
     }
     try:
@@ -161,7 +161,7 @@ def check_and_trigger_optimization(data):
 #     {
 #       "scheduleID": 1,
 #       "eventID": 1,
-#       "userID": 123,
+#       "user_id": 123,
 #       "start_time": "2023-12-01T09:00:00",
 #       "end_time": "2023-12-01T10:00:00",
 #       "token": "event123"
@@ -184,7 +184,7 @@ def get_all_schedules():
 # Input
 # {
 #   "token": "event123",
-#   "userID": 123,
+#   "user_id": 123,
 #   "scheduleID": 1
 # }
 # Output    

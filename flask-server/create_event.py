@@ -55,13 +55,13 @@ Sample event JSON output:
         "township": "Marina Bay",
         "invitees": [
             {
-            'userID': 1
+            'user_id': 1
             'username': "user2",
             'email': "user2@email.com",
             'telegramtag': "@user2"
             },
             {
-                'userID': 2
+                'user_id': 2
                 'username': "user3",
                 'email': "user3@email.com",
                 'telegramtag': "@user3"

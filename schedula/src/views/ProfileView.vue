@@ -131,7 +131,7 @@ export default {
     data() {
         return {
             user: {
-                userID: localStorage.getItem('userID'),
+                user_id: localStorage.getItem('user_id'),
                 name: '',
                 password: '',
                 tele: '',
@@ -147,9 +147,9 @@ export default {
     components: { Separator, Label },
     methods: {
         loadUserData() {
-            console.log(this.user.userID)
+            console.log(this.user.user_id)
             axios
-                .get(`http://127.0.0.1:5000/user/${this.user.userID}`)
+                .get(`http://127.0.0.1:5000/user/${this.user.user_id}`)
                 .then((response) => {
                     this.user.name = response.data.username
                     this.user.tele = response.data.telegramtag
@@ -160,7 +160,7 @@ export default {
         saveSettings() {
             // Logic to save user settings
             axios
-                .put(`http://127.0.0.1:5000/user/${this.user.userID}`, {
+                .put(`http://127.0.0.1:5000/user/${this.user.user_id}`, {
                     username: this.user.name,
                     telegramtag: this.user.tele,
                     email: this.user.email
@@ -187,7 +187,7 @@ export default {
 
             // Send a request to the microservice to update the password
             axios
-                .put(`http://127.0.0.1:5000/user/${this.user.userID}/password`, {
+                .put(`http://127.0.0.1:5000/user/${this.user.user_id}/password`, {
                     oldPassword: this.user.password,
                     newPassword: this.user.newPwd
                 })
@@ -200,7 +200,7 @@ export default {
                 })
         },
         logout() {
-            localStorage.removeItem('userID')
+            localStorage.removeItem('user_id')
             router.push({ name: 'SignInSignUp' })
         }
     }

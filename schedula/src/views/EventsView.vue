@@ -16,7 +16,7 @@ import { ref, onMounted } from 'vue'
 
 const router = useRouter()
 const route = useRoute()
-const userID = localStorage.getItem('userID')
+const user_id = localStorage.getItem('user_id')
 
 const events = ref(null)
 

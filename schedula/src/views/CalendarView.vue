@@ -23,7 +23,7 @@ let INITIAL_EVENTS = [
 ]
 
 export default {
-    userID: localStorage.getItem('userID'),
+    user_id: localStorage.getItem('user_id'),
     components: {
         FullCalendar, // make the <FullCalendar> tag available
         VueDatePicker,

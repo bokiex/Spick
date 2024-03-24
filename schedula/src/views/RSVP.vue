@@ -10,7 +10,7 @@ export default{
     components:{VueCal},
     data() {
         return {
-            userID:"",
+            user_id:"",
             eventToken:"",
             currentStep: 1,
             steps: [
@@ -21,11 +21,11 @@ export default{
         }    
     },
     created(){
-        this.userID = this.$route.params.userID;
+        this.user_id = this.$route.params.user_id;
         this.eventToken = this.$route.params.eventToken;
-        axios.get(`localhost/entercode.json?userID=${this.userID}&eventToken=${this.eventToken}`)
+        axios.get(`localhost/entercode.json?user_id=${this.user_id}&eventToken=${this.eventToken}`)
         .then (response=>{
-            console.log(this.userID)
+            console.log(this.user_id)
             console.log(this.eventToken)
         })
     },
@@ -47,7 +47,7 @@ export default{
           var url = "http://localhost:5100/rsvp/accept"
           var events = this.getEvents()
           var data = {
-            "userID": this.userID,
+            "user_id": this.user_id,
             "token": this.eventToken,
             "eventID": eventID,
             "sched_list": events
@@ -69,7 +69,7 @@ export default{
               var event = {
               scheduleID : this.index,
               eventID : this.eventID,
-              userID : this.userID,
+              user_id : this.user_id,
               start_time : timeslot.start.format('YYYY-MM-DD').concat("T", timeslot.start.formatTime('HH:mm:00')),
               end_time : timeslot.end.format('YYYY-MM-DD').concat("T", timeslot.end.formatTime('HH:mm:00'))}
               result.push(event)

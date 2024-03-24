@@ -46,7 +46,7 @@ export default {
                 time_out: ''
             },
             selected_friend: '',
-            user_id: localStorage.getItem('userID')
+            user_id: localStorage.getItem('user_id')
         }
     },
     methods: {

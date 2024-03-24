@@ -10,7 +10,7 @@ def find_overlapping_times(schedules):
     for schedule in schedules:
         start = datetime.strptime(schedule['start_time'], "%Y-%m-%dT%H:%M:%S")
         end = datetime.strptime(schedule['end_time'], "%Y-%m-%dT%H:%M:%S")
-        schedules_by_day[start.date()].append((start, end, schedule['userID']))
+        schedules_by_day[start.date()].append((start, end, schedule['user_id']))
     
     optimized_schedules = {}
 

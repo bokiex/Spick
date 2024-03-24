@@ -8,7 +8,7 @@ USE `user`;
 -- ---------------------------------------------------------------- --
 DROP TABLE IF EXISTS `user`;
 CREATE TABLE IF NOT EXISTS `user` (
-  `userID` INT AUTO_INCREMENT PRIMARY KEY,
+  `user_id` INT AUTO_INCREMENT PRIMARY KEY,
   `username` VARCHAR(64) UNIQUE NOT NULL,
   `email` VARCHAR(120) UNIQUE NOT NULL,
   `password_hash` VARCHAR(128),
