@@ -17,5 +17,6 @@ class UserResponse(BaseModel):
     username: str
     email: str
     password_hash: str
+    telegram_id : str | None = None
     telegram_tag: str | None = None
     image: str | None = None

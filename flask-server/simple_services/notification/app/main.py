@@ -18,36 +18,41 @@ bot = AsyncTeleBot(bot_token)
 async def create_user(message):
     telegram_id = message.chat.id
     telegram_tag = message.chat.username
-    try:
-        result = update_user_by_telegram_tag(telegram_id, telegram_tag)
-        data = result.json()
-        await bot.send_message(telegram_id, data['message'])
-    except Exception as e:        
-        await bot.send_message(telegram_id, "An error occurred adding the user. Please try again later.")
+
+    result = update_user_by_telegram_tag(telegram_id, telegram_tag)
+    await bot.send_message(telegram_id, result['message'])
+    
     
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-# Echo functionality
+    task = asyncio.create_task(bot.polling())
+    print("Bot started.")
 
-    asyncio.run(bot.polling())
     yield
-    asyncio.run(bot.stop_polling()) 
+
+    print("Stopping bot...")
+    task.cancel()
 
 app = FastAPI(lifespan=lifespan)
 
 # Update user by telegram tag
 def update_user_by_telegram_tag(telegram_id: str, telegram_tag: str):
-    user = requests.get(user_ms + telegram_tag)
-    print(user)
+    user = requests.get(user_ms + "telegram/" + telegram_tag)
     if int(user.status_code) > 300:
+        
 		#channel.basic_publish(exchange=exchangename, routing_key="update.error", body=json.dumps({"telegram_id": telegram_id, "telegram_tag": telegram_tag}))
+        
+        if int(user.status_code) == 500:
+            return {"message": "User microservice is down. Please try again later."}
         return {"message": "User not found. Have you created an account yet?"}
+    
     user = user.json()
-    user["telegram_id"] = telegram_id
-	
-    result = requests.put(user_ms + telegram_tag, json=user)
+    user["telegram_id"] = str(telegram_id)
+    result = requests.put(user_ms, json=user)
+    
     if int(result.status_code) > 300:
-        raise Exception()
+        #channel.basic_publish(exchange=exchangename, routing_key="update.error", body=json.dumps({"telegram_id": telegram_id, "telegram_tag": telegram_tag}))
+        return {"message": "An error occurred updating the user."}
     return {"message": "Your account is now tied to your telegram tag.", "user": result.json()}
 
 @app.post("/notification")

@@ -18,14 +18,13 @@ exchangetype = "topic"
 
 # Initialize FastAPI app
 app = FastAPI()
-user_ms = environ.get("USER_URL") or "http://localhost:8000/users/"
+user_ms = environ.get("USER_URL") or "http://localhost:3000/users/"
 
 """
 {
   "username": "string",
   "email": "string",
   "password": "string",
-  "password_hash": "string",
   "telegram_id": "string",
   "telegram_tag": "string"
 }
