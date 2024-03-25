@@ -66,6 +66,17 @@ async def read_user_schedules(event_id: int, db: Session = Depends(get_db)):
     return schedules
 
 
+#Input
+# {
+#       "schedule_id": 4,
+#       "event_id": 1,
+#       "user_id": 101
+# }   
+"""
+{
+    "message": "Schedule deleted successfully."
+}
+"""
 @app.delete("/user_schedule/", response_model=schemas.ScheduleDeleteResponse)
 def delete_schedule(delete_request: models.ScheduleDelete, db: Session = Depends(get_db)):
     result = crud.delete_user_schedule(
