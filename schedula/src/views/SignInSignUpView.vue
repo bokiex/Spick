@@ -15,7 +15,7 @@ export default {
     methods: {
         async signUp(){
             try{
-                const response = await axios.post('http://127.0.0.1:5000/signup', {
+                const response = await axios.post('http://127.0.0.1:8000/signup', {
                     username : this.username,
                     email: this.email,
                     telegram_tag: this.telegramHandle,
@@ -34,7 +34,7 @@ export default {
         },
         async signIn(){
             try{
-                const response = await axios.post('http://127.0.0.1:5000/login',{
+                const response = await axios.post('http://127.0.0.1:8000/login',{
                     username: this.username,
                     password: this.password,
                 });
