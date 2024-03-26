@@ -9,6 +9,7 @@ from sqlalchemy.orm import Session
 from os import environ
 from contextlib import asynccontextmanager
 from werkzeug.security import generate_password_hash, check_password_hash
+from fastapi.middleware.cors import CORSMiddleware
 
 connection = None
 channel = None
@@ -18,8 +19,22 @@ exchangetype = "topic"
 
 # Initialize FastAPI app
 app = FastAPI()
-user_ms = environ.get("USER_URL") or "http://localhost:3000/users/"
+origins = [
+    "http://localhost:5173",
+    "https://localhost.tiangolo.com",
+    "http://localhost",
+    "http://localhost:8080",
+]
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+user_ms = environ.get("USER_URL") or "http://localhost:3000/users/"
 """
 {
   "username": "string",
