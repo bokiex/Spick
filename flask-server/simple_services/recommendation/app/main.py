@@ -320,7 +320,7 @@ def processSearch(search):
     data = {"textQuery" : searchstr, "maxResultCount": 3}
     json_data = json.dumps(data)
     headers = {'Content-Type':'application/json', 'X-Goog-Api-Key':api_key, 
-            'X-Goog-FieldMask': 'places.displayName,places.formattedAddress,places.priceLevel,places.photos'}
+            'X-Goog-FieldMask': 'places.displayName,places.formattedAddress,places.priceLevel'}
     print('\n-----calling places API-----')
     reply = rq.post(url, data = json_data, headers=headers)
     response = reply.json()
@@ -351,13 +351,15 @@ def get_recommendation( search: schemas.Search):
         print("\nReceived search results in JSON:", result)
         # 2. Save the result to the database
         result = jsonable_encoder(result)
+        
         res = []
      
         for i in result['places']:
+      
             recommendation_name = i['displayName']['text']
             recommendation_address = i['formattedAddress']
-            recommendation_photo = i['photos'][1]
-            processImage(recommendation_photo['name'])
+         
+           
             recommendation = {
                 "recommendation_name": recommendation_name,
                 "recommendation_address": recommendation_address
@@ -366,7 +368,7 @@ def get_recommendation( search: schemas.Search):
             res.append(recommendation)
         return res
     except:
-      
+        
         raise HTTPException(status_code=404, detail="No recommendation found.")
     
 

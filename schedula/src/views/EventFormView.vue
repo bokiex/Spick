@@ -113,15 +113,10 @@ function prevStep() {
 }
 
 function previewFile(event) {
-    const file = image.value
-    console.log(event.target.files[0])
-    const reader = new FileReader()
-    reader.onloadend = () => {
-        selected.value = reader.result
-    }
-    if (file) {
-        reader.readAsDataURL(file)
-    }
+    const file = event.target.files[0]
+    
+    image.value = file
+    console.log(image.value)
 }
 
 async function submitForm() {
@@ -133,6 +128,7 @@ async function submitForm() {
             user_id: 1,
             event_name: event_name.value,
             event_desc: event_desc.value,
+            image: image.value.name,
             invitees: invitees.value,
             type: type.value,
             township: township.value,
@@ -140,35 +136,17 @@ async function submitForm() {
             datetime_end: datetime_end.value,
             time_out: time_out.value
         }
-        console.log(create_event)
+        console.log(JSON.stringify(create_event))
+        
+        const formData = new FormData();
+        formData.append("event", JSON.stringify(create_event)); // eventData is your form's data as a JS object
+        formData.append("file", image.value);
+        
 
         try {
             const res = await fetch(event_ms, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    user_id: 1,
-                    event_name: 'sdf',
-                    event_desc: 'sdf',
-                    invitees: [
-                        {
-                            user_id: 3,
-                            username: 'sdf',
-                            email: 'sdfds',
-                            password_hash: 'string',
-                            telegram_id: null,
-                            telegram_tag: 'string',
-                            image: null
-                        }
-                    ],
-                    type: 'celebrations',
-                    township: 'bedok',
-                    datetime_start: '2024-03-20T05:27:00.000Z',
-                    datetime_end: '2024-03-28T05:28:00.000Z',
-                    time_out: '2024-03-29T05:28:00.000Z'
-                })
+                body: formData
             })
 
             if (!res.ok) {

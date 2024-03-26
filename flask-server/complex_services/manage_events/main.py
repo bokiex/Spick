@@ -5,7 +5,7 @@ import amqp_connection
 import pika
 import json
 import apscheduler
-from fastapi import FastAPI, Depends
+from fastapi import FastAPI, Depends , File, UploadFile, Form
 from datetime import datetime
 from fastapi.responses import JSONResponse , PlainTextResponse
 from os import environ
@@ -15,7 +15,9 @@ from fastapi.encoders import jsonable_encoder
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.jobstores.sqlalchemy import SQLAlchemyJobStore
 from fastapi.middleware.cors import CORSMiddleware
-
+from typing import Optional
+from pyfa_converter import FormDepends
+import httpx
 
 event_ms = environ.get('EVENT_URL') or "http://localhost:3800/event"
 notification_ms = environ.get("NOTIFICATION_URL") or "http://localhost:5005/notification"
@@ -116,29 +118,51 @@ Sample event JSON output:
 """
 
 
+    
+
+
 @app.post("/create_event")
-def create_event(event: schemas.Recommend):
-
-    event_dict = event.dict()
-    print(event_dict)
-
+async def create_event(event: str = Form(...), file: Optional[UploadFile] = File(default=None)):
+    print(event)
+    print(file)
+    event_data = json.loads(event)
+    event = schemas.Recommend(**event_data)
+    
     # Get recommendation from recommendation microservice
     print("----- Getting recommendation list -----")
     #recommendation_result = requests.post(recommendation_ms, json=jsonable_encoder({"type": event_dict["type"], "township": event_dict["township"]}))
 
-    message = [
-        {"recommendation_name": "Jurong Lake Gardens", "recommendation_address": "Yuan Ching Rd, Singapore"}, {"recommendation_name": "Pandan Reservoir Park", "recommendation_address": "700 W Coast Rd, Singapore 608785"}, {"recommendation_name": "The Oval, Jurong Lake Gardens West", "recommendation_address": "Singapore"}, {"recommendation_name": "Jurong Central Park", "recommendation_address": "Junction off Jalan Boon Lay & Boon Lay Way, Singapore 609961"}, {"recommendation_name": "Taman Jurong Greens", "recommendation_address": "Singapore"}, {"recommendation_name": "Lakeside Garden", "recommendation_address": "106 Yuan Ching Rd, Singapore"}, {"recommendation_name": "Teban Neighbourhood Park", "recommendation_address": "Teban Gardens Rd, Singapore"}, {"recommendation_name": "Jurong Eco-Garden", "recommendation_address": "Cleantech Loop, Singapore"}, {"recommendation_name": "Toh Guan Park", "recommendation_address": "285D Toh Guan Rd, Block 285D, Singapore 604285"}, {"recommendation_name": "West Coast Park", "recommendation_address": "W Coast Ferry Rd, Singapore 126978"}, {"recommendation_name": "Jalan Bahar Park", "recommendation_address": "Jurong West St. 24, Singapore"}, {"recommendation_name": "Neram Streams", "recommendation_address": "8 Yuan Ching Rd, Singapore 618658"}, {"recommendation_name": "Butterfly Maze", "recommendation_address": "Yuan Ching Rd, Singapore"}, {"recommendation_name": "Rasau Walk", "recommendation_address": "9 Japanese Garden Rd, Singapore 619228"}, {"recommendation_name": "Jurong Hill Park", "recommendation_address": "60 Jurong Hill, Singapore 628926"}, {"recommendation_name": "Taman Jurong Park", "recommendation_address": "Yung Ho Rd, Singapore 610153"}, {"recommendation_name": "Waringin Hut", "recommendation_address": "177 Hindhede Drive, Singapore 589333"}, {"recommendation_name": "Jurong Play Grounds", "recommendation_address": "JPG, 2 Jurong Gateway Rd, Singapore 608512"}, {"recommendation_name": "Japanese Garden", "recommendation_address": "1 Chinese Garden Rd, Singapore 619795"}, {"recommendation_name": "Chinese Garden Main Entrance", "recommendation_address": "Blk 151 Boon Lay Wy, Singapore 609959"}] #json.dumps(recommendation_result.json())
-    #if recommendation_result.status_code not in range(200,300):
-
-#        channel.basic_publish(exchange=exchangename, routing_key="create_event.error",body=message, properties=pika.BasicProperties(delivery_mode=2))
-     
- #       return recommendation_result.json()
+    recommendation_result = requests.post(recommendation_ms, json=jsonable_encoder({"type": event.type, "township": event.township}))
     
-    # Create event through event microservice  
-    event_dict["recommendation"] = message[0:3]
-    print("----- Creating event -----")
-    event_result = requests.post(event_ms, json=jsonable_encoder(event_dict))
+    message = json.dumps(recommendation_result.json())
+    if recommendation_result.status_code == 404:
+        return JSONResponse(status_code=404, content={"error": "No recommendations found"})
+    if recommendation_result.status_code not in range(200,300):
 
+        channel.basic_publish(exchange=exchangename, routing_key="create_event.error",body=message, properties=pika.BasicProperties(delivery_mode=2))
+      
+        return JSONResponse(status_code=500, content={"error": "recommendation service not available"})
+
+    # Create event through event microservice
+   
+  
+    event_dict = jsonable_encoder(event)
+  
+    event_dict["recommendation"] = recommendation_result.json()
+    event_dict["image"] = file.filename
+    print(event_dict)
+    
+  
+    async with httpx.AsyncClient() as client:
+        # Create the form data
+        files = {
+            # Assuming the FastAPI endpoint expects the file under the key "files"
+            "files": (file.filename, file.file, file.content_type),
+        }
+        event_result = await client.post(event_ms, data={"event": json.dumps(event_dict)}, files=files)
+     
+
+    
     if event_result.status_code not in range(200,300):
         channel.basic_publish(exchange=exchangename, routing_key="create_event.error",body=json.dumps(event_result.json()), properties=pika.BasicProperties(delivery_mode=2))
         return event_result

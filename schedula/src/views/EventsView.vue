@@ -28,6 +28,15 @@ onMounted(async () => {
 const navigate = (id) => {
     router.push({ path: `/events/${id}` })
 }
+
+function getImageUrl(event) {
+    if (event && event.image) {
+        console.log(event.image)
+        return `https://spickbucket.s3.ap-southeast-1.amazonaws.com/${event.image}`
+    }
+    // Return a default image URL or an empty string if event or event.image is not available
+    return 'path/to/default/image.jpg'
+}
 </script>
 
 <template>
@@ -47,7 +56,7 @@ const navigate = (id) => {
             @click="navigate(event?.event_id)"
         >
             <div class="space-y-2">
-                <img :src="event?.image[0]?.image_path" alt="" />
+                <img :src="getImageUrl(event)" alt="" />
                 <div class="flex flex-col gap-y-1.5">
                     <h1>{{ event?.event_name }}</h1>
                 </div>
