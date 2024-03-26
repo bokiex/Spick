@@ -65,7 +65,6 @@ async def get_user_by_telegram_tag(telegram_tag: str, db: Session = Depends(get_
 # Update user
 @app.put("/users")
 async def update_user(user: schemas.User, db: Session = Depends(get_db)):
-    print(user)
     result = crud.update_user(db, user)
     if result is None:
         raise HTTPException(status_code=404, detail="User not found.")
