@@ -9,26 +9,32 @@ export default {
             email: '',
             telegramHandle:'',
             password: '',
+            showModal: false, // For controlling the visibility of the custom alert
         };
     },
     methods: {
         async signUp(){
             try{
-                const response = await axios.post('http://127.0.0.1:5000/signup', {
+                const response = await axios.post('http://127.0.0.1:8000/signup', {
                     username : this.username,
                     email: this.email,
                     telegram_tag: this.telegramHandle,
                     password: this.password,
                 });
                 console.log(response.data);
-                this.signInClick(); //redirect to login page after successful registration
+                // this.signInClick(); //redirect to login page after successful registration
+                this.showModal = true;
             }catch(error){
                 console.log(error.response.data);
             }
         },
+        closeAndRedirect(){
+            this.showModal = false; // Close the custom alert
+            this.signInClick(); //redirect to login page after successful registration
+        },
         async signIn(){
             try{
-                const response = await axios.post('http://127.0.0.1:5000/login',{
+                const response = await axios.post('http://127.0.0.1:8000/login',{
                     username: this.username,
                     password: this.password,
                 });
@@ -85,10 +91,10 @@ export default {
                         <i class="fas fa-lock"></i>
                         <input v-model="password" type="password" placeholder="Password" />
                     </div>
-                    <div class="checkbox-container">
+                    <!-- <div class="checkbox-container">
                         <input type="checkbox" id="spick-bot-check">
                         <label for="spick-bot-check">Please tick me after sending a 'HI' to our friendly <a href="#" class="spick-bot-link">Spick Bot</a> before signing up!!</label>
-                    </div>
+                    </div> -->
                     <input type="submit" class="btn" value="Sign up" />
                 </form>
             </div>
@@ -118,6 +124,17 @@ export default {
                     </button>
                 </div>
                 <img src="../../public/register.svg" class="image" alt="" />
+            </div>
+        </div>
+        <div v-if="showModal" class="custom-modal">
+            <div>
+                <p style="font-weight: bolder; padding-bottom: 1.8rem">Sign Up Successful!</p>
+                <p>
+                    Say "Hi" to our friendly Spick Telegram Bot by
+                    <a class="spick-bot-link" href="https://t.me/eventmanager145723_bot" target="spickbot">Clicking HERE</a> 
+                    or tele @eventmanager145723_bot now before Logging In!
+                </p>
+                <button class="btn" @click="closeAndRedirect">Completed</button>
             </div>
         </div>
     </div>
@@ -561,4 +578,26 @@ form.sign-in-form {
         left: 50%;
     }
 }
+
+.custom-modal {
+    /* Add your styles for the modal here */
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: lightblue;
+    padding: 20px;
+    border-radius: 20px;
+    height: 20%;
+    width: 45%;
+    z-index: 1000; /* Ensure it appears above other content */
+    display: flex;
+    align-items: center;
+    text-align: center;
+}
+
+.custom-modal p{
+    font-size: 1.3rem;
+}
+
 </style>
