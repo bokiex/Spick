@@ -7,7 +7,7 @@ import json
 import apscheduler
 from fastapi import FastAPI, Depends
 from datetime import datetime
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse , PlainTextResponse
 from os import environ
 from contextlib import asynccontextmanager
 from sqlalchemy.orm import Session
@@ -19,7 +19,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 event_ms = environ.get('EVENT_URL') or "http://localhost:3800/event"
 notification_ms = environ.get("NOTIFICATION_URL") or "http://localhost:5005/notification"
-recommendation_ms = environ.get('RECOMMENDATION_URL') or "http://localhost:3700/recommendation"
+recommendation_ms = environ.get('RECOMMENDATION_URL') or "http://localhost:3500/recommendation"
 
 connection = None
 channel = None
@@ -115,10 +115,12 @@ Sample event JSON output:
 }
 """
 
+
 @app.post("/create_event")
 def create_event(event: schemas.Recommend):
 
     event_dict = event.dict()
+    print(event_dict)
 
     # Get recommendation from recommendation microservice
     print("----- Getting recommendation list -----")

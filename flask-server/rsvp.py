@@ -169,7 +169,7 @@ def check_and_trigger_optimization(data):
 #     ...
 #   ]
 # }                        
-@app.route("/rsvp/user_schedules", methods=['GET'])
+@app.route("/rsvp/user_schedules", methods=['GET'])   #i think dont need check with john
 def get_all_schedules():
     # The token is now expected to be a query parameter in the request URL
     token = request.args.get('eventID')

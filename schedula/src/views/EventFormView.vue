@@ -105,11 +105,11 @@ const { value: time_out } = useField('time_out')
 const { value: township } = useField('township')
 
 const nextStep = async () => {
-    currentStep.value += 33
+    currentStep.value += 50
     console.log(currentStep)
 }
 function prevStep() {
-    currentStep.value -= 33
+    currentStep.value -= 50
 }
 
 function previewFile(event) {
@@ -126,8 +126,8 @@ function previewFile(event) {
 
 async function submitForm() {
     // Make sure all steps are validated before submitting
-    currentStep.value += 33
-    if (currentStep.value === 99) {
+
+    if (currentStep.value === 100) {
         // Send the form data to your backend
         const create_event = {
             user_id: 1,
@@ -148,15 +148,36 @@ async function submitForm() {
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify(create_event)
+                body: JSON.stringify({
+                    user_id: 1,
+                    event_name: 'sdf',
+                    event_desc: 'sdf',
+                    invitees: [
+                        {
+                            user_id: 3,
+                            username: 'sdf',
+                            email: 'sdfds',
+                            password_hash: 'string',
+                            telegram_id: null,
+                            telegram_tag: 'string',
+                            image: null
+                        }
+                    ],
+                    type: 'celebrations',
+                    township: 'bedok',
+                    datetime_start: '2024-03-20T05:27:00.000Z',
+                    datetime_end: '2024-03-28T05:28:00.000Z',
+                    time_out: '2024-03-29T05:28:00.000Z'
+                })
             })
 
             if (!res.ok) {
-                throw new Error(`HTTP error! status: ${res.status}`)
-            }
+                const data = await res.json()
 
-            const data = await res.json()
+                throw new Error(data.error)
+            }
         } catch (error) {
+            console.log(error)
             console.error('Error fetching data: ', error)
         }
     }
@@ -250,7 +271,7 @@ async function submitForm() {
 
                 <!-- Step 1 end -->
                 <!-- Step 2 start -->
-                <div v-if="currentStep === 33" class="h-full">
+                <div v-if="currentStep === 50" class="h-full">
                     <div class="space-y-6">
                         <div>
                             <h3 class="text-lg font-medium">Pick the type of event.</h3>
