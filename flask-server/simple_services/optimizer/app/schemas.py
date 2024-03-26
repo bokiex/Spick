@@ -9,18 +9,15 @@ class ScheduleItem(BaseModel):
     end_time: datetime
     schedule_id: int
 
-class ScheduleList(BaseModel):
-    sched_list: List[ScheduleItem]
-
 class CommonSlot(BaseModel):
     start: datetime
-    end: Optional[datetime] = None
+    end: datetime
 
 class OptimizedScheduleDay(BaseModel):
     date: str
     common_slot: CommonSlot
-    attending_users: List[int]  # Adjusted to reflect the user_id type
-    non_attending_users: List[int]  # Adjusted to reflect the user_id type
+    attending_users: List[int]
+    non_attending_users: List[int]
 
 class OptimizedSchedules(BaseModel):
     schedules: List[OptimizedScheduleDay]

@@ -12,5 +12,6 @@ CREATE TABLE IF NOT EXISTS `user_schedule` (
   `event_id` INT NOT NULL,
   `user_id` INT NOT NULL,
   `start_time` DATETIME NOT NULL,
-  `end_time` DATETIME NOT NULL
+  `end_time` DATETIME NOT NULL,
+  PRIMARY KEY (`event_id`,`user_id`,`start_time`,`end_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
