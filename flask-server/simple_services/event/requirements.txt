@@ -1,0 +1,2 @@
+pydantic==1.10.4
+pyfa_converter==1.0.5.0
