@@ -4,10 +4,11 @@ from typing import List
 
 
 class User(BaseModel):
+    user_id: int | None = None
     username: str
     email: str
-    password: str
-    password_hash: str
+    password: str | None = None
+    password_hash: str | None = None
     telegram_id : str | None = None
     telegram_tag: str | None = None
     image: str | None = None

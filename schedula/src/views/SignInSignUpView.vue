@@ -127,13 +127,15 @@ export default {
             </div>
         </div>
         <div v-if="showModal" class="custom-modal">
-            <p style="font-weight: bolder;">Sign Up Successful!</p>
-            <p>
-                Say "Hi" to our friendly Spick Telegram Bot by
-                <a class="spick-bot-link" href="https://t.me/eventmanager145723_bot" target="spickbot">Clicking HERE</a> 
-                or tele @eventmanager145723_bot now before Logging In!
-            </p>
-            <button class="btn" @click="closeAndRedirect">Completed</button>
+            <div>
+                <p style="font-weight: bolder; padding-bottom: 1.8rem">Sign Up Successful!</p>
+                <p>
+                    Say "Hi" to our friendly Spick Telegram Bot by
+                    <a class="spick-bot-link" href="https://t.me/eventmanager145723_bot" target="spickbot">Clicking HERE</a> 
+                    or tele @eventmanager145723_bot now before Logging In!
+                </p>
+                <button class="btn" @click="closeAndRedirect">Completed</button>
+            </div>
         </div>
     </div>
 </template>
@@ -586,13 +588,12 @@ form.sign-in-form {
     background-color: lightblue;
     padding: 20px;
     border-radius: 20px;
-    height: 25%;
+    height: 20%;
     width: 45%;
     z-index: 1000; /* Ensure it appears above other content */
     display: flex;
-    flex-direction: column;
     align-items: center;
-    text-align: center
+    text-align: center;
 }
 
 .custom-modal p{

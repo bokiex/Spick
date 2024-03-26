@@ -41,7 +41,7 @@ Output
 """
 # main.py adjustment for create_schedules endpoint
 @app.post("/user_schedule/", response_model=schemas.UserScheduleList)
-async def create_schedules(schedule_list: schemas.UserScheduleList, db: Session = Depends(get_db)):
+def create_schedules(schedule_list: schemas.UserScheduleList, db: Session = Depends(get_db)):
     return crud.create_user_schedules(db=db, schedule_list=schedule_list)
 
 #input
@@ -59,7 +59,7 @@ Output
 ]
 """
 @app.get("/user_schedule/{event_id}", response_model=List[schemas.UserScheduleInDB])
-async def read_user_schedules(event_id: int, db: Session = Depends(get_db)):
+def read_user_schedules(event_id: int, db: Session = Depends(get_db)):
     schedules = crud.get_user_schedules(db, event_id=event_id)
     if not schedules:
         raise HTTPException(status_code=404, detail="Schedules not found")
