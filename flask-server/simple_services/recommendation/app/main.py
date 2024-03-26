@@ -26,7 +26,7 @@ async def exception_handler(request, exc):
     )
 
 
-api_key = "AIzaSyBVwaHGbGTnc-cQHpIM6qqMbGIb7C-xKVA"
+api_key = "AIzaSyCviJPB1AYuNDE3k51tPnoLsnU39QJDOaY"
 
 """
 format of input
@@ -317,10 +317,10 @@ def processSearch(search):
     search = jsonable_encoder(search)
     searchstr = search["type"] + "near" + search["township"]
 
-    data = {"textQuery" : searchstr}
+    data = {"textQuery" : searchstr, "maxResultCount": 3}
     json_data = json.dumps(data)
     headers = {'Content-Type':'application/json', 'X-Goog-Api-Key':api_key, 
-            'X-Goog-FieldMask': 'places.displayName,places.formattedAddress,places.priceLevel'}
+            'X-Goog-FieldMask': 'places.displayName,places.formattedAddress,places.priceLevel,places.photos'}
     print('\n-----calling places API-----')
     reply = rq.post(url, data = json_data, headers=headers)
     response = reply.json()
@@ -328,6 +328,15 @@ def processSearch(search):
     print('search_result:', response)
     return response
 
+def processImage(resource_name):
+    url = "https://places.googleapis.com/v1/" + resource_name + "/media?maxHeightPx=400&maxWidthPx=400?key=" + api_key
+    print(url)
+    print(
+        '\n-----calling places photos-----'
+    )
+    res = rq.get(url)
+    print("\nReceived photos result:", res.json())
+   
 # Get recommendations from Places API
 @app.post("/recommendation", response_model=list[schemas.Recommendation])
 def get_recommendation( search: schemas.Search):
@@ -343,10 +352,12 @@ def get_recommendation( search: schemas.Search):
         # 2. Save the result to the database
         result = jsonable_encoder(result)
         res = []
-        print(result)
+     
         for i in result['places']:
             recommendation_name = i['displayName']['text']
             recommendation_address = i['formattedAddress']
+            recommendation_photo = i['photos'][1]
+            processImage(recommendation_photo['name'])
             recommendation = {
                 "recommendation_name": recommendation_name,
                 "recommendation_address": recommendation_address

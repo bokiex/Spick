@@ -11,7 +11,7 @@ async def optimize_schedule(schedule_list: List[ScheduleItem]):
     return OptimizedSchedules(schedules=optimized_schedule_days)
 
 
-#Input
+# Input
 # [
 #     {
 #         "event_id": 1,

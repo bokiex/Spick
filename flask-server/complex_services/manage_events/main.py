@@ -7,7 +7,7 @@ import json
 import apscheduler
 from fastapi import FastAPI, Depends
 from datetime import datetime
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse , PlainTextResponse
 from os import environ
 from contextlib import asynccontextmanager
 from sqlalchemy.orm import Session
@@ -19,7 +19,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 event_ms = environ.get('EVENT_URL') or "http://localhost:3800/event"
 notification_ms = environ.get("NOTIFICATION_URL") or "http://localhost:5005/notification"
-recommendation_ms = environ.get('RECOMMENDATION_URL') or "http://localhost:3700/recommendation"
+recommendation_ms = environ.get('RECOMMENDATION_URL') or "http://localhost:3500/recommendation"
 
 connection = None
 channel = None
@@ -114,27 +114,30 @@ Sample event JSON output:
 }
 """
 
+
 @app.post("/create_event")
 def create_event(event: schemas.Recommend):
 
     event_dict = event.dict()
+    print(event_dict)
 
     # Get recommendation from recommendation microservice
 
     recommendation_result = requests.post(recommendation_ms, json=jsonable_encoder({"type": event_dict["type"], "township": event_dict["township"]}))
     
-    print(recommendation_result.json())
     message = json.dumps(recommendation_result.json())
+    if recommendation_result.status_code == 404:
+        return JSONResponse(status_code=404, content={"error": "No recommendations found"})
     if recommendation_result.status_code not in range(200,300):
 
         channel.basic_publish(exchange=exchangename, routing_key="create_event.error",body=message, properties=pika.BasicProperties(delivery_mode=2))
-     
-        return recommendation_result.json()
+      
+        return JSONResponse(status_code=500, content={"error": "recommendation service not available"})
 
     # Create event through event microservice
    
     event_dict["recommendation"] = recommendation_result.json()[0:3]
-  
+
     event_result = requests.post(event_ms, json=jsonable_encoder(event_dict))
 
     if event_result.status_code not in range(200,300):
@@ -142,7 +145,8 @@ def create_event(event: schemas.Recommend):
         return event_result
     
     # Send notification to users
-    channel.basic_publish(exchange=exchangename, routing_key="create_event.notification",body=event_result.json(), properties=pika.BasicProperties(delivery_mode=2))
+    notification_message =   json.dumps(event_result.json())
+    channel.basic_publish(exchange=exchangename, routing_key="create_event.notification",body=notification_message, properties=pika.BasicProperties(delivery_mode=2))
     
     # # Start scheduler for event time out
     scheduler.add_job(on_timeout, 'date', run_date=event_result.json()["data"]["time_out"], args=[event_result.json()["data"]["event_id"]])
