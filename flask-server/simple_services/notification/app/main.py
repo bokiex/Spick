@@ -48,7 +48,7 @@ def update_user_by_telegram_tag(telegram_id: str, telegram_tag: str):
     
     user = user.json()
     user["telegram_id"] = str(telegram_id)
-    result = requests.put(user_ms, json=user)
+    result = requests.put(user_ms, json=jsonable_encoder(user))
     
     if int(result.status_code) > 300:
         #channel.basic_publish(exchange=exchangename, routing_key="update.error", body=json.dumps({"telegram_id": telegram_id, "telegram_tag": telegram_tag}))
