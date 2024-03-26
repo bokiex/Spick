@@ -2,6 +2,9 @@ import logging
 import sqlalchemy as db
 import requests
 import asyncio
+import json
+import pika
+import amqp_connection
 from telebot.async_telebot import AsyncTeleBot
 from os import environ
 from flask import jsonify
@@ -27,6 +30,11 @@ async def create_user(message):
 async def lifespan(app: FastAPI):
     task = asyncio.create_task(bot.polling())
     print("Bot started.")
+    print("Error microservice: Getting Connection")
+    connection = amqp_connection.create_connection()
+    print("Error microservice: Connection established successfully")
+    channel = connection.channel()
+    receiveNotification(channel)
 
     yield
 
@@ -55,10 +63,30 @@ def update_user_by_telegram_tag(telegram_id: str, telegram_tag: str):
         return {"message": "An error occurred updating the user."}
     return {"message": "Your account is now tied to your telegram tag.", "user": result.json()}
 
-@app.post("/notification")
-async def send_notification(notification: dict):
+
+def receiveNotification(channel):
     try:
-        bot.send_message(notification['telegram_id'], notification['message'])
+        channel.basic_consume(queue="Notification", on_message_callback=callback, auto_ack=True)
+        print('Notification microservice: Consuming from queue: Notification')
+        channel.start_consuming()
+        
+    except pika.exceptions.AMQPError as e:
+        print(f"Notification microservice: Failed to connect: {e}")
+        
+    except KeyboardInterrupt:
+        print("Notification microservice: Program interrupted by user.")
+
+def callback(channel, method, properties, body):
+    print("\nNotification microservice: Received a notification by " + __file__)
+    processNotification(body)
+    print()
+
+def processNotification(notification):
+    print("Notification microservice: Sending the notifications:")
+    try:
+        notification = json.loads(notification)
+        print("--JSON:", notification)
     except Exception as e:
-        raise HTTPException(status_code=500, detail="An error occurred sending the notification.")
-    return {"message": "Notification sent."}
+        print("--NOT JSON:", e)
+        print("--DATA:", notification)
+    print()

@@ -30,6 +30,29 @@ onMounted(async () => {
     }
 })
 
+const format_date = (datetime) => {
+    const date = new Date(datetime)
+    const date_options = {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+    }
+
+    return date.toLocaleDateString('en-US', date_options)
+}
+
+const format_time = (datetime) => {
+    const date = new Date(datetime)
+    const time_options = { hour: 'numeric', minute: 'numeric', hour12: true }
+
+    return date.toLocaleTimeString('en-US', time_options)
+}
+
+const reservation = () => {
+    router.push({ path: `/RSVP` })
+}
+
 // const event = {
 //     title: 'Dinner Party',
 //     image: '/event.jpg',
@@ -48,6 +71,17 @@ onMounted(async () => {
 //         // More attendees...
 //     ]
 // }
+
+function getImageUrl(event) {
+    if (event && event.image) {
+        const url = 'https://spickbucket.s3.ap-southeast-1.amazonaws.com/' + event.image
+
+        return url
+    }
+
+    // Return a default image URL or an empty string if event or event.image is not available
+    return 'path/to/default/image.jpg'
+}
 </script>
 
 <template>
@@ -57,7 +91,7 @@ onMounted(async () => {
                 <Skeleton v-if="loading" class="h-64 w-full rounded-xl" />
                 <img
                     v-else
-                    :src="event?.image[0]?.image_path"
+                    :src="getImageUrl(event)"
                     alt="Event banner"
                     class="w-full h-64 object-cover"
                 />
@@ -75,14 +109,14 @@ onMounted(async () => {
                             <Calendar class="flex-shrink-0" />
                             <Skeleton v-if="loading" class="w-24 h-6" />
                             <span v-else class="text-sm">
-                                {{ event?.event_time }}
+                                {{ format_date(event?.datetime_start) }}
                             </span>
                         </div>
                         <div class="flex gap-x-1 text-muted-foreground">
-                            <Clock class="flex-shrink-0 " />
+                            <Clock class="flex-shrink-0" />
                             <Skeleton v-if="loading" class="w-24 h-6" />
                             <span class="text-sm">
-                                {{ event?.event_time }}
+                                {{ format_time(event?.datetime_start) }}
                             </span>
                         </div>
                         <div class="flex gap-x-1 text-muted-foreground">
@@ -107,22 +141,35 @@ onMounted(async () => {
                             <div class="flex flex-col gap-y-1.5 p-4 space-y-1">
                                 <h3 class="text-lg font-semibold">RSVP now</h3>
                                 <p class="text-muted-foreground">Click to RSVP</p>
-                                <Button>Join</Button>
+                                <Button @click="reservation()">Join</Button>
                             </div>
                         </Card>
                         <Card>
                             <div class="flex flex-col gap-y-1.5 p-4 space-y-1">
                                 <h3 class="text-lg font-semibold">Organizer</h3>
-                                <p>{{ event?.organizer.name }}</p>
-                                <p>{{ event?.organizer.contact }}</p>
+                                <p>{{ event?.user_id }}</p>
+                                <p>{{ event?.user_id }}</p>
                             </div>
                         </Card>
 
                         <Card>
                             <div class="flex flex-col gap-y-1.5 p-4 space-y-1">
                                 <h3 class="text-lg font-semibold">Attendees</h3>
-                                <div class="flex space-x-2 overflow-hidden">
-                                    <Avatar v-for="attendee in event?.invitees"> </Avatar>
+                                <div class="flex overflow-hidden gap-x-3">
+                                    <div
+                                        class=" flex flex-col items-center justify-center"
+                                        v-for="invitee in event?.invitees"
+                                        :key="invitee.user_id"
+                                    >
+                                        <Avatar
+                                            src="https://images.unsplash.com/photo-1492633423870-43d1cd2775eb?&w=128&h=128&dpr=2&q=80"
+                                            class="w-12 h-12 rounded-full"
+                                        >
+                                        </Avatar>
+                                        <span class=" p-2 text-center font-light text-xs">
+                                            Light
+                                        </span>
+                                    </div>
                                 </div>
                             </div>
                         </Card>
