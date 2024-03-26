@@ -26,7 +26,7 @@ async def exception_handler(request, exc):
     )
 
 
-api_key = "AIzaSyBVwaHGbGTnc-cQHpIM6qqMbGIb7C-xKVA"
+api_key = "AIzaSyBJcTQkFWKa28LPKZID2hniKw8cegieay8"
 
 """
 format of input

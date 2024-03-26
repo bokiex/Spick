@@ -37,7 +37,8 @@ async def lifespan(app: FastAPI):
         print("\nCreate the 'Exchange' before running this microservice. \nExiting the program.")
         sys.exit(0)
 
-    scheduler.configure(jobstores={'default': SQLAlchemyJobStore(url='mysql+mysqlconnector://root:root@localhost:8889/scheduler')})
+    jobstore = SQLAlchemyJobStore(url='mysql+mysqlconnector://root@localhost:3306/scheduler')
+    scheduler.add_jobstore(jobstore)
     scheduler.start()
 
     yield
@@ -120,32 +121,33 @@ def create_event(event: schemas.Recommend):
     event_dict = event.dict()
 
     # Get recommendation from recommendation microservice
+    print("----- Getting recommendation list -----")
+    #recommendation_result = requests.post(recommendation_ms, json=jsonable_encoder({"type": event_dict["type"], "township": event_dict["township"]}))
 
-    recommendation_result = requests.post(recommendation_ms, json=jsonable_encoder({"type": event_dict["type"], "township": event_dict["township"]}))
-    
-    print(recommendation_result.json())
-    message = json.dumps(recommendation_result.json())
-    if recommendation_result.status_code not in range(200,300):
+    message = [
+        {"recommendation_name": "Jurong Lake Gardens", "recommendation_address": "Yuan Ching Rd, Singapore"}, {"recommendation_name": "Pandan Reservoir Park", "recommendation_address": "700 W Coast Rd, Singapore 608785"}, {"recommendation_name": "The Oval, Jurong Lake Gardens West", "recommendation_address": "Singapore"}, {"recommendation_name": "Jurong Central Park", "recommendation_address": "Junction off Jalan Boon Lay & Boon Lay Way, Singapore 609961"}, {"recommendation_name": "Taman Jurong Greens", "recommendation_address": "Singapore"}, {"recommendation_name": "Lakeside Garden", "recommendation_address": "106 Yuan Ching Rd, Singapore"}, {"recommendation_name": "Teban Neighbourhood Park", "recommendation_address": "Teban Gardens Rd, Singapore"}, {"recommendation_name": "Jurong Eco-Garden", "recommendation_address": "Cleantech Loop, Singapore"}, {"recommendation_name": "Toh Guan Park", "recommendation_address": "285D Toh Guan Rd, Block 285D, Singapore 604285"}, {"recommendation_name": "West Coast Park", "recommendation_address": "W Coast Ferry Rd, Singapore 126978"}, {"recommendation_name": "Jalan Bahar Park", "recommendation_address": "Jurong West St. 24, Singapore"}, {"recommendation_name": "Neram Streams", "recommendation_address": "8 Yuan Ching Rd, Singapore 618658"}, {"recommendation_name": "Butterfly Maze", "recommendation_address": "Yuan Ching Rd, Singapore"}, {"recommendation_name": "Rasau Walk", "recommendation_address": "9 Japanese Garden Rd, Singapore 619228"}, {"recommendation_name": "Jurong Hill Park", "recommendation_address": "60 Jurong Hill, Singapore 628926"}, {"recommendation_name": "Taman Jurong Park", "recommendation_address": "Yung Ho Rd, Singapore 610153"}, {"recommendation_name": "Waringin Hut", "recommendation_address": "177 Hindhede Drive, Singapore 589333"}, {"recommendation_name": "Jurong Play Grounds", "recommendation_address": "JPG, 2 Jurong Gateway Rd, Singapore 608512"}, {"recommendation_name": "Japanese Garden", "recommendation_address": "1 Chinese Garden Rd, Singapore 619795"}, {"recommendation_name": "Chinese Garden Main Entrance", "recommendation_address": "Blk 151 Boon Lay Wy, Singapore 609959"}] #json.dumps(recommendation_result.json())
+    #if recommendation_result.status_code not in range(200,300):
 
-        channel.basic_publish(exchange=exchangename, routing_key="create_event.error",body=message, properties=pika.BasicProperties(delivery_mode=2))
+#        channel.basic_publish(exchange=exchangename, routing_key="create_event.error",body=message, properties=pika.BasicProperties(delivery_mode=2))
      
-        return recommendation_result.json()
-
-    # Create event through event microservice
-   
-    event_dict["recommendation"] = recommendation_result.json()[0:3]
-  
+ #       return recommendation_result.json()
+    
+    # Create event through event microservice  
+    event_dict["recommendation"] = message[0:3]
+    print("----- Creating event -----")
     event_result = requests.post(event_ms, json=jsonable_encoder(event_dict))
 
     if event_result.status_code not in range(200,300):
-        channel.basic_publish(exchange=exchangename, routing_key="create_event.error",body=event_result.json(), properties=pika.BasicProperties(delivery_mode=2))
+        channel.basic_publish(exchange=exchangename, routing_key="create_event.error",body=json.dumps(event_result.json()), properties=pika.BasicProperties(delivery_mode=2))
         return event_result
     
+    event_result = event_result.json()
     # Send notification to users
-    channel.basic_publish(exchange=exchangename, routing_key="create_event.notification",body=event_result.json(), properties=pika.BasicProperties(delivery_mode=2))
+    channel.basic_publish(exchange=exchangename, routing_key="create_event.notification",body=json.dumps(event_result), properties=pika.BasicProperties(delivery_mode=2))
     
+    print(event_result["data"]["event_id"])
     # # Start scheduler for event time out
-    scheduler.add_job(on_timeout, 'date', run_date=event_result.json()["data"]["time_out"], args=[event_result.json()["data"]["event_id"]])
+    scheduler.add_job(on_timeout, 'date', run_date=event_result["data"]["time_out"], args=[event_result["data"]["event_id"]])
     scheduler.print_jobs()
   
 
@@ -153,21 +155,22 @@ def create_event(event: schemas.Recommend):
 def delete_event(event_id: int):
     event_result = requests.delete(event_ms + f"/{event_id}").json()
     if event_result.status_code not in range(200,300):
-        channel.basic_publish(exchange=exchangename, routing_key="delete_event.error",body=event_result, properties=pika.BasicProperties(delivery_mode=2))
+        channel.basic_publish(exchange=exchangename, routing_key="delete_event.error",body=json.dumps(event_result.json()), properties=pika.BasicProperties(delivery_mode=2))
         return event_result
     
     channel.basic_publish(exchange=exchangename, routing_key="delete_event.notification",body=event_result, properties=pika.BasicProperties(delivery_mode=2))
     return event_result
 
-def on_timeout(event_id: int):
-    event_result = requests.get(event_ms + f"/{event_id}").json()
+def on_timeout(event_id: str):
+    event_result = requests.get(event_ms + f"/{event_id}")
     if event_result.status_code not in range(200,300):
-        channel.basic_publish(exchange=exchangename, routing_key="timeout.error",body=event_result, properties=pika.BasicProperties(delivery_mode=2))
+        channel.basic_publish(exchange=exchangename, routing_key="timeout.error",body=json.dumps(event_result.json()), properties=pika.BasicProperties(delivery_mode=2))
         return event_result
     
+    event_result = event_result.json()
     # Update event timeout to null
     event_result["time_out"] = None
-    event_result = requests.put(event_ms + f"/{event_id}", json=jsonable_encoder(event_result)).json()
+    event_result = requests.put(event_ms + f"/{event_id}", json=jsonable_encoder(event_result))
     if event_result.status_code not in range(200,300):
         channel.basic_publish(exchange=exchangename, routing_key="timeout.error",body=event_result, properties=pika.BasicProperties(delivery_mode=2))
         return event_result
