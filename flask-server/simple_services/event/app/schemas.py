@@ -4,8 +4,6 @@ from typing import List, Optional
 from fastapi import File, UploadFile
 
 
-
-
 class Invitee(BaseModel):
 
     user_id: int
@@ -48,3 +46,24 @@ class EventPut(BaseModel):
 class EventResponse(Event):
     event_id: str
 
+
+class OptimizedScheduleDay(BaseModel):
+    event_id: str
+    date: str
+    start: datetime
+    end: datetime
+    attending_users: List[int]
+    non_attending_users: List[int]
+
+class OptimizedSchedules(BaseModel):
+    schedules: List[OptimizedScheduleDay]
+class OptimizedScheduleDay(BaseModel):
+    event_id: str
+    date: str
+    start: datetime
+    end: datetime
+    attending_users: List[int]
+    non_attending_users: List[int]
+
+class OptimizedSchedules(BaseModel):
+    schedules: List[OptimizedScheduleDay]

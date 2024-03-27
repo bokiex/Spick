@@ -226,6 +226,16 @@ async def create_invitees(invitee: schemas.Invitee, db: Session = Depends(get_db
         return jsonable_encoder({"message": "User has already been invited to this event."})
     return jsonable_encoder({"data": {"user_id": res.user_id}, "message": "Invitee has been added."})
 
+
+
+@app.post("/update_optimize")
+def add_opt_schedule(optimized: schemas.OptimizedSchedules, db: Session = Depends(get_db)):
+    res = crud.add_opt_schedule(db, optimized)
+    if res is None:
+        return jsonable_encoder({"message": "Optimized schedule has already been invited to this event."})
+    return jsonable_encoder({"message": "Optimized schedule has been added."})
+
+
 #!/usr/bin/env python3
 # The above shebang (#!) operator tells Unix-like environments
 # to run this file as a python3 script

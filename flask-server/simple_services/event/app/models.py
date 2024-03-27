@@ -50,3 +50,10 @@ class Image(Base):
     event_id = Column(String(6), ForeignKey('event.event_id'), nullable=False)
 
     # event = relationship("Event", back_populates="image")
+
+class Optimized(Base):
+    __tablename__ = 'optimized'
+    event_id = Column(String(6), primary_key=True, nullable=False)
+    attendee_id = Column(Integer, primary_key=True, nullable=False)
+    start_time = Column(TIMESTAMP, nullable=False)
+    end_time = Column(TIMESTAMP, nullable=False)
