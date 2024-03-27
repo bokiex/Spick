@@ -1,9 +1,23 @@
-from fastapi import FastAPI, Depends
+from fastapi import FastAPI, Depends, Form, UploadFile, File
 from database import SessionLocal
 from fastapi.encoders import jsonable_encoder
 import crud, schemas
 from sqlalchemy.orm import Session
 from fastapi.middleware.cors import CORSMiddleware
+from typing import Optional
+from datetime import datetime
+from dataclasses import dataclass, asdict
+import boto3
+import os
+from fastapi.responses import JSONResponse
+import json
+from dotenv import load_dotenv
+
+load_dotenv()
+
+AWS_ACCESS_KEY_ID = os.getenv('AWS_ACCESS_KEY_ID')
+AWS_SECRET_ACCESS_KEY = os.getenv('AWS_SECRET_ACCESS_KEY')
+
 # Initialize FastAPI app
 app = FastAPI()
 origins = [
@@ -35,8 +49,8 @@ def get_events(db: Session = Depends(get_db)):
     return jsonable_encoder(res)
 
 # Get event by ID
-@app.get("/event/{event_id}", response_model=schemas.EventResponse)
-async def get_event_by_id(event_id: int, db: Session = Depends(get_db)):
+@app.get("/event/{event_id}", response_model=schemas.Event)
+async def get_event_by_id(event_id: str, db: Session = Depends(get_db)):
  
     res = crud.get_event_by_id(event_id, db)
     if res == []:
@@ -71,11 +85,49 @@ async def delete_event(event_id: int):
     "user_id": 1
 }
 """
+def upload_file(files: UploadFile, object_name=None):
+    """Upload a file to an S3 bucket
+
+    :param file_name: File to upload
+    :param bucket: Bucket to upload to
+    :param object_name: S3 object name. If not specified then file_name is used
+    :return: True if file was uploaded, else False
+    """
+    print("\n Uploading file to S3 bucket")
+    print(files)
+    # Upload the file
+    if object_name is None:
+        object_name = files.filename
+        
+    s3_client = boto3.client('s3', aws_access_key_id = AWS_ACCESS_KEY_ID,
+    aws_secret_access_key = AWS_SECRET_ACCESS_KEY)
+    try:
+     
+        s3_client.upload_fileobj(files.file, "spickbucket", object_name)
+        
+        return JSONResponse(status_code=200, content={"message": "File uploaded successfully."})
+    except:
+        return JSONResponse(status_code=400, content={"message": "File upload failed."})
+
+
+
+
+    
 # Create event
 @app.post("/event")
-async def create_event(event: schemas.Event, db: Session = Depends(get_db)):
-
+async def create_event(event: str = Form(...),  files: Optional[UploadFile] = File(default=None), db: Session = Depends(get_db)):
+    
+    print(event)
+    print(files)
+    event = json.loads(event)
+    event = schemas.Event(**event)
+    
+    
+    
     res = crud.create_event(db, event)
+    upload_file(files)
+    
+
     if res is None:
         return jsonable_encoder({"message": "An event with the same name already exists."})
     return jsonable_encoder({"data": res, "message": "Event has been created."})
@@ -173,6 +225,16 @@ async def create_invitees(invitee: schemas.Invitee, db: Session = Depends(get_db
     if res is None:
         return jsonable_encoder({"message": "User has already been invited to this event."})
     return jsonable_encoder({"data": {"user_id": res.user_id}, "message": "Invitee has been added."})
+
+
+
+@app.post("/update_optimize")
+def add_opt_schedule(optimized: schemas.OptimizedSchedules, db: Session = Depends(get_db)):
+    res = crud.add_opt_schedule(db, optimized)
+    if res is None:
+        return jsonable_encoder({"message": "Optimized schedule has already been invited to this event."})
+    return jsonable_encoder({"message": "Optimized schedule has been added."})
+
 
 #!/usr/bin/env python3
 # The above shebang (#!) operator tells Unix-like environments

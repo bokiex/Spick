@@ -3,6 +3,7 @@ from typing import List, Dict
 from datetime import datetime
 from collections import defaultdict
 from schemas import OptimizedScheduleDay, OptimizedSchedules, ScheduleItem, CommonSlot
+from utils import find_overlapping_times
 
 app = FastAPI()
 
@@ -11,6 +12,7 @@ def optimize_schedule(schedule_list: List[ScheduleItem]):
     schedules_by_day: Dict[datetime, List] = defaultdict(list)
     for schedule in schedule_list:
         schedules_by_day[schedule.start_time.date()].append((schedule.start_time, schedule.end_time, schedule.user_id))
+        id = schedule.event_id
 
     optimized_schedule_days = []
 
@@ -37,7 +39,7 @@ def optimize_schedule(schedule_list: List[ScheduleItem]):
                 if not current_attendees and slot_start:  # if ending a slot
                     potential_slots.append((slot_start, time, len(current_attendees)))
                     slot_start = None
-        
+
         # Filtering slots that have the max number of attendees
         slots_with_max_attendees = [slot for slot in potential_slots if slot[2] == max(max_attendees, len(current_attendees))]
 
@@ -52,16 +54,22 @@ def optimize_schedule(schedule_list: List[ScheduleItem]):
 
             optimized_schedule_days.append(
                 OptimizedScheduleDay(
+                    event_id = id,
                     date=str(day),
-                    common_slot=CommonSlot(start=slot_start, end=slot_end),
+                    start=slot_start,
+                    end=slot_end,
                     attending_users=list(attending_users),
                     non_attending_users=list(non_attending_users),
                 )
             )
+    max_attendees_count = max(len(day.attending_users) for day in optimized_schedule_days)
+    print(max_attendees_count)
+    filtered_schedule_days = [day for day in optimized_schedule_days if len(day.attending_users) == max_attendees_count]
+    print(filtered_schedule_days)
 
-    return OptimizedSchedules(schedules=optimized_schedule_days)
 
 
+    return OptimizedSchedules(schedules=filtered_schedule_days)
 # Input
 # [
 #     {

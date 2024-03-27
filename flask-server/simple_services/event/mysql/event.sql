@@ -49,3 +49,11 @@ CREATE TABLE IF NOT EXISTS `image` (
     `event_id` varchar(6) NOT NULL,
     FOREIGN KEY (event_id) REFERENCES event(event_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE IF NOT EXISTS `Optimized` (
+    `event_id` VARCHAR(6) NOT NULL,
+    `attendee_id` INT, 
+    `start_time` timestamp,
+    `end_time` timestamp,
+    PRIMARY KEY (`event_id`, `attendee_id`,`start_time`,`end_time`)
+)   ENGINE=InnoDB DEFAULT CHARSET=utf8;

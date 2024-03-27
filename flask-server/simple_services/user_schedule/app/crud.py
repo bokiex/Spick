@@ -2,22 +2,23 @@
 from sqlalchemy.orm import Session
 import models, schemas
 
-def get_user_schedules(db: Session, event_id: int):
+def get_user_schedules(db: Session, event_id: str):
     return db.query(models.UserSchedule).filter(models.UserSchedule.event_id == event_id).all()
 
-# crud.py adjustment for create_user_schedules
+# crud.py
 def create_user_schedules(db: Session, schedule_list: schemas.UserScheduleList):
     created_schedules = []
     for schedule_data in schedule_list.sched_list:
         db_schedule = models.UserSchedule(**schedule_data.dict())
         db.add(db_schedule)
-    db.commit()
+        # Flush to ensure db_schedule is populated with database-generated values like schedule_id
+        db.flush()
+        created_schedules.append(db_schedule)
+    db.commit()  # Commit after all schedules are added and flushed
 
-    # Assuming db_schedules is a list of SQLAlchemy model instances
-    db_schedules = db.query(models.UserSchedule).all()
-    # Convert each SQLAlchemy model instance to a dictionary and then to a Pydantic model
-    created_schedules = [schemas.UserScheduleCreate(**db_schedule.__dict__) for db_schedule in db_schedules]
-    return schemas.UserScheduleList(sched_list=created_schedules)
+    # Convert the SQLAlchemy model instances back to Pydantic models
+    return [schemas.UserScheduleInDB.from_orm(schedule) for schedule in created_schedules]
+
 
 
 
@@ -32,5 +33,5 @@ def delete_user_schedule(db: Session, schedule_id: int, event_id: int, user_id: 
         db.commit()
         return {"message": "Schedule deleted successfully."}
     else:
-        return None
+        return {"message": "Error."}
 

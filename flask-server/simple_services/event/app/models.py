@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, TIMESTAMP, String, ForeignKey, LargeBinary
+from sqlalchemy import Column, Integer, TIMESTAMP, String, ForeignKey, LargeBinary, Boolean
 from sqlalchemy.orm import relationship
 from database import Base
 
@@ -19,14 +19,19 @@ class Event(Base):
     user_id = Column(Integer, nullable=False)
     reservation_name = Column(String(64), nullable=True)
     reservation_address = Column(String(64), nullable=True)
-    recommendation = relationship("Recommendation", back_populates="event")
-    image = relationship("Image", back_populates="event")
+    image = Column(String(1024), nullable=True)
+    recommendations = relationship("Recommendation", back_populates="event",   cascade="all, delete, delete-orphan")
+    # image = relationship("Image", back_populates="event")
+    invitees = relationship("Invitee", back_populates="event",   cascade="all, delete, delete-orphan")
 
 class Invitee(Base):
     __tablename__ = 'invitee'
-    event_id = Column(String(6), primary_key=True, nullable=False)
+    event_id = Column(String(6), ForeignKey('event.event_id'), nullable=False)
     user_id = Column(Integer, primary_key=True, nullable=False)
-    status = Column(String(64), nullable=True)
+    username = Column(String(64), nullable=False)
+    image = Column(String(256), nullable=True)
+    status = Column(Boolean, nullable=False, default=False)
+    event = relationship("Event", back_populates="invitees")
 
 class Recommendation(Base):
     __tablename__ = 'recommendation'
@@ -35,7 +40,7 @@ class Recommendation(Base):
     recommendation_address = Column(String(64), nullable=False)
     event_id = Column(String(6), ForeignKey('event.event_id'), nullable=False)
 
-    event = relationship("Event", back_populates="recommendation")
+    event = relationship("Event", back_populates="recommendations")
 
 class Image(Base):
     __tablename__ = 'image'
@@ -44,4 +49,11 @@ class Image(Base):
     image_path = Column(String(1024), nullable=False)
     event_id = Column(String(6), ForeignKey('event.event_id'), nullable=False)
 
-    event = relationship("Event", back_populates="image")
+    # event = relationship("Event", back_populates="image")
+
+class Optimized(Base):
+    __tablename__ = 'optimized'
+    event_id = Column(String(6), primary_key=True, nullable=False)
+    attendee_id = Column(Integer, primary_key=True, nullable=False)
+    start_time = Column(TIMESTAMP, nullable=False)
+    end_time = Column(TIMESTAMP, nullable=False)

@@ -1,6 +1,6 @@
 from collections import defaultdict
-from typing import List
 from schemas import ScheduleItem, OptimizedScheduleDay, CommonSlot
+from typing import List
 
 def find_overlapping_times(schedules: List[ScheduleItem]) -> List[OptimizedScheduleDay]:
     schedules_by_day = defaultdict(list)
@@ -17,31 +17,25 @@ def find_overlapping_times(schedules: List[ScheduleItem]) -> List[OptimizedSched
             time_blocks.append((end, 'end', user_id))
         time_blocks.sort()
 
-        max_attendees = 0
         current_attendees = set()
-        potential_slots = []
-        slot_start = None
-
+        best_overlap = 0
+        best_times = None
         for time, event, user_id in time_blocks:
             if event == 'start':
-                if not current_attendees:  # if starting a new slot
-                    slot_start = time
                 current_attendees.add(user_id)
+                if len(current_attendees) > best_overlap:
+                    best_overlap = len(current_attendees)
+                    best_times = (time, None)
             else:
+                if len(current_attendees) == best_overlap and best_times[1] is None:
+                    best_times = (best_times[0], time)
                 current_attendees.remove(user_id)
-                if not current_attendees:  # if ending a slot
-                    potential_slots.append((slot_start, time, max_attendees))
-                    slot_start = None
-                    max_attendees = max(max_attendees, len(current_attendees))
-        
-        # Filtering slots that have the max number of attendees
-        slots_with_max_attendees = [slot for slot in potential_slots if slot[2] == max_attendees]
 
-        for slot_start, slot_end, _ in slots_with_max_attendees:
+        if best_times:
             attending_users = set()
             non_attending_users = set()
             for start, end, user_id in day_schedules:
-                if start <= slot_start and end >= slot_end:
+                if start <= best_times[0] and end >= best_times[1]:
                     attending_users.add(user_id)
                 else:
                     non_attending_users.add(user_id)
@@ -49,7 +43,7 @@ def find_overlapping_times(schedules: List[ScheduleItem]) -> List[OptimizedSched
             optimized_schedule_days.append(
                 OptimizedScheduleDay(
                     date=str(day),
-                    common_slot=CommonSlot(start=slot_start, end=slot_end),
+                    common_slot=CommonSlot(start=best_times[0], end=best_times[1]),
                     attending_users=list(attending_users),
                     non_attending_users=list(non_attending_users),
                 )

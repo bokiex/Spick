@@ -5,7 +5,7 @@ import amqp_connection
 import pika
 import json
 import apscheduler
-from fastapi import FastAPI, Depends
+from fastapi import FastAPI, Depends , File, UploadFile, Form
 from datetime import datetime
 from fastapi.responses import JSONResponse , PlainTextResponse
 from os import environ
@@ -15,7 +15,9 @@ from fastapi.encoders import jsonable_encoder
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.jobstores.sqlalchemy import SQLAlchemyJobStore
 from fastapi.middleware.cors import CORSMiddleware
-
+from typing import Optional
+from pyfa_converter import FormDepends
+import httpx
 
 event_ms = environ.get('EVENT_URL') or "http://localhost:3800/event"
 notification_ms = environ.get("NOTIFICATION_URL") or "http://localhost:5005/notification"
@@ -37,7 +39,8 @@ async def lifespan(app: FastAPI):
         print("\nCreate the 'Exchange' before running this microservice. \nExiting the program.")
         sys.exit(0)
 
-    scheduler.configure(jobstores={'default': SQLAlchemyJobStore(url='mysql+mysqlconnector://root:root@localhost:8889/scheduler')})
+    jobstore = SQLAlchemyJobStore(url='mysql+mysqlconnector://root@localhost:3306/scheduler')
+    scheduler.add_jobstore(jobstore)
     scheduler.start()
 
     yield
@@ -115,15 +118,21 @@ Sample event JSON output:
 """
 
 
+    
+
+
 @app.post("/create_event")
-def create_event(event: schemas.Recommend):
-
-    event_dict = event.dict()
-    print(event_dict)
-
+async def create_event(event: str = Form(...), file: Optional[UploadFile] = File(default=None)):
+    print(event)
+    print(file)
+    event_data = json.loads(event)
+    event = schemas.Recommend(**event_data)
+    
     # Get recommendation from recommendation microservice
+    print("----- Getting recommendation list -----")
+    #recommendation_result = requests.post(recommendation_ms, json=jsonable_encoder({"type": event_dict["type"], "township": event_dict["township"]}))
 
-    recommendation_result = requests.post(recommendation_ms, json=jsonable_encoder({"type": event_dict["type"], "township": event_dict["township"]}))
+    recommendation_result = requests.post(recommendation_ms, json=jsonable_encoder({"type": event.type, "township": event.township}))
     
     message = json.dumps(recommendation_result.json())
     if recommendation_result.status_code == 404:
@@ -136,20 +145,35 @@ def create_event(event: schemas.Recommend):
 
     # Create event through event microservice
    
-    event_dict["recommendation"] = recommendation_result.json()[0:3]
+  
+    event_dict = jsonable_encoder(event)
+  
+    event_dict["recommendation"] = recommendation_result.json()
+    event_dict["image"] = file.filename
+    print(event_dict)
+    
+  
+    async with httpx.AsyncClient() as client:
+        # Create the form data
+        files = {
+            # Assuming the FastAPI endpoint expects the file under the key "files"
+            "files": (file.filename, file.file, file.content_type),
+        }
+        event_result = await client.post(event_ms, data={"event": json.dumps(event_dict)}, files=files)
+     
 
-    event_result = requests.post(event_ms, json=jsonable_encoder(event_dict))
-
+    
     if event_result.status_code not in range(200,300):
-        channel.basic_publish(exchange=exchangename, routing_key="create_event.error",body=event_result.json(), properties=pika.BasicProperties(delivery_mode=2))
+        channel.basic_publish(exchange=exchangename, routing_key="create_event.error",body=json.dumps(event_result.json()), properties=pika.BasicProperties(delivery_mode=2))
         return event_result
     
+    event_result = event_result.json()
     # Send notification to users
-    notification_message =   json.dumps(event_result.json())
-    channel.basic_publish(exchange=exchangename, routing_key="create_event.notification",body=notification_message, properties=pika.BasicProperties(delivery_mode=2))
+    channel.basic_publish(exchange=exchangename, routing_key="create_event.notification",body=json.dumps(event_result), properties=pika.BasicProperties(delivery_mode=2))
     
+    print(event_result["data"]["event_id"])
     # # Start scheduler for event time out
-    scheduler.add_job(on_timeout, 'date', run_date=event_result.json()["data"]["time_out"], args=[event_result.json()["data"]["event_id"]])
+    scheduler.add_job(on_timeout, 'date', run_date=event_result["data"]["time_out"], args=[event_result["data"]["event_id"]])
     scheduler.print_jobs()
   
 
@@ -157,21 +181,22 @@ def create_event(event: schemas.Recommend):
 def delete_event(event_id: int):
     event_result = requests.delete(event_ms + f"/{event_id}").json()
     if event_result.status_code not in range(200,300):
-        channel.basic_publish(exchange=exchangename, routing_key="delete_event.error",body=event_result, properties=pika.BasicProperties(delivery_mode=2))
+        channel.basic_publish(exchange=exchangename, routing_key="delete_event.error",body=json.dumps(event_result.json()), properties=pika.BasicProperties(delivery_mode=2))
         return event_result
     
     channel.basic_publish(exchange=exchangename, routing_key="delete_event.notification",body=event_result, properties=pika.BasicProperties(delivery_mode=2))
     return event_result
 
-def on_timeout(event_id: int):
-    event_result = requests.get(event_ms + f"/{event_id}").json()
+def on_timeout(event_id: str):
+    event_result = requests.get(event_ms + f"/{event_id}")
     if event_result.status_code not in range(200,300):
-        channel.basic_publish(exchange=exchangename, routing_key="timeout.error",body=event_result, properties=pika.BasicProperties(delivery_mode=2))
+        channel.basic_publish(exchange=exchangename, routing_key="timeout.error",body=json.dumps(event_result.json()), properties=pika.BasicProperties(delivery_mode=2))
         return event_result
     
+    event_result = event_result.json()
     # Update event timeout to null
     event_result["time_out"] = None
-    event_result = requests.put(event_ms + f"/{event_id}", json=jsonable_encoder(event_result)).json()
+    event_result = requests.put(event_ms + f"/{event_id}", json=jsonable_encoder(event_result))
     if event_result.status_code not in range(200,300):
         channel.basic_publish(exchange=exchangename, routing_key="timeout.error",body=event_result, properties=pika.BasicProperties(delivery_mode=2))
         return event_result
