@@ -6,7 +6,6 @@ from sqlalchemy.orm import Session
 from fastapi.middleware.cors import CORSMiddleware
 from typing import Optional
 from datetime import datetime
-from dataclasses import dataclass, asdict
 import boto3
 import os
 from fastapi.responses import JSONResponse
@@ -15,8 +14,10 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+
 AWS_ACCESS_KEY_ID = os.getenv('AWS_ACCESS_KEY_ID')
 AWS_SECRET_ACCESS_KEY = os.getenv('AWS_SECRET_ACCESS_KEY')
+
 
 # Initialize FastAPI app
 app = FastAPI()
@@ -99,7 +100,8 @@ def upload_file(files: UploadFile, object_name=None):
     if object_name is None:
         object_name = files.filename
         
-    s3_client = boto3.client('s3', aws_access_key_id = AWS_ACCESS_KEY_ID,
+    s3_client = boto3.client('s3', 
+    aws_access_key_id = AWS_ACCESS_KEY_ID,
     aws_secret_access_key = AWS_SECRET_ACCESS_KEY)
     try:
      

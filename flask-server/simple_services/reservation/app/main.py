@@ -15,7 +15,7 @@ def get_db():
         yield db
     finally:
         db.close()
-
+        
 @app.get("/ping")
 def ping():
     return {"message": "pong"}

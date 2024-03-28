@@ -1,7 +1,6 @@
 from fastapi import FastAPI, HTTPException
-from database import SessionLocal
 from fastapi.encoders import jsonable_encoder
-import crud, schemas
+import  schemas
 from sqlalchemy.orm import Session
 from fastapi.responses import JSONResponse
 import json
@@ -11,12 +10,7 @@ import requests as rq
 # Initialize FastAPI app
 app = FastAPI()
 
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
+
 
 @app.exception_handler(Exception)
 async def exception_handler(request, exc):
@@ -313,7 +307,7 @@ format of output of recommendation
 """
 def processSearch(search):
     url = "https://places.googleapis.com/v1/places:searchText"
-    # placeholder data
+
     search = jsonable_encoder(search)
     searchstr = search["type"] + "near" + search["township"]
 
@@ -325,23 +319,20 @@ def processSearch(search):
     reply = rq.post(url, data = json_data, headers=headers)
     response = reply.json()
 
-    print('search_result:', response)
+    print('\nSearch_result:', response)
     return response
 
 def processImage(resource_name):
     url = "https://places.googleapis.com/v1/" + resource_name + "/media?maxHeightPx=400&maxWidthPx=400?key=" + api_key
     print(url)
-    print(
-        '\n-----calling places photos-----'
-    )
+    print('\n-----calling places photos-----')
     res = rq.get(url)
     print("\nReceived photos result:", res.json())
    
 # Get recommendations from Places API
 @app.post("/recommendation", response_model=list[schemas.Recommendation])
 def get_recommendation( search: schemas.Search):
-    
- 
+
     # Simple check of input format and data of the request are JSON
     print("\nReceived search terms in JSON:", search)
 
@@ -355,11 +346,9 @@ def get_recommendation( search: schemas.Search):
         res = []
      
         for i in result['places']:
-      
             recommendation_name = i['displayName']['text']
             recommendation_address = i['formattedAddress']
          
-           
             recommendation = {
                 "recommendation_name": recommendation_name,
                 "recommendation_address": recommendation_address
@@ -373,22 +362,5 @@ def get_recommendation( search: schemas.Search):
     
 
     
-    #     create_recommendation(db, recommendation)
-
-    # # 3. Return the result
-    # return db.query(models.Recommendation).all()
-
-
-
-    # if reached here, not a JSON request.
-    # return jsonify({
-    #     "code": 400,
-    #     "message": "Invalid JSON input: " + str(request.get_data())
-    # }), 400
-
-    
-    
-
-
 
 

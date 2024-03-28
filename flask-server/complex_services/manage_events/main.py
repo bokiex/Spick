@@ -5,18 +5,15 @@ import amqp_connection
 import pika
 import json
 import apscheduler
-from fastapi import FastAPI, Depends , File, UploadFile, Form
-from datetime import datetime
-from fastapi.responses import JSONResponse , PlainTextResponse
+from fastapi import FastAPI,  File, UploadFile, Form
+from fastapi.responses import JSONResponse 
 from os import environ
 from contextlib import asynccontextmanager
-from sqlalchemy.orm import Session
 from fastapi.encoders import jsonable_encoder
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.jobstores.sqlalchemy import SQLAlchemyJobStore
 from fastapi.middleware.cors import CORSMiddleware
 from typing import Optional
-from pyfa_converter import FormDepends
 import httpx
 
 event_ms = environ.get('EVENT_URL') or "http://localhost:3800/event"
@@ -39,7 +36,7 @@ async def lifespan(app: FastAPI):
         print("\nCreate the 'Exchange' before running this microservice. \nExiting the program.")
         sys.exit(0)
 
-    jobstore = SQLAlchemyJobStore(url='mysql+mysqlconnector://root@localhost:3306/scheduler')
+    jobstore = SQLAlchemyJobStore(url='mysql+mysqlconnector://is213@localhost:8889/scheduler')
     scheduler.add_jobstore(jobstore)
     scheduler.start()
 
@@ -123,56 +120,61 @@ Sample event JSON output:
 
 @app.post("/create_event")
 async def create_event(event: str = Form(...), file: Optional[UploadFile] = File(default=None)):
-    print(event)
-    print(file)
+    
     event_data = json.loads(event)
     event = schemas.Recommend(**event_data)
     
     # Get recommendation from recommendation microservice
-    print("----- Getting recommendation list -----")
+    print("\n----- Getting recommendation list -----")
     #recommendation_result = requests.post(recommendation_ms, json=jsonable_encoder({"type": event_dict["type"], "township": event_dict["township"]}))
-
     recommendation_result = requests.post(recommendation_ms, json=jsonable_encoder({"type": event.type, "township": event.township}))
     
-    message = json.dumps(recommendation_result.json())
+
+    # If search is invalid and recommendation returns no results
     if recommendation_result.status_code == 404:
         return JSONResponse(status_code=404, content={"error": "No recommendations found"})
+    
+    # If recommendation service is not available
     if recommendation_result.status_code not in range(200,300):
-
+        # Publish to error queue
+        message = json.dumps(recommendation_result.json())
         channel.basic_publish(exchange=exchangename, routing_key="create_event.error",body=message, properties=pika.BasicProperties(delivery_mode=2))
-      
         return JSONResponse(status_code=500, content={"error": "recommendation service not available"})
 
-    # Create event through event microservice
-   
+    print("\n------ Recommendation list retrieved ------")
+    print(recommendation_result.json())
   
     event_dict = jsonable_encoder(event)
-  
+    
+    # Add recommendation to event
     event_dict["recommendation"] = recommendation_result.json()
+
+    # Add image filename to event
     event_dict["image"] = file.filename
     print(event_dict)
     
   
+    # Send event to event microservice
+    print("\n------ Sending event to event microservice ------")
     async with httpx.AsyncClient() as client:
-        # Create the form data
         files = {
-            # Assuming the FastAPI endpoint expects the file under the key "files"
             "files": (file.filename, file.file, file.content_type),
         }
         event_result = await client.post(event_ms, data={"event": json.dumps(event_dict)}, files=files)
      
-
-    
+    # If event service is not available
     if event_result.status_code not in range(200,300):
         channel.basic_publish(exchange=exchangename, routing_key="create_event.error",body=json.dumps(event_result.json()), properties=pika.BasicProperties(delivery_mode=2))
         return event_result
     
+    print("\n------ Event created ------")
     event_result = event_result.json()
+
     # Send notification to users
     channel.basic_publish(exchange=exchangename, routing_key="create_event.notification",body=json.dumps(event_result), properties=pika.BasicProperties(delivery_mode=2))
     
     print(event_result["data"]["event_id"])
-    # # Start scheduler for event time out
+    # Start scheduler for event time out
     scheduler.add_job(on_timeout, 'date', run_date=event_result["data"]["time_out"], args=[event_result["data"]["event_id"]])
     scheduler.print_jobs()
   

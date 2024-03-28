@@ -1,25 +1,20 @@
 from pydantic import BaseModel
 from datetime import datetime
 from typing import List, Optional
-from fastapi import File, UploadFile
-
 
 
 
 class Invitee(BaseModel):
-
     user_id: int
     status: bool = False
     username: str
     image: str | None = None
 
-    
 
 class Recommendation(BaseModel):
     recommendation_name: str
     recommendation_address: str
 
-  
 
 class Event(BaseModel):
     event_name: str
@@ -34,6 +29,7 @@ class Event(BaseModel):
     reservation_name: Optional[str] = None
     reservation_address: Optional[str] = None
 
+
 class EventPut(BaseModel):
     event_name: Optional[str] = None
     event_desc: Optional[str] = None
@@ -44,6 +40,7 @@ class EventPut(BaseModel):
     recommendations: Optional[List[Recommendation]] = None
     reservation_name: str
     reservation_address: str
+
 
 class EventResponse(Event):
     event_id: str

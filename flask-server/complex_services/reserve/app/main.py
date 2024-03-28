@@ -1,20 +1,19 @@
 from fastapi import FastAPI, Depends
 import requests
 import  schemas
-
+from os import environ
 from sqlalchemy.orm import Session
 from fastapi.encoders import jsonable_encoder
 
 # Initialize FastAPI app
 app = FastAPI()
 
-reservation_ms = "http://0.0.0.0:3400/reservation"
-event_ms = "http://0.0.0.0:3600/event"
-recommendation_ms = "http://0.0.0.0:"
+reservation_ms = environ.get("RESERVATION_URL") or "http://0.0.0.0:3400/reservation"
+event_ms = environ.get("EVENT_URL") or "http://0.0.0.0:3600/event"
 
 @app.get("/ping")
 def ping():
-    return {"message": requests.get( reservation_ms ).json()}
+    return {"message": "pong"}
 
 @app.post("/reserve")
 def reserve(reservation: schemas.Reservation):
