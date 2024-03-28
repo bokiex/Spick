@@ -1,7 +1,8 @@
 import sqlalchemy as db
 import requests
 import amqp_connection
-from telebot.async_telebot import AsyncTeleBot
+import json
+from telebot import TeleBot
 from os import environ
 from flask import jsonify
 from fastapi import FastAPI, Depends, HTTPException
@@ -12,7 +13,7 @@ from fastapi.responses import JSONResponse
 bot_token = environ.get('BOT_TOKEN') or "6996801409:AAGDWkgPaCtRAqH08y9lwYJQif6ESOnQ984"
 user_ms = environ.get("USER_URL") or "http://localhost:3000/users/"
 notification_ms = environ.get("NOTIFICATION_URL") or "http://localhost:5000/notification/"
-bot = AsyncTeleBot(bot_token)
+bot = TeleBot(bot_token)
 
 app = FastAPI()
 
@@ -28,12 +29,20 @@ def receiver():
 
     def processNotification(notification):
         countnotif = 0
-        print(notification)
+        print(notification.decode())
+        notification = notification.decode().replace("\r\n", "")
 
+        notification = json.loads(notification)
         notification_list = notification['notification_list']
         message = notification['message']
         users = requests.get(user_ms)
+
+        if users.status_code in range(300, 599):
+            return JSONResponse(status_code=users.status_code, content={"message":users.json()["detail"]})
+        users = users.json()
+        print(users)
         for user in users:
+            
             if user['telegram_id'] == None or user['telegram_tag'] not in notification_list:
                 continue
             #sendurl = "https://api.telegram.org/bot" + token + "/sendMessage" + "?chat_id=" + user["telegram_id"] + "&text=" + chatmsg
