@@ -28,9 +28,7 @@ class Invitee(Base):
     __tablename__ = 'invitee'
     event_id = Column(String(6), ForeignKey('event.event_id'), nullable=False)
     user_id = Column(Integer, primary_key=True, nullable=False)
-    username = Column(String(64), nullable=False)
-    image = Column(String(256), nullable=True)
-    status = Column(Boolean, nullable=False, default=False)
+    status = Column(Boolean, nullable=True, default=False)
     event = relationship("Event", back_populates="invitees")
 
 class Recommendation(Base):
