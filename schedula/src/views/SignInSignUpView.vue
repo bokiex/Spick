@@ -36,14 +36,14 @@ export default {
             try {
                 const response = await axios.post('http://127.0.0.1:8000/login', {
                     username: this.username,
-                    password: this.password
-                })
-                console.log(response.data)
-                localStorage.setItem('userID', response.data.userID)
-                // console.log(response.data.userID)
-                router.push('/')
-            } catch (error) {
-                console.log(error.response.data)
+                    password: this.password,
+                });
+                console.log(response.data.user);
+                localStorage.setItem('userID', response.data.user.user_id);
+                console.log(localStorage)
+                router.push('/');
+            }catch(error){
+                console.log(error.response.data);
             }
         },
 

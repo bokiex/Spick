@@ -8,8 +8,8 @@ import os
 
 
 # SQLALCHEMY_DATABASE_URL = os.getenv("dbURL")
-SQLALCHEMY_DATABASE_URL = 'mysql+mysqlconnector://is213@localhost:3306/user'
-#SQLALCHEMY_DATABASE_URL = 'mysql+mysqlconnector://is213@localhost:8889/user'
+# SQLALCHEMY_DATABASE_URL = 'mysql+mysqlconnector://is213@localhost:3306/event'
+SQLALCHEMY_DATABASE_URL = 'mysql+mysqlconnector://root@localhost:3306/user'
 
 engine = create_engine(SQLALCHEMY_DATABASE_URL, echo=True)
 
