@@ -8,14 +8,16 @@ import { isProxy, toRaw } from 'vue';
 // eventID placeholder
 export default {
     components: { VueCal },
-    userID: localStorage.getItem('userID'),
     data() {
         return {
             eventToken: "",
+            userID:null,
             currentStep: 1,
             minDate: null,
             maxDate: null,
             valid:false,
+            invited:false,
+            timeout:null,
             steps: [
                 { id: 1, label: 'Step 1', description: 'Acceptance' },
                 { id: 2, label: 'Step 2', description: 'Availability' },
@@ -24,6 +26,7 @@ export default {
         }
     },
     created() {
+        this.userID = localStorage.getItem('userID'),
         this.eventToken = this.$route.params.eventToken;
         console.log(this.eventToken)
         axios.get(`http://localhost:3800/event/${this.eventToken}`)
@@ -35,12 +38,20 @@ export default {
             catch{
                 var event = response.data
                 this.valid = true
+                for (var user of event.invitees){
+                    if (user.user_id === this.userID){
+                        this.invited = true
+                    }
+                }
+                this.minDate = new Date(Date.parse(event.datetime_start))
+                this.maxDate = new Date(Date.parse(event.datetime_end))
+                document.getElementById("name").innerText = event.event_name
+                this.timeout = event.time_out
             }     
-            this.minDate = new Date(Date.parse(event.datetime_start))
-            this.maxDate = new Date(Date.parse(event.datetime_end))
-            document.getElementById("name").innerText = event.event_name
+            
 
         })
+
     },
     computed: {
         // Get the Monday of the real time current week.
@@ -83,7 +94,7 @@ export default {
                 url,
                 data
             )
-                .then(function (response) {
+            .then(function (response) {
                     this.$route.push({ path: '/' })
             })
         },
@@ -121,7 +132,20 @@ export default {
 </script>
 
 <template>
-    <div class="container p-4" v-if="this.valid === true">
+        <div class="container p-4" v-if="this.timeout === null">
+        <div class="row justify-content-center">
+            <!-- Form Start -->
+            <div class="form-container" style="position: relative;">
+                <div class="center" style="text-align:center;">
+                    <div style="text-align:center;">
+                        <h1 class="header form-input" style="font-size:x-large;">Event signup period is over</h1>
+                        <router-link class = "btn exit" type = "button" :to="`/`">Home</router-link>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="container p-4" v-else-if="this.valid === true && this.invited === true">
         <div class="row justify-content-center">
             <!-- Form Start -->
             <div class="form-container">
@@ -208,13 +232,26 @@ export default {
         </div>
     </div>
 
-    <div class="container p-4" v-else="this.valid === false">
+    <div class="container p-4" v-else-if="this.valid === false">
         <div class="row justify-content-center">
             <!-- Form Start -->
             <div class="form-container" style="position: relative;">
                 <div class="center" style="text-align:center;">
                     <div style="text-align:center;">
                         <h1 class="header form-input" style="font-size:x-large;">Event code is invalid</h1>
+                        <router-link class = "btn exit" type = "button" :to="`/`">Home</router-link>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="container p-4" v-else-if="this.invited === false">
+        <div class="row justify-content-center">
+            <!-- Form Start -->
+            <div class="form-container" style="position: relative;">
+                <div class="center" style="text-align:center;">
+                    <div style="text-align:center;">
+                        <h1 class="header form-input" style="font-size:x-large;">You are not invited</h1>
                         <router-link class = "btn exit" type = "button" :to="`/`">Home</router-link>
                     </div>
                 </div>
