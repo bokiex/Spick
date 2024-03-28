@@ -14,6 +14,8 @@ export default {
         return {
             eventToken: "",
             currentStep: 1,
+            minDate: null,
+            maxDate: null,
             steps: [
                 { id: 1, label: 'Step 1', description: 'Acceptance' },
                 { id: 2, label: 'Step 2', description: 'Availability' },
@@ -34,8 +36,8 @@ export default {
                 var event = response.data
                 pass
             }     
-            var minDate = new Date(Date.parse(event.datetime_start))
-            var maxDate = new Date(Date.parse(event.datetime_end))
+            this.minDate = new Date(Date.parse(event.datetime_start))
+            this.maxDate = new Date(Date.parse(event.datetime_end))
             document.getElementById("name").innerText = event.event_name
 
         })
@@ -160,9 +162,9 @@ export default {
                             :disable-views="['years', 'year']" hide-view-selector resize-x
                             :editable-events="{ title: false, drag: false, resize: true, delete: true, create: true }"
                             :snap-to-time="15" :events="events" class="vuecal--full-height-delete"
-                            :min-date=minDate
-                            :max-date=maxDate
-                            :selected-date=minDate
+                            :min-date=this.minDate
+                            :max-date=this.maxDate
+                            :selected-date=this.minDate
                             >
                             </vue-cal>
                     </div>
