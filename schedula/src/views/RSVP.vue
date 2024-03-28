@@ -6,7 +6,6 @@ import { isProxy, toRaw } from 'vue';
 
 
 // eventID placeholder
-var eventID = 0
 export default {
     components: { VueCal },
     userID: localStorage.getItem('userID'),
@@ -16,6 +15,7 @@ export default {
             currentStep: 1,
             minDate: null,
             maxDate: null,
+            valid:false,
             steps: [
                 { id: 1, label: 'Step 1', description: 'Acceptance' },
                 { id: 2, label: 'Step 2', description: 'Availability' },
@@ -30,11 +30,11 @@ export default {
         .then (response=>{
             try {
                 var placeholder = response.data.detail
-                console.log(error)
+                this.valid = false
             }
             catch{
                 var event = response.data
-                pass
+                this.valid = true
             }     
             this.minDate = new Date(Date.parse(event.datetime_start))
             this.maxDate = new Date(Date.parse(event.datetime_end))
@@ -55,6 +55,20 @@ export default {
         prevStep() {
             if (this.currentStep > 1) this.currentStep--
         },
+        sendDecline(){
+            var url = "http://localhost:5100/rsvp/decline"
+            var data = {
+                "user_id": this.userID,
+                "event_id": this.eventToken,
+            }
+            axios.post(
+                url,
+                data
+            )
+            .then(function (response) {
+                    this.$route.push({ path: '/' })
+            })
+        },
         sendAccept() {
             this.nextStep()
             var url = "http://localhost:5100/rsvp/accept"
@@ -62,7 +76,6 @@ export default {
             var data = {
                 "userID": this.userID,
                 "token": this.eventToken,
-                "eventID": eventID,
                 "sched_list": events
             }
             console.log(data)
@@ -71,8 +84,8 @@ export default {
                 data
             )
                 .then(function (response) {
-                    this.$route.push({ path: '/calendarview' })
-                })
+                    this.$route.push({ path: '/' })
+            })
         },
         getEvents() {
             var events = toRaw(this.$refs.vuecal.mutableEvents)
@@ -81,7 +94,7 @@ export default {
             for (var timeslot of events) {
                 var event = {
                     scheduleID: this.index,
-                    eventID: this.eventID,
+                    eventID: this.eventToken,
                     userID: this.userID,
                     start_time: timeslot.start.format('YYYY-MM-DD').concat("T", timeslot.start.formatTime('HH:mm:00')),
                     end_time: timeslot.end.format('YYYY-MM-DD').concat("T", timeslot.end.formatTime('HH:mm:00'))
@@ -108,7 +121,7 @@ export default {
 </script>
 
 <template>
-    <div class="container p-4">
+    <div class="container p-4" v-if="this.valid === true">
         <div class="row justify-content-center">
             <!-- Form Start -->
             <div class="form-container">
@@ -195,6 +208,20 @@ export default {
         </div>
     </div>
 
+    <div class="container p-4" v-else="this.valid === false">
+        <div class="row justify-content-center">
+            <!-- Form Start -->
+            <div class="form-container" style="position: relative;">
+                <div class="center" style="text-align:center;">
+                    <div style="text-align:center;">
+                        <h1 class="header form-input" style="font-size:x-large;">Event code is invalid</h1>
+                        <router-link class = "btn exit" type = "button" :to="`/`">Home</router-link>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
 
 </template>
 <style>
@@ -203,6 +230,11 @@ export default {
 }
 </style>
 <style scoped language="scss">
+.center {
+  margin: auto;
+  width: 50%;
+  padding: 10px;
+}
 nav {
     border-radius: 15px;
 }
