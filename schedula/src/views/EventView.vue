@@ -50,7 +50,7 @@ const format_time = (datetime) => {
 }
 
 const reservation = () => {
-    router.push({ path: `/RSVP` })
+    router.push({ path: `/events/${event_id}/RSVP` })
 }
 
 // const event = {

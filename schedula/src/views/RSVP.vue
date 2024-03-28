@@ -1,201 +1,211 @@
-<script>
-import VueCal from 'vue-cal';
-import 'vue-cal/dist/vuecal.css';
-import axios from 'axios';
-import { isProxy, toRaw } from 'vue';
-
+<script setup>
+import VueCal from 'vue-cal'
+import 'vue-cal/dist/vuecal.css'
+import axios from 'axios'
+import { onMounted, ref, toRaw } from 'vue'
+import {
+    DialogClose,
+    DialogContent,
+    DialogDescription,
+    DialogOverlay,
+    DialogPortal,
+    DialogRoot,
+    DialogTitle,
+    DialogTrigger,
+    Separator
+} from 'radix-vue'
+import Button from '@/components/Button.vue'
+import { useRouter } from 'vue-router'
 
 // eventID placeholder
-var eventID = 0
-export default {
-    components: { VueCal },
-    userID: localStorage.getItem('userID'),
-    data() {
-        return {
-            eventToken: "",
-            currentStep: 1,
-            minDate: null,
-            maxDate: null,
-            steps: [
-                { id: 1, label: 'Step 1', description: 'Acceptance' },
-                { id: 2, label: 'Step 2', description: 'Availability' },
-                { id: 3, label: 'Step 3', description: 'End' }
-            ]
-        }
-    },
-    created() {
-        this.eventToken = this.$route.params.eventToken;
-        console.log(this.eventToken)
-        axios.get(`http://localhost:3800/event/${this.eventToken}`)
-        .then (response=>{
-            try {
-                var placeholder = response.data.detail
-                console.log(error)
-            }
-            catch{
-                var event = response.data
-                pass
-            }     
-            this.minDate = new Date(Date.parse(event.datetime_start))
-            this.maxDate = new Date(Date.parse(event.datetime_end))
-            document.getElementById("name").innerText = event.event_name
+const userID = localStorage.getItem('userID')
 
-        })
-    },
-    computed: {
-        // Get the Monday of the real time current week.
-        previousFirstDayOfWeek() {
-            return new Date(new Date().setDate(new Date().getDate() - (new Date().getDay() + 6) % 7))
-        }
-    },
-    methods: {
-        nextStep() {
-            if (this.currentStep < this.steps.length) this.currentStep++
-        },
-        prevStep() {
-            if (this.currentStep > 1) this.currentStep--
-        },
-        sendAccept() {
-            this.nextStep()
-            var url = "http://localhost:5100/rsvp/accept"
-            var events = this.getEvents()
-            var data = {
-                "userID": this.userID,
-                "token": this.eventToken,
-                "eventID": eventID,
-                "sched_list": events
-            }
-            console.log(data)
-            axios.post(
-                url,
-                data
-            )
-                .then(function (response) {
-                    this.$route.push({ path: '/calendarview' })
-                })
-        },
-        getEvents() {
-            var events = toRaw(this.$refs.vuecal.mutableEvents)
-            var result = []
-            var index = 0
-            for (var timeslot of events) {
-                var event = {
-                    scheduleID: this.index,
-                    eventID: this.eventID,
-                    userID: this.userID,
-                    start_time: timeslot.start.format('YYYY-MM-DD').concat("T", timeslot.start.formatTime('HH:mm:00')),
-                    end_time: timeslot.end.format('YYYY-MM-DD').concat("T", timeslot.end.formatTime('HH:mm:00'))
-                }
-                result.push(event)
-                index++
-            }
-            return result
-        }
-        // onEvent (event, deleteEventFunction) {
-        //   var events = toRaw(this.$refs.vuecal.mutableEvents)
-        //   var start = event.start
-        //   var end = event.end
-        //   for (var timeslot of events){
-        //     if (timeslot.end >= event.start && event.start >= timeslot.start){
-        //       return false
-        //     }
-        //   }
-        // return event}
+const eventToken = ''
+const currentStep = 1
+const minDate = null
+const maxDate = null
 
-    }
+onMounted(() => {
+ 
+    
+    axios.get(`http://localhost:3800/event/${this.eventToken}`).then((response) => {
+        try {
+            var placeholder = response.data.detail
+            console.log(error)
+        } catch {
+            var event = response.data
+            pass
+        }
+        minDate = new Date(Date.parse(event.datetime_start))
+        maxDate = new Date(Date.parse(event.datetime_end))
+        document.getElementById('name').innerText = event.event_name
+    })
+})
+
+// Get the Monday of the real time current week.
+function previousFirstDayOfWeek() {
+    return new Date(new Date().setDate(new Date().getDate() - ((new Date().getDay() + 6) % 7)))
 }
+
+function nextStep() {
+    if (this.currentStep < this.steps.length) this.currentStep++
+}
+function prevStep() {
+    if (this.currentStep > 1) this.currentStep--
+}
+function sendAccept() {
+    this.nextStep()
+    var url = 'http://localhost:5100/rsvp/accept'
+    var events = this.getEvents()
+    var data = {
+        userID: this.userID,
+        token: this.eventToken,
+        eventID: eventID,
+        sched_list: events
+    }
+    console.log(data)
+    axios.post(url, data).then(function (response) {
+        this.$route.push({ path: '/calendarview' })
+    })
+}
+function getEvents() {
+    var events = toRaw(this.$refs.vuecal.mutableEvents)
+    var result = []
+    var index = 0
+    for (var timeslot of events) {
+        var event = {
+            scheduleID: this.index,
+            eventID: this.eventID,
+            userID: this.userID,
+            start_time: timeslot.start
+                .format('YYYY-MM-DD')
+                .concat('T', timeslot.start.formatTime('HH:mm:00')),
+            end_time: timeslot.end
+                .format('YYYY-MM-DD')
+                .concat('T', timeslot.end.formatTime('HH:mm:00'))
+        }
+        result.push(event)
+        index++
+    }
+    return result
+}
+// onEvent (event, deleteEventFunction) {
+//   var events = toRaw(this.$refs.vuecal.mutableEvents)
+//   var start = event.start
+//   var end = event.end
+//   for (var timeslot of events){
+//     if (timeslot.end >= event.start && event.start >= timeslot.start){
+//       return false
+//     }
+//   }
+// return event}
+
 // code
 </script>
 
 <template>
-    <div class="container p-4">
-        <div class="row justify-content-center">
-            <!-- Form Start -->
-            <div class="form-container">
-                <!-- Sidebar start -->
-                <div class="form-sidebar">
-                    <div class="step" :class="{ active: currentStep == 1 }">
-                        <div class="circle">1</div>
-                        <div class="step-content">
-                            <span>Step 1</span>
-                            <b>Acceptance</b>
+    <div class="m-auto relative w-full h-screen space-y-6 sm:w-[450px]">
+        <div class="my-10 relative h-[700px] space-y-6">
+            <form class="form">
+                <div class="h-full">
+                    <!-- Content omitted for brevity -->
+                    <div class="space-y-6">
+                        <div>
+                            <h3 class="text-lg font-medium">Event Invitation</h3>
+                            <p class="text-sm text-muted-foreground">
+                                You have been invited to attend
+                            </p>
+                        </div>
+                        <Separator class="shrink-0 bg-border h-px w-full" />
+                        <div>
+                            <h3 class="text-lg font-medium">Date and time.</h3>
+                            <p class="text-sm text-muted-foreground">
+                                Select the date and time you are available.
+                            </p>
                         </div>
                     </div>
-                    <div class="step" :class="{ active: currentStep == 2 }">
-                        <div class="circle">2</div>
-                        <div class="step-content">
-                            <span>Step 2</span>
-                            <b>Availability</b>
-                        </div>
-                    </div>
-                    <div class="step" :class="{ active: currentStep == 3 }">
-                        <div class="circle">3</div>
-                        <div class="step-content">
-                            <span>Step 3</span>
-                            <b>End</b>
-                        </div>
-                    </div>
+                    <!-- Step 1 start -->
                 </div>
-                <!-- Sidebar end -->
-                <!-- Step 1 start -->
-                <div class="stp step-1" v-if="currentStep === 1">
-                    <div class="header">
-                        <h1 class="title">Event Invitation</h1>
-                        <p class="exp">
-                            You have been invited to attend <span id = "name"></span>.
-                        </p>
-                    </div>
-                    <div class="btns">
-                        <button class="decline" @click="prevStep" type="submit">Decline</button>
-                        <button class="next-stp" @click="nextStep" type="button" style="float: right">Accept</button>
-                    </div>
-                </div>
+
                 <!-- Step 1 end -->
                 <!-- Step 2 start -->
-                <div class="stp step-2" v-if="currentStep === 2">
-                    <div class="header">
-                        <h1 class="title">Date and time.</h1>
-                        <p class="exp">Select the date and time you are available.</p>
-                    </div>
-                    <div style="width:100%;height:65%;float:right;">
-                        <vue-cal id="calendar" ref="vuecal" :time-from="0 * 60" :time-to="24 * 60"
-                            :disable-views="['years', 'year']" hide-view-selector resize-x
-                            :editable-events="{ title: false, drag: false, resize: true, delete: true, create: true }"
-                            :snap-to-time="15" :events="events" class="vuecal--full-height-delete"
-                            :min-date=this.minDate
-                            :max-date=this.maxDate
-                            :selected-date=this.minDate
-                            >
-                            </vue-cal>
-                    </div>
 
-                    <div class="btns">
-                        <button class="prev-stp" @click="prevStep" type="button">Go Back</button>
-                        <button class="next-stp" @click="sendAccept" type="submit" style="float: right">
-                            Next Step
-                        </button>
-                    </div>
+                <div class="h-[500px]">
+                    <vue-cal
+                        id="calendar"
+                        ref="vuecal"
+                        :time-from="0 * 60"
+                        :time-to="24 * 60"
+                        :disable-views="['years', 'year']"
+                        hide-view-selector
+                        resize-x
+                        :editable-events="{
+                            title: false,
+                            drag: false,
+                            resize: true,
+                            delete: true,
+                            create: true
+                        }"
+                        :snap-to-time="15"
+                        :events="events"
+                        :min-date="this.minDate"
+                        :max-date="this.maxDate"
+                        :selected-date="this.minDate"
+                    >
+                    </vue-cal>
                 </div>
+
                 <!-- Step 2 end -->
                 <!-- Step 3 Start -->
-                <div class="stp step-3" v-if="currentStep === 3">
-                    <div class="header">
-                        <h1 class="title">Thank you!</h1>
-                        <p class="exp">
-                            You have submitted your availability.
-                        </p>
-                    </div>
-                    <div class="btns">
-                        <button class="prev-stp" @click="prevStep" type="button">Go Back</button>
-                        <button class="exit" id="exit" @click="exit" style="float: right">Exit</button>
+                <div>
+                    <div class="flex justify-between m-5">
+                        <Button @click="prevStep">Decline</Button>
+                        <DialogRoot>
+                            <DialogTrigger>
+                                <Button type="button"> Submit </Button>
+                            </DialogTrigger>
+                            <DialogPortal>
+                                <DialogOverlay
+                                    class="fixed inset-0 z-50 bg-black/80 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0"
+                                />
+                                <DialogContent
+                                    class="data-[state=open]:animate-contentShow fixed top-[50%] left-[50%] max-h-[85vh] w-[90vw] max-w-[450px] translate-x-[-50%] translate-y-[-50%] rounded-[6px] bg-white p-[25px] shadow-[hsl(206_22%_7%_/_35%)_0px_10px_38px_-10px,_hsl(206_22%_7%_/_20%)_0px_10px_20px_-15px] focus:outline-none z-[100]"
+                                >
+                                    <DialogTitle class="text-mauve12 m-0 text-[17px] font-semibold">
+                                        Thank you!
+                                    </DialogTitle>
+                                    <DialogDescription
+                                        class="text-mauve11 mt-[10px] mb-5 text-[15px] leading-normal"
+                                    >
+                                        You have submitted your availability.
+                                    </DialogDescription>
+
+                                    <div class="mt-[25px] flex justify-end">
+                                        <DialogClose as-child>
+                                            <button
+                                                variant="outline"
+                                                class="inline-flex h-[35px] items-center justify-center rounded-[4px] px-[15px] font-semibold leading-none focus:shadow-[0_0_0_2px] focus:outline-none"
+                                            >
+                                                Exit
+                                            </button>
+                                        </DialogClose>
+                                    </div>
+                                    <DialogClose
+                                        class="text-grass11 hover:bg-green4 focus:shadow-green7 absolute top-[10px] right-[10px] inline-flex h-[25px] w-[25px] appearance-none items-center justify-center rounded-full focus:shadow-[0_0_0_2px] focus:outline-none"
+                                        aria-label="Close"
+                                    >
+                                        <Icon icon="lucide:x" />
+                                    </DialogClose>
+                                </DialogContent>
+                            </DialogPortal>
+                        </DialogRoot>
                     </div>
                 </div>
+
                 <!-- Step 3 end -->
-            </div>
+            </form>
         </div>
     </div>
-
-
 </template>
 <style>
 .vuecal__event {
@@ -522,7 +532,6 @@ form .error {
 }
 
 @media (max-width: 600px) {
-
     /* Stack sidebar above the form content on small screens */
     .form-container {
         flex-direction: column;
