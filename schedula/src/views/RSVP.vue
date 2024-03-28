@@ -164,7 +164,7 @@ export default {
                             :snap-to-time="15" :events="events" class="vuecal--full-height-delete"
                             :min-date=this.minDate
                             :max-date=this.maxDate
-                            :selected-date=minDate
+                            :selected-date=this.minDate
                             >
                             </vue-cal>
                     </div>
