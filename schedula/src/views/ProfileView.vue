@@ -54,7 +54,7 @@ import Button from '../components/Button.vue'
                 </div>
 
                 <div class="flex justify-start">
-                    <Button type="submit">Save</Button>
+                    <Button type="submit" @click="saveSettings">Save</Button>
                 </div>
             </div>
         </div>
@@ -130,8 +130,8 @@ import Button from '../components/Button.vue'
 export default {
     data() {
         return {
+            userID: localStorage.getItem('userID'),
             user: {
-                userID: localStorage.getItem('userID'),
                 name: '',
                 password: '',
                 tele: '',
@@ -147,12 +147,12 @@ export default {
     components: { Separator, Label },
     methods: {
         loadUserData() {
-            console.log(this.user.userID)
+            console.log(this.userID)
             axios
-                .get(`http://127.0.0.1:5000/user/${this.user.userID}`)
+                .get(`http://127.0.0.1:3000/users/user_id/${this.userID}`)
                 .then((response) => {
                     this.user.name = response.data.username
-                    this.user.tele = response.data.telegramtag
+                    this.user.tele = response.data.telegram_tag
                     this.user.email = response.data.email
                 })
                 .catch((error) => console.error(error))
@@ -160,14 +160,14 @@ export default {
         saveSettings() {
             // Logic to save user settings
             axios
-                .put(`http://127.0.0.1:5000/user/${this.user.userID}`, {
+                .put(`http://127.0.0.1:3000/users/user_id/${this.userID}`, {
                     username: this.user.name,
-                    telegramtag: this.user.tele,
+                    telegram_tag: this.user.tele,
                     email: this.user.email
                 })
                 .then((response) => {
                     console.log('Settings saved', response.data)
-                    alert('changed!')
+                    alert('Changed!')
                     // Additional logic upon success
                 })
                 .catch((error) => console.error(error))
@@ -187,7 +187,7 @@ export default {
 
             // Send a request to the microservice to update the password
             axios
-                .put(`http://127.0.0.1:5000/user/${this.user.userID}/password`, {
+                .put(`http://127.0.0.1:3000/users/user_id/${userID}/password`, {
                     oldPassword: this.user.password,
                     newPassword: this.user.newPwd
                 })
@@ -200,7 +200,7 @@ export default {
                 })
         },
         logout() {
-            localStorage.removeItem('userID')
+            localStorage.removeItem('user_id')
             router.push({ name: 'SignInSignUp' })
         }
     }
