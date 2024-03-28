@@ -3,10 +3,10 @@ from datetime import datetime
 from typing import List, Optional
 
 class Invitee(BaseModel):
-    user_id: int
-    status: bool = False
-    username: str
-    image: str | None = None
+    event_id = str 
+    user_id: int 
+    status: str | None = None
+
 
 
 class Recommendation(BaseModel):
@@ -21,7 +21,7 @@ class Event(BaseModel):
     datetime_end: datetime
     image: str | None = None
     invitees: List[Invitee] = []
-    time_out: datetime
+    time_out: datetime | None = None
     user_id: int
     recommendations: List[Recommendation] = []
     reservation_name: Optional[str] = None
@@ -54,13 +54,4 @@ class OptimizedScheduleDay(BaseModel):
 
 class OptimizedSchedules(BaseModel):
     schedules: List[OptimizedScheduleDay]
-class OptimizedScheduleDay(BaseModel):
-    event_id: str
-    date: str
-    start: datetime
-    end: datetime
-    attending_users: List[int]
-    non_attending_users: List[int]
 
-class OptimizedSchedules(BaseModel):
-    schedules: List[OptimizedScheduleDay]

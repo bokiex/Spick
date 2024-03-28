@@ -3,7 +3,7 @@ from typing import List, Dict
 from datetime import datetime
 from collections import defaultdict
 from schemas import OptimizedScheduleDay, OptimizedSchedules, ScheduleItem, CommonSlot
-from utils import find_overlapping_times
+
 
 app = FastAPI()
 
@@ -63,9 +63,7 @@ def optimize_schedule(schedule_list: List[ScheduleItem]):
                 )
             )
     max_attendees_count = max(len(day.attending_users) for day in optimized_schedule_days)
-    print(max_attendees_count)
     filtered_schedule_days = [day for day in optimized_schedule_days if len(day.attending_users) == max_attendees_count]
-    print(filtered_schedule_days)
 
 
 

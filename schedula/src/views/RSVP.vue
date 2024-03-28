@@ -15,30 +15,22 @@ import {
     Separator
 } from 'radix-vue'
 import Button from '@/components/Button.vue'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 
 // eventID placeholder
 const userID = localStorage.getItem('userID')
 
-const eventToken = ''
-const currentStep = 1
-const minDate = null
-const maxDate = null
+const route = useRoute()
+
+const event_id = route.params.id
+const timeout = ref(null)
 
 onMounted(() => {
- 
-    
-    axios.get(`http://localhost:3800/event/${this.eventToken}`).then((response) => {
-        try {
-            var placeholder = response.data.detail
-            console.log(error)
-        } catch {
-            var event = response.data
-            pass
-        }
-        minDate = new Date(Date.parse(event.datetime_start))
-        maxDate = new Date(Date.parse(event.datetime_end))
-        document.getElementById('name').innerText = event.event_name
+    axios.get(`http://localhost:3800/event/${event_id}`).then((response) => {
+        const event = response.data
+        const minDate = new Date(Date.parse(event.datetime_start))
+        const maxDate = new Date(Date.parse(event.datetime_end))
+        timeout.value = event.time_out
     })
 })
 
@@ -47,12 +39,6 @@ function previousFirstDayOfWeek() {
     return new Date(new Date().setDate(new Date().getDate() - ((new Date().getDay() + 6) % 7)))
 }
 
-function nextStep() {
-    if (this.currentStep < this.steps.length) this.currentStep++
-}
-function prevStep() {
-    if (this.currentStep > 1) this.currentStep--
-}
 function sendAccept() {
     this.nextStep()
     var url = 'http://localhost:5100/rsvp/accept'
@@ -106,7 +92,57 @@ function getEvents() {
 <template>
     <div class="m-auto relative w-full h-screen space-y-6 sm:w-[450px]">
         <div class="my-10 relative h-[700px] space-y-6">
-            <form class="form">
+            <div class="container p-4" v-if="timeout === null">
+                <div class="row justify-content-center">
+                    <!-- Form Start -->
+                    <div class="form-container" style="position: relative">
+                        <div class="center" style="text-align: center">
+                            <div style="text-align: center">
+                                <h1 class="header form-input" style="font-size: x-large">
+                                    Event signup period is over
+                                </h1>
+                                <router-link class="btn exit" type="button" :to="`/`"
+                                    >Home</router-link
+                                >
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="container p-4" v-else-if="this.valid === false">
+                <div class="row justify-content-center">
+                    <!-- Form Start -->
+                    <div class="form-container" style="position: relative">
+                        <div class="center" style="text-align: center">
+                            <div style="text-align: center">
+                                <h1 class="header form-input" style="font-size: x-large">
+                                    Event code is invalid
+                                </h1>
+                                <router-link class="btn exit" type="button" :to="`/`"
+                                    >Home</router-link
+                                >
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="container p-4" v-else-if="this.invited === false">
+                <div class="row justify-content-center">
+                    <!-- Form Start -->
+                    <div class="form-container" style="position: relative">
+                        <div class="center" style="text-align: center">
+                            <div style="text-align: center">
+                                <h1 class="header form-input" style="font-size: x-large">
+                                    You are not invited
+                                </h1>
+                                <router-link class="btn exit" type="button" :to="`/`">Home</router-link
+                                >
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <form class="form" v-else>
                 <div class="h-full">
                     <!-- Content omitted for brevity -->
                     <div class="space-y-6">
@@ -159,8 +195,11 @@ function getEvents() {
                 <!-- Step 3 Start -->
                 <div>
                     <div class="flex justify-between m-5">
-                        <Button @click="prevStep">Decline</Button>
                         <DialogRoot>
+                            <DialogTrigger>
+                                <Button type="button">Decline</Button>
+                            </DialogTrigger>
+
                             <DialogTrigger>
                                 <Button type="button"> Submit </Button>
                             </DialogTrigger>
@@ -213,6 +252,11 @@ function getEvents() {
 }
 </style>
 <style scoped language="scss">
+.center {
+    margin: auto;
+    width: 50%;
+    padding: 10px;
+}
 nav {
     border-radius: 15px;
 }

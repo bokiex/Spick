@@ -20,7 +20,6 @@ onMounted(async () => {
         const data = await fetch('http://localhost:3800/event' + `/${event_id}`).then((res) =>
             res.json()
         )
-
         event.value = data
         console.log(data)
     } catch (error) {
