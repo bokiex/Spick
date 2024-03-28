@@ -25,8 +25,6 @@ def create_event(db: Session, event: schemas.Event):
 
     # Convert 'recommendation' dictionaries to model instances
 
-    
-    
     db_event = models.Event(**event_data)
    
     if hasattr(event, 'recommendations') and event.recommendations:
@@ -40,8 +38,6 @@ def create_event(db: Session, event: schemas.Event):
              
                 db_inv = models.Invitee(**inv.dict(), event=db_event)
                 db_event.invitees.append(db_inv)
-
-
 
     db.add(db_event)
     db.commit()

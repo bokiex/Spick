@@ -5,12 +5,13 @@ import '@vuepic/vue-datepicker/dist/main.css'
 import { ref, onMounted } from 'vue'
 
 const events = ref([])
+const loading = ref(true)
 onMounted(async () => {
     try {
         // Example API call - replace with your actual API call
         const data = await fetch('http://localhost:3800/event').then((res) => res.json())
         console.log(data)
-        events = data.map((event) => ({
+        events.value = data.map((event) => ({
             start: event.range_start,
             end: event.range_end,
             title: event.event_name,
@@ -26,7 +27,7 @@ onMounted(async () => {
     }
 })
 
-const userID = localStorage.getItem('userID')
+const user_id = localStorage.getItem('userID')
 </script>
 <template>
     <div class="">
