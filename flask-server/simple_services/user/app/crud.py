@@ -26,8 +26,8 @@ def get_user_by_telegram_tag(db: Session, telegram_tag: str):
         return None
     return db_user
 
-def update_user(db: Session, user: schemas.User):
-    db_user = db.query(models.User).filter(models.User.user_id == user.user_id).first()
+def update_user(db: Session, user: schemas.User, user_id: int):
+    db_user = db.query(models.User).filter(models.User.user_id == user_id).first()
     if db_user is None:
         return None
     db_user.username = user.username
@@ -37,4 +37,10 @@ def update_user(db: Session, user: schemas.User):
     db_user.telegram_tag = user.telegram_tag
     db.commit()
     db.refresh(db_user)
+    return db_user
+
+def get_user_by_user_id(db: Session, user_id: int):
+    db_user = db.query(models.User).filter(models.User.user_id == user_id).first()
+    if db_user is None:
+        return None
     return db_user
