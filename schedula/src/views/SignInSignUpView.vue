@@ -1,49 +1,49 @@
 <script>
-import axios from 'axios';
-import router from  '../router';
+import axios from 'axios'
+import router from '../router'
 
 export default {
-    data(){
-        return{
+    data() {
+        return {
             username: '',
             email: '',
-            telegramHandle:'',
+            telegramHandle: '',
             password: '',
-            showModal: false, // For controlling the visibility of the custom alert
-        };
+            showModal: false // For controlling the visibility of the custom alert
+        }
     },
     methods: {
-        async signUp(){
-            try{
+        async signUp() {
+            try {
                 const response = await axios.post('http://127.0.0.1:8000/signup', {
-                    username : this.username,
+                    username: this.username,
                     email: this.email,
                     telegram_tag: this.telegramHandle,
-                    password: this.password,
-                });
-                console.log(response.data);
+                    password: this.password
+                })
+                console.log(response.data)
                 // this.signInClick(); //redirect to login page after successful registration
-                this.showModal = true;
-            }catch(error){
-                console.log(error.response.data);
+                this.showModal = true
+            } catch (error) {
+                console.log(error.response.data)
             }
         },
-        closeAndRedirect(){
-            this.showModal = false; // Close the custom alert
-            this.signInClick(); //redirect to login page after successful registration
+        closeAndRedirect() {
+            this.showModal = false // Close the custom alert
+            this.signInClick() //redirect to login page after successful registration
         },
-        async signIn(){
-            try{
-                const response = await axios.post('http://127.0.0.1:8000/login',{
+        async signIn() {
+            try {
+                const response = await axios.post('http://127.0.0.1:8000/login', {
                     username: this.username,
-                    password: this.password,
-                });
-                console.log(response.data);
-                localStorage.setItem('userID', response.data.userID);
+                    password: this.password
+                })
+                console.log(response.data)
+                localStorage.setItem('userID', response.data.userID)
                 // console.log(response.data.userID)
-                router.push('/');
-            }catch(error){
-                console.log(error.response.data);
+                router.push('/')
+            } catch (error) {
+                console.log(error.response.data)
             }
         },
 
@@ -82,7 +82,7 @@ export default {
                         <i class="fas fa-envelope"></i>
                         <input v-model="email" type="email" placeholder="Email" />
                     </div>
-                    <div class="input-field" style="margin-bottom: 0.1rem;">
+                    <div class="input-field" style="margin-bottom: 0.1rem">
                         <i class="fa-brands fa-telegram"></i>
                         <input v-model="telegramHandle" type="text" placeholder="Telegram Handle" />
                     </div>
@@ -105,7 +105,8 @@ export default {
                 <div class="content">
                     <h3>New here ?</h3>
                     <p>
-                        Sign up now to be part of the scheduling squad and start coordinating your events with ease!!
+                        Sign up now to be part of the scheduling squad and start coordinating your
+                        events with ease!!
                     </p>
                     <button class="btn transparent" id="sign-up-btn" @click="signUpClick">
                         Sign up
@@ -116,9 +117,7 @@ export default {
             <div class="panel right-panel">
                 <div class="content">
                     <h3>Already a Member?</h3>
-                    <p>
-                        Sign In below and continue streamlining your event planning journey!!
-                    </p>
+                    <p>Sign In below and continue streamlining your event planning journey!!</p>
                     <button class="btn transparent" id="sign-in-btn" @click="signInClick">
                         Sign in
                     </button>
@@ -131,7 +130,12 @@ export default {
                 <p style="font-weight: bolder; padding-bottom: 1.8rem">Sign Up Successful!</p>
                 <p>
                     Say "Hi" to our friendly Spick Telegram Bot by
-                    <a class="spick-bot-link" href="https://t.me/eventmanager145723_bot" target="spickbot">Clicking HERE</a> 
+                    <a
+                        class="spick-bot-link"
+                        href="https://t.me/eventmanager145723_bot"
+                        target="spickbot"
+                        >Clicking HERE</a
+                    >
                     or tele @eventmanager145723_bot now before Logging In!
                 </p>
                 <button class="btn" @click="closeAndRedirect">Completed</button>
@@ -172,10 +176,10 @@ input {
 }
 
 .sign-up-form p {
-        font-size: 0.7rem;
-        color: #a1a1a1;
-        text-align: left ;
-    }
+    font-size: 0.7rem;
+    color: #a1a1a1;
+    text-align: left;
+}
 
 .checkbox-container {
     margin: 0.5rem 0;
@@ -190,7 +194,7 @@ input {
     margin-left: 0.2rem;
 }
 
-.checkbox-container input[type="checkbox"] {
+.checkbox-container input[type='checkbox'] {
     margin-right: 0.3rem;
 }
 
@@ -596,8 +600,7 @@ form.sign-in-form {
     text-align: center;
 }
 
-.custom-modal p{
+.custom-modal p {
     font-size: 1.3rem;
 }
-
 </style>

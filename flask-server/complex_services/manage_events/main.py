@@ -114,10 +114,6 @@ Sample event JSON output:
 }
 """
 
-
-    
-
-
 @app.post("/create_event")
 async def create_event(event: str = Form(...), file: Optional[UploadFile] = File(default=None)):
     
@@ -151,8 +147,6 @@ async def create_event(event: str = Form(...), file: Optional[UploadFile] = File
 
     # Add image filename to event
     event_dict["image"] = file.filename
-    print(event_dict)
-    
   
     # Send event to event microservice
     print("\n------ Sending event to event microservice ------")
