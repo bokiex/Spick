@@ -172,19 +172,23 @@ def check_and_trigger_optimization(data):
     event_id = data['event_id']
     if invitees_left == 0 :
         response = requests.get(f"{USER_SCHEDULE_SERVICE_URL}{event_id}")
-        print(response)
         if response.status_code >300:
-            raise HTTPException(status_code=response.status_code, detail=response)
+            channel.basic_publish(exchange=exchangename, routing_key="timeout.error",body=response, properties=pika.BasicProperties(delivery_mode=2))
+            return response
+        
         payload = response.json()
 
         opt = requests.post(OPTIMIZE_SCHEDULE_SERVICE_URL, json=payload)
         if opt.status_code >300:
-            raise HTTPException(status_code=opt.status_code, detail=opt)
+            channel.basic_publish(exchange=exchangename, routing_key="timeout.error",body=opt, properties=pika.BasicProperties(delivery_mode=2))
+            return opt
+        
         opt = opt.json()
 
         opt_update = requests.post(UPDATE_OPTIMIZATION_URL, json = opt)
         if opt_update.status_code >300:
-            raise HTTPException(status_code=opt_update.status_code, detail="failed to update event db")
+            channel.basic_publish(exchange=exchangename, routing_key="timeout.error",body=opt_update, properties=pika.BasicProperties(delivery_mode=2))
+            return opt_update
 
         event_result = requests.get(f"{EVENT_URL}{event_id}")
         if event_result.status_code not in range(200,300):
@@ -201,7 +205,8 @@ def check_and_trigger_optimization(data):
 
         host_tag = requests.get(f"{EVENT_URL}{event_id}")
         if host_tag.status_code >300:
-            raise HTTPException(status_code=host_tag.status_code, detail=host_tag)
+            channel.basic_publish(exchange=exchangename, routing_key="timeout.error",body=host_tag, properties=pika.BasicProperties(delivery_mode=2))
+            return host_tag
 
         noti_payload = jsonable_encoder( {"notification_list":  [host_tag.json()["host_tag"]], "message": f"Event {event_id} Optimised." })
                                                               
