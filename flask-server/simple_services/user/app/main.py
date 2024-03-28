@@ -28,7 +28,7 @@ async def create_user(message):
         
         user.telegram_id = str(telegram_id)
         print(jsonable_encoder(user))
-        result = crud.update_user(db, user)
+        result = crud.update_user(db, user, user.user_id)
         
         if result is None:
             msg = "An error occurred updating the user."
