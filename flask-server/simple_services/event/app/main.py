@@ -109,10 +109,6 @@ def upload_file(files: UploadFile, object_name=None):
     except:
         return JSONResponse(status_code=400, content={"message": "File upload failed."})
 
-
-
-
-    
 # Create event
 @app.post("/event")
 async def create_event(event: str = Form(...),  files: Optional[UploadFile] = File(default=None), db: Session = Depends(get_db)):

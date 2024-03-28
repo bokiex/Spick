@@ -117,10 +117,6 @@ Sample event JSON output:
 }
 """
 
-
-    
-
-
 @app.post("/create_event")
 async def create_event(event: str = Form(...), file: Optional[UploadFile] = File(default=None)):
     print(event)
@@ -141,7 +137,7 @@ async def create_event(event: str = Form(...), file: Optional[UploadFile] = File
 
         channel.basic_publish(exchange=exchangename, routing_key="create_event.error",body=message, properties=pika.BasicProperties(delivery_mode=2))
       
-        return JSONResponse(status_code=500, content={"error": "recommendation service not available"})
+        return JSONResponse(status_code=500, content={"error": "Recommendation service not available"})
 
     # Create event through event microservice
    
@@ -150,8 +146,6 @@ async def create_event(event: str = Form(...), file: Optional[UploadFile] = File
   
     event_dict["recommendation"] = recommendation_result.json()
     event_dict["image"] = file.filename
-    print(event_dict)
-    
   
     async with httpx.AsyncClient() as client:
         # Create the form data

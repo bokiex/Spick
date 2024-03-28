@@ -32,7 +32,7 @@ def update_user(db: Session, user: schemas.User):
         return None
     db_user.username = user.username
     db_user.email = user.email
-    db_user.password = user.password
+    db_user.password_hash = user.password_hash
     db_user.telegram_id = user.telegram_id
     db_user.telegram_tag = user.telegram_tag
     db.commit()
