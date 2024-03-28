@@ -16,6 +16,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from typing import Optional
 import httpx
 
+user_ms = environ.get('USER_URL') or "http://localhost:3000/users"
 event_ms = environ.get('EVENT_URL') or "http://localhost:3800/event"
 notification_ms = environ.get("NOTIFICATION_URL") or "http://localhost:5005/notification"
 recommendation_ms = environ.get('RECOMMENDATION_URL') or "http://localhost:3500/recommendation"
@@ -61,6 +62,25 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+@app.get("/event/{event_id}", response_model=list[schemas.EventResponse])
+def get_events():
+    event_result = requests.get(event_ms).json()    
+    if event_result.status_code not in range(200,300):
+        channel.basic_publish(exchange=exchangename, routing_key="get_event.error",body=json.dumps(event_result.json()), properties=pika.BasicProperties(delivery_mode=2))
+        return event_result
+
+    user_result = requests.get(user_ms).json()
+    if user_result.status_code not in range(200,300):
+        channel.basic_publish(exchange=exchangename, routing_key="get_event.error",body=json.dumps(user_result.json()), properties=pika.BasicProperties(delivery_mode=2))
+        return user_result
+    for i in user_result:
+        if i["user_id"] == event_result["data"]["user_id"]:
+            event_result["data"]["username"] = i["username"]
+            event_result["data"]["email"] = i["email"]
+            event_result["data"]["telegramtag"] = i["telegramtag"]
+            break
+
 """
 Sample event JSON input:
 {
