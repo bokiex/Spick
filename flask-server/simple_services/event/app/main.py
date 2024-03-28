@@ -190,7 +190,7 @@ def get_invitee_responded(event_id: int, db: Session = Depends(get_db)):
 }
 """
 @app.get("/invitee/{event_id}")
-def get_invitees(event_id:int, db: Session = Depends(get_db)):
+def get_invitees(event_id:str, db: Session = Depends(get_db)):
     all_invitees = crud.get_invitee(db, event_id)
     if all_invitees == []:
         return jsonable_encoder({"message": "No invitees found."})

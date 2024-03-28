@@ -39,14 +39,14 @@ def create_event(db: Session, event: schemas.Event):
 
     return db_event
 
-def get_event_by_id(event_id: int,db: Session ):
+def get_event_by_id(event_id: str,db: Session ):
     res = db.query(models.Event).options(
         joinedload(models.Event.recommendations),
         joinedload(models.Event.invitees)).filter(models.Event.event_id == event_id).first()
 
     return res
 
-def update_event(event_id:int, event: schemas.EventPut, db: Session ):
+def update_event(event_id:str, event: schemas.EventPut, db: Session ):
     db_event = db.query(models.Event).filter(models.Event.event_id == event_id).first()
     if not db_event:
         
@@ -59,19 +59,19 @@ def update_event(event_id:int, event: schemas.EventPut, db: Session ):
     db.refresh(db_event)
     return db_event
 
-def delete_event(db: Session, event_id: int):
+def delete_event(db: Session, event_id: str):
     db_event = db.query(models.Event).filter(models.Event.event_id == event_id).first()
     if db_event:
         db.delete(db_event)
         db.commit()
     return db_event
 
-def get_invitee(db: Session, event_id: int):
+def get_invitee(db: Session, event_id: str):
     # get all invitees by event_id
     res = db.query(models.Invitee).filter(models.Invitee.event_id == event_id).all()
     return res
 
-def get_invitee_responded(db: Session, event_id: int):
+def get_invitee_responded(db: Session, event_id: str):
     return db.query(models.Invitee).filter(models.Invitee.event_id == event_id, models.Invitee.status != None).all()
 
 def update_invitee(db: Session, invitee: schemas.Invitee):

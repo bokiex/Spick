@@ -73,7 +73,7 @@ def get_db():
 
 # Get all users
 @app.get("/users", response_model=list[schemas.UserResponse])
-async def get_all_users(db: Session = Depends(get_db)):
+def get_all_users(db: Session = Depends(get_db)):
     result = crud.get_users(db)
     if result == []:
         raise HTTPException(status_code=404, detail="No users found.")

@@ -15,6 +15,7 @@ class Recommendation(BaseModel):
 
 
 class Event(BaseModel):
+    event_id: str | None = None
     event_name: str
     event_desc: str
     datetime_start: datetime
