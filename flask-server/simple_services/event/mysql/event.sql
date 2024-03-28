@@ -27,7 +27,7 @@ CREATE TABLE IF NOT EXISTS `event` (
 CREATE TABLE IF NOT EXISTS `invitee` (
     `event_id` varchar(6) NOT NULL,
     `user_id` INT,
-    `status` varchar(64),
+    `status` varchar(6),
     FOREIGN KEY (event_id) REFERENCES event(event_id),
     PRIMARY KEY (`event_id`, `user_id`)
 )   ENGINE=InnoDB DEFAULT CHARSET=utf8;

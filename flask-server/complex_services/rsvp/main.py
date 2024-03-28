@@ -10,6 +10,7 @@ import amqp_connection
 import pika
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
+import json
 
 app = FastAPI()
 
@@ -160,7 +161,7 @@ def decline_invitation(request: DeclineInvitationSchema):
     opt_data = retrieve_response.json()
     opt_data["event_id"] = request.event_id
     # Assuming check_and_trigger_optimization exists and works as expected
-    x = check_and_trigger_optimization(jsonable_encoder(opt_data))  # Ensure this function is defined or adjusted for FastAPI
+    x = check_and_trigger_optimization((opt_data))  # Ensure this function is defined or adjusted for FastAPI
     x = jsonable_encoder(x)
 
     return x
@@ -173,23 +174,24 @@ def check_and_trigger_optimization(data):
     if invitees_left == 0 :
         response = requests.get(f"{USER_SCHEDULE_SERVICE_URL}{event_id}")
         if response.status_code >300:
-            channel.basic_publish(exchange=exchangename, routing_key="timeout.error",body=response, properties=pika.BasicProperties(delivery_mode=2))
+            channel.basic_publish(exchange=exchangename, routing_key="user_schedule.error",body=response, properties=pika.BasicProperties(delivery_mode=2))
             return response
         
         payload = response.json()
 
         opt = requests.post(OPTIMIZE_SCHEDULE_SERVICE_URL, json=payload)
         if opt.status_code >300:
-            channel.basic_publish(exchange=exchangename, routing_key="timeout.error",body=opt, properties=pika.BasicProperties(delivery_mode=2))
+            channel.basic_publish(exchange=exchangename, routing_key="optimize.error",body=opt, properties=pika.BasicProperties(delivery_mode=2))
             return opt
         
         opt = opt.json()
 
         opt_update = requests.post(UPDATE_OPTIMIZATION_URL, json = opt)
         if opt_update.status_code >300:
-            channel.basic_publish(exchange=exchangename, routing_key="timeout.error",body=opt_update, properties=pika.BasicProperties(delivery_mode=2))
+            channel.basic_publish(exchange=exchangename, routing_key="update.error",body=opt_update, properties=pika.BasicProperties(delivery_mode=2))
             return opt_update
 
+    #if full response, set the timeout to NULL 
         event_result = requests.get(f"{EVENT_URL}{event_id}")
         if event_result.status_code not in range(200,300):
             channel.basic_publish(exchange=exchangename, routing_key="timeout.error",body=json.dumps(event_result.json()), properties=pika.BasicProperties(delivery_mode=2))
@@ -253,9 +255,21 @@ def optimize_schedule(request: TimeoutOptimizeScheduleRequest):
     opt_update = requests.post(UPDATE_OPTIMIZATION_URL, json = opt_response.json())
     if opt_update.status_code >300:
         raise HTTPException(status_code=opt_update.status_code, detail="failed to update event db")
-    return opt_response.json()    
     
+    event_result = requests.get(f"{EVENT_URL}{request.event_id}")
+    if event_result.status_code not in range(200,300):
+        channel.basic_publish(exchange=exchangename, routing_key="timeout.error",body=json.dumps(event_result.json()), properties=pika.BasicProperties(delivery_mode=2))
+        return event_result
+        
+    event_result = event_result.json()
+    # Update event timeout to null
+    event_result["time_out"] = None
+    event_result = requests.put(f"{EVENT_URL}{request.event_id}", json=jsonable_encoder(event_result))
+    if event_result.status_code not in range(200,300):
+        channel.basic_publish(exchange=exchangename, routing_key="timeout.error",body=event_result, properties=pika.BasicProperties(delivery_mode=2))
+        return event_result    
     
+    return opt_response.json()
 
     
 
