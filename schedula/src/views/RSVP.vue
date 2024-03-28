@@ -24,6 +24,21 @@ export default {
     created() {
         this.eventToken = this.$route.params.eventToken;
         console.log(this.eventToken)
+        axios.get(`http://localhost:3800/event/${this.eventToken}`)
+        .then (response=>{
+            try {
+                var placeholder = response.data.detail
+                console.log(error)
+            }
+            catch{
+                var event = response.data
+                pass
+            }     
+            var minDate = new Date(Date.parse(event.datetime_start))
+            var maxDate = new Date(Date.parse(event.datetime_end))
+            document.getElementById("name").innerText = event.event_name
+
+        })
     },
     computed: {
         // Get the Monday of the real time current week.
@@ -125,7 +140,7 @@ export default {
                     <div class="header">
                         <h1 class="title">Event Invitation</h1>
                         <p class="exp">
-                            You have been invited to attend this event.
+                            You have been invited to attend <span id = "name"></span>.
                         </p>
                     </div>
                     <div class="btns">
@@ -144,7 +159,12 @@ export default {
                         <vue-cal id="calendar" ref="vuecal" :time-from="0 * 60" :time-to="24 * 60"
                             :disable-views="['years', 'year']" hide-view-selector resize-x
                             :editable-events="{ title: false, drag: false, resize: true, delete: true, create: true }"
-                            :snap-to-time="15" :events="events" class="vuecal--full-height-delete"></vue-cal>
+                            :snap-to-time="15" :events="events" class="vuecal--full-height-delete"
+                            :min-date=minDate
+                            :max-date=maxDate
+                            :selected-date=minDate
+                            >
+                            </vue-cal>
                     </div>
 
                     <div class="btns">
