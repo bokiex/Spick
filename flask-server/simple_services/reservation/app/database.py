@@ -20,7 +20,6 @@ DATABASE = "reservation"
 #SQLALCHEMY_DATABASE_URL = 'mysql+mysqlconnector://is213@localhost:8889/reservations'
 SQLALCHEMY_DATABASE_URL = 'mysql+mysqlconnector://is213@localhost:3306/reservation'
 
-print(SQLALCHEMY_DATABASE_URL)
 engine = create_engine(SQLALCHEMY_DATABASE_URL, echo=True)
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)

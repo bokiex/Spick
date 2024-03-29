@@ -15,7 +15,7 @@ import json
 
 reservation_ms = environ.get("RESERVATION_URL") or "http://localhost:3400/reservation"
 event_ms = environ.get("EVENT_URL") or "http://localhost:3600/event"
-
+manage_event_ms = environ.get("MANAGE_EVENT_URL") or "http://localhost:3500/event"
 connection = None
 channel = None
 exchangename = "generic_topic"
@@ -61,6 +61,8 @@ def reserve(reservation: schemas.Reservation):
     reservation_details = {
         "user_id": reservation.user_id,
         "reservation_name": reservation.reservation_name,
+        "reservation_start_time": str(reservation.datetime_start),
+        "reservation_end_time": str(reservation.datetime_end),
         "reservation_address": reservation.reservation_address
     }
 
@@ -68,17 +70,34 @@ def reserve(reservation: schemas.Reservation):
     if res.status_code not in range(200,300):
         channel.basic_publish(exchange=exchangename, routing_key="reservation.error", body=json.dumps(res.json()))
         return HTTPException(status_code=400, detail={"message":res.json()})
+
+    res = res.json()['reservation']
     
-    update_event = requests.put(event_ms + f"/{reservation.event_id}", json=res.json())
+    event_details = {
+        "reservation_name": res["reservation_name"],
+        "reservation_address": res["reservation_address"],
+        "datetime_start": res["reservation_start_time"],
+        "datetime_end": res["reservation_end_time"],
+    }    
+    update_event = requests.put(event_ms + f"/{reservation.event_id}", json=event_details)
     if update_event.status_code not in range(200,300):
         channel.basic_publish(exchange=exchangename, routing_key="event.error", body=json.dumps(update_event.json()))
         return HTTPException(status_code=400, detail={"message":update_event.json()})
     
+    event = requests.get(manage_event_ms + f"/{reservation.event_id}")
+    if event.status_code not in range(200,300):
+        channel.basic_publish(exchange=exchangename, routing_key="manage_event.error", body=json.dumps(event.json()))
+        return HTTPException(status_code=400, detail={"message":event.json()})
+    
+    event = event.json()
+    print(event)
 
+    # convert datetime into date and time 
+    reservation.datetime_start = reservation.datetime_start.strftime("%m-%d %H:%M:%S")
     notification = {
-        "notification_list": [i.telegram_tag for i in reservation.invitees],
+        "notification_list": [i["telegram_tag"] for i in event["invitees"]],
         "message": f"{reservation.reservation_name} at {reservation.reservation_address} has been reserved at {reservation.datetime_start}. See you there!"
     }
-    channel.basic_publish(exchange=exchangename, routing_key="reservation.notification", body=jsonable_encoder(notification))
+    channel.basic_publish(exchange=exchangename, routing_key="reservation.notification", body=json.dumps(notification))
     return JSONResponse(status_code=201, content={"message": "Reservation created successfully."})
 

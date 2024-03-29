@@ -47,6 +47,8 @@ def get_db():
 @app.get("/event", response_model=list[schemas.Event])
 def get_events(db: Session = Depends(get_db)):
     res = crud.get_events(db)
+    if res == []:
+        return jsonable_encoder({"message": "No events found."})
     return jsonable_encoder(res)
 
 # Get event by ID
@@ -61,7 +63,7 @@ async def get_event_by_id(event_id: str, db: Session = Depends(get_db)):
 
 # Update event
 @app.put("/event/{event_id}")
-async def update_event(event_id: int, event: schemas.EventPut, db: Session = Depends(get_db)):
+async def update_event(event_id: str, event: schemas.EventPut, db: Session = Depends(get_db)):
   
     res = crud.update_event(event_id, event, db)
     if res == []:

@@ -44,7 +44,7 @@ def get_event_by_id(event_id: str,db: Session ):
 
     return res
 
-def update_event(event_id:str, event: schemas.EventPut, db: Session ):
+def update_event(event_id: str, event: schemas.EventPut, db: Session ):
     db_event = db.query(models.Event).filter(models.Event.event_id == event_id).first()
     if not db_event:
         
@@ -54,7 +54,7 @@ def update_event(event_id:str, event: schemas.EventPut, db: Session ):
         setattr(db_event, key, value)
     db.commit()
     db.refresh(db_event)
-    return db_event
+    return get_event_by_id(event_id, db)
 
 def delete_event(db: Session, event_id: str):
     db_event = db.query(models.Event).filter(models.Event.event_id == event_id).first()
