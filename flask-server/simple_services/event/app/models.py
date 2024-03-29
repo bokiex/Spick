@@ -21,14 +21,13 @@ class Event(Base):
     reservation_address = Column(String(64), nullable=True)
     image = Column(String(1024), nullable=True)
     recommendations = relationship("Recommendation", back_populates="event",   cascade="all, delete, delete-orphan")
-    # image = relationship("Image", back_populates="event")
     invitees = relationship("Invitee", back_populates="event",   cascade="all, delete, delete-orphan")
 
 class Invitee(Base):
     __tablename__ = 'invitee'
     event_id = Column(String(6), ForeignKey('event.event_id'), nullable=False)
     user_id = Column(Integer, primary_key=True, nullable=False)
-    status = Column(Boolean, nullable=True, default=False)
+    status = Column(String(6), nullable=True, default=False)
     event = relationship("Event", back_populates="invitees")
 
 class Recommendation(Base):
@@ -39,15 +38,6 @@ class Recommendation(Base):
     event_id = Column(String(6), ForeignKey('event.event_id'), nullable=False)
 
     event = relationship("Event", back_populates="recommendations")
-
-class Image(Base):
-    __tablename__ = 'image'
-    id = Column(Integer, primary_key=True, autoincrement=True, index=True)
-    image_name = Column(String(255), nullable=False)
-    image_path = Column(String(1024), nullable=False)
-    event_id = Column(String(6), ForeignKey('event.event_id'), nullable=False)
-
-    # event = relationship("Event", back_populates="image")
 
 class Optimized(Base):
     __tablename__ = 'optimized'
