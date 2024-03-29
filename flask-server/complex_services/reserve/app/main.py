@@ -63,9 +63,20 @@ def reserve(reservation: schemas.Reservation):
         "reservation_address": reservation.reservation_address
     }
 
-    res= requests.post(reservation_ms, json=reservation_details)
+    res = requests.post(reservation_ms, json=reservation_details)
     if res.status_code not in range(200,300):
-        return {"message": "reservation failed"}
-    else:
-        update_event = requests.put( event_ms + f"/{reservation.event_id}", json=res.json())
+        channel.basic_publish(exchange=exchangename, routing_key="reservation.error", body=json.dumps(res.json()))
+        return HTTPException(status_code=400, detail={"message":res.json()})
+    
+    update_event = requests.put(event_ms + f"/{reservation.event_id}", json=res.json())
+    if update_event.status_code not in range(200,300):
+        channel.basic_publish(exchange=exchangename, routing_key="event.error", body=json.dumps(update_event.json()))
+        return HTTPException(status_code=400, detail={"message":update_event.json()})
+    
+
+    notification = {
+        "notification_list": [i.telegram_tag for i in reservation.invitees],
+        "message": f"Reservation created for {reservation.reservation_name} at {reservation.reservation_address} on {reservation.start_time} for {reservation.num_guests} guests"
+    }
+    channel.basic_publish(exchange=exchangename, routing_key="reservation.notification", body=jsonable_encoder(notification))
 
