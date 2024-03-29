@@ -12,5 +12,5 @@ CREATE TABLE IF NOT EXISTS `reservation` (
     `user_id` VARCHAR(64) NOT NULL,
     `reservation_name` VARCHAR(64) NOT NULL,
     `reservation_time` TIMESTAMP NOT NULL,
-    `reservation_address` VARCHAR(256) NOT NULL,
+    `reservation_address` VARCHAR(256) NOT NULL
 )   ENGINE=InnoDB DEFAULT CHARSET=utf8;

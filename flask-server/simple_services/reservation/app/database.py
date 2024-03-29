@@ -11,14 +11,14 @@ load_dotenv()
 # DB_USER = os.getenv("DB_USER")
 DB_PASSWORD = os.getenv("DB_PASSWORD")
 # DATABASE = os.getenv("DATABASE")
-DATABASE = "reservations"
+DATABASE = "reservation"
 
 
 # SQLALCHEMY_DATABASE_URL = (
 #     f"mysql+mysqlconnector://root:root@host.docker.internal:9999/reservations"
 # )
-SQLALCHEMY_DATABASE_URL = 'mysql+mysqlconnector://is213@localhost:8889/reservations'
-# SQLALCHEMY_DATABASE_URL = 'mysql+mysqlconnector://is213@localhost:3306/reservations'
+#SQLALCHEMY_DATABASE_URL = 'mysql+mysqlconnector://is213@localhost:8889/reservations'
+SQLALCHEMY_DATABASE_URL = 'mysql+mysqlconnector://is213@localhost:3306/reservation'
 
 print(SQLALCHEMY_DATABASE_URL)
 engine = create_engine(SQLALCHEMY_DATABASE_URL, echo=True)

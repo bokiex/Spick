@@ -12,8 +12,6 @@ def get_events(db: Session):
    
     return res
 
-
-
 def create_event(db: Session, event: schemas.Event):
 
     event_data = event.dict(exclude={"recommendations", "invitees"})

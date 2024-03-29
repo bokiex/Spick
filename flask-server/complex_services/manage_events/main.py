@@ -17,7 +17,7 @@ from typing import Optional
 import httpx
 
 user_ms = environ.get('USER_URL') or "http://localhost:3000/users/"
-event_ms = environ.get('EVENT_URL') or "http://localhost:8000/event/"
+event_ms = environ.get('EVENT_URL') or "http://localhost:5000/event/"
 notification_ms = environ.get("NOTIFICATION_URL") or "http://localhost:5005/notification/"
 recommendation_ms = environ.get('RECOMMENDATION_URL') or "http://localhost:3500/recommendation/"
 rsvp_ms = environ.get('RSVP_URL') or "http://localhost:4000/rsvp/optimize/"
@@ -66,13 +66,13 @@ app.add_middleware(
 def get_events():
     event_result = requests.get(event_ms)
     if event_result.status_code not in range(200,300):
-        channel.basic_publish(exchange=exchangename, routing_key="get_event.error",body=json.dumps(event_result.json()), properties=pika.BasicProperties(delivery_mode=2))
+        channel.basic_publish(exchange=exchangename, routing_key="get_event.error",body=event_result, properties=pika.BasicProperties(delivery_mode=2))
         return event_result
     event_result = event_result.json()
 
     user_result = requests.get(user_ms)
     if user_result.status_code not in range(200,300):
-        channel.basic_publish(exchange=exchangename, routing_key="get_event.error",body=json.dumps(user_result.json()), properties=pika.BasicProperties(delivery_mode=2))
+        channel.basic_publish(exchange=exchangename, routing_key="get_event.error",body=json.dumps(user_result), properties=pika.BasicProperties(delivery_mode=2))
         return user_result
     user_result = user_result.json()
 

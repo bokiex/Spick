@@ -3,21 +3,14 @@ from datetime import datetime
 from typing import List, Optional
 from fastapi import File, UploadFile
 
-
 class Invitee(BaseModel):
     event_id: str 
-    user_id: int
+    user_id: int 
     status: str | None = None
-
-
-
-    
 
 class Recommendation(BaseModel):
     recommendation_name: str
     recommendation_address: str
-
-  
 
 class Event(BaseModel):
     event_name: str
@@ -47,7 +40,6 @@ class EventPut(BaseModel):
 
 class EventResponse(Event):
     event_id: str
-
 
 class OptimizedScheduleDay(BaseModel):
     event_id: str
