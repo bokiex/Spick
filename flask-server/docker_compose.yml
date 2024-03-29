@@ -1,0 +1,20 @@
+services:
+  user_schedule:
+    build: .\simple_services\user_schedule
+    ports:
+      - "8007:8007"
+    environment:
+      - DATABASE_URL=mysql://mysql+mysqlconnector://root@localhost:3306/user_schedule
+        
+  screening:
+    build:
+      context: ./
+      dockerfile: screening.Dockerfile
+    restart: always
+    environment:
+      dbURL: mysql+mysqlconnector://is213@host.docker.internal:3306/screening
+      PYTHONUNBUFFERED: 1
+    ports:
+      - "5000:5000"
+    networks:
+      - kong-net

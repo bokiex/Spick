@@ -3,8 +3,27 @@ from fastapi import FastAPI, Depends, HTTPException
 from sqlalchemy.orm import Session
 import crud, models, schemas, database
 from typing import List
+from fastapi.middleware.cors import CORSMiddleware
+
 
 app = FastAPI()
+
+
+origins = [
+    "http://localhost:5173",
+    "https://localhost.tiangolo.com",
+    "http://localhost",
+    "http://localhost:8080",
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 
 # Dependency to get the DB session
 def get_db():

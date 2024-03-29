@@ -15,13 +15,13 @@ import json
 
 # URLs for the User Schedule, Optimize Schedule services, and Event Status Update
 
-OPTIMIZE_SCHEDULE_SERVICE_URL = "http://127.0.0.1:8001/optimize_schedule"
-UPDATE_RESPONSES_URL = "http://127.0.0.1:8002/invitee"
-VALUE_RETRIEVE_URL = "http://127.0.0.1:8002/invitee/"
-UPDATE_OPTIMIZATION_URL = "http://127.0.0.1:8002/update_optimize"
-EVENT_URL = "http://127.0.0.1:8002/event/"
-USER_SCHEDULE_SERVICE_URL = "http://127.0.0.1:8003/user_schedule/"
-NOTIFICATION_URL = "http://127.0.0.1:8004/notification"
+OPTIMIZE_SCHEDULE_SERVICE_URL = "http://127.0.0.1:8008/optimize_schedule"
+UPDATE_RESPONSES_URL = "http://127.0.0.1:8000/invitee"
+VALUE_RETRIEVE_URL = "http://127.0.0.1:8000/invitee/"
+UPDATE_OPTIMIZATION_URL = "http://127.0.0.1:8000/update_optimize"
+EVENT_URL = "http://127.0.0.1:8000/event/"
+USER_SCHEDULE_SERVICE_URL = "http://127.0.0.1:8007/user_schedule/"
+NOTIFICATION_URL = "http://127.0.0.1:8002/notification"
 
 
 connection = None
@@ -42,6 +42,21 @@ async def lifespan(app: FastAPI):
     yield
     connection.close()
 
+app = FastAPI(lifespan=lifespan)
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    global connection, channel
+    connection = amqp_connection.create_connection()
+    channel = connection.channel()
+
+    if not amqp_connection.check_exchange(channel, exchangename, exchangetype):
+        print("\nCreate the 'Exchange' before running this microservice. \nExiting the program.")
+        sys.exit(0)
+
+    yield
+    connection.close()
+   
 app = FastAPI(lifespan=lifespan)
 
 origins = [
@@ -197,21 +212,24 @@ def check_and_trigger_optimization(data):
             return event_result
         
         event_result = event_result.json()
+        print(event_result)
         # Update event timeout to null
         event_result["time_out"] = None
+        print(event_result)
         event_result = requests.put(f"{EVENT_URL}{event_id}", json=jsonable_encoder(event_result))
-        if event_result.status_code not in range(200,300):
-            channel.basic_publish(exchange=exchangename, routing_key="timeout.error",body=event_result, properties=pika.BasicProperties(delivery_mode=2))
-            return event_result
+        
+        # if event_result.status_code not in range(200,300):
+        #     channel.basic_publish(exchange=exchangename, routing_key="timeout.error",body=json.dumps(event_result.json()), properties=pika.BasicProperties(delivery_mode=2))
+        #     return event_result
 
-        host_tag = requests.get(f"{EVENT_URL}{event_id}")
-        if host_tag.status_code >300:
-            channel.basic_publish(exchange=exchangename, routing_key="timeout.error",body=host_tag, properties=pika.BasicProperties(delivery_mode=2))
-            return host_tag
+        # host_tag = requests.get(f"{EVENT_URL}{event_id}")
+        # if host_tag.status_code >300:
+        #     channel.basic_publish(exchange=exchangename, routing_key="timeout.error",body=host_tag, properties=pika.BasicProperties(delivery_mode=2))
+        #     return host_tag
 
-        noti_payload = jsonable_encoder( {"notification_list":  [host_tag.json()["host_tag"]], "message": f"Event {event_id} Optimised." })
+        # noti_payload = jsonable_encoder( {"notification_list":  [host_tag.json()["host_tag"]], "message": f"Event {event_id} Optimised." })
                                                               
-        channel.basic_publish(exchange=exchangename, routing_key="update_optimization.notification",body=noti_payload, properties=pika.BasicProperties(delivery_mode=2))
+        # channel.basic_publish(exchange=exchangename, routing_key="update_optimization.notification",body=noti_payload, properties=pika.BasicProperties(delivery_mode=2))
         
         
         return jsonable_encoder(opt)
