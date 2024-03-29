@@ -42,15 +42,6 @@ CREATE TABLE IF NOT EXISTS `recommendation` (
 
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-CREATE TABLE IF NOT EXISTS `image` (
-    `id` INT AUTO_INCREMENT PRIMARY KEY,
-    `image_path` VARCHAR(1024) NOT NULL,
-    `image_name` VARCHAR(255),
-    `image_type` VARCHAR(50),
-    `event_id` varchar(6) NOT NULL,
-    FOREIGN KEY (event_id) REFERENCES event(event_id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
 CREATE TABLE IF NOT EXISTS `Optimized` (
     `event_id` VARCHAR(6) NOT NULL,
     `attendee_id` INT, 

@@ -8,5 +8,4 @@ class Reservation(Base):
     reservation_name = Column(String(64), nullable=False)
     reservation_time = Column(TIMESTAMP, nullable=False)
     reservation_address = Column(String(64), nullable=False)
-    created_at = Column(TIMESTAMP, nullable=False)
  
