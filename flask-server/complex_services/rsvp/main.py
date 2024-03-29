@@ -12,7 +12,6 @@ from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 import json
 
-app = FastAPI()
 
 # URLs for the User Schedule, Optimize Schedule services, and Event Status Update
 
@@ -30,6 +29,20 @@ channel = None
 exchangename = "generic_topic"
 exchangetype = "topic"
 
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    global connection, channel
+    connection = amqp_connection.create_connection()
+    channel = connection.channel()
+
+    if not amqp_connection.check_exchange(channel, exchangename, exchangetype):
+        print("\nCreate the 'Exchange' before running this microservice. \nExiting the program.")
+        sys.exit(0)
+
+    yield
+    connection.close()
+
+app = FastAPI(lifespan=lifespan)
 
 origins = [
     "http://localhost:5173",
@@ -45,20 +58,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    global connection, channel
-    connection = amqp_connection.create_connection()
-    channel = connection.channel()
-
-    if not amqp_connection.check_exchange(channel, exchangename, exchangetype):
-        print("\nCreate the 'Exchange' before running this microservice. \nExiting the program.")
-        sys.exit(0)
-
-    yield
-    connection.close()
-   
 
 # put this logic after getting host teletag
 # channel.basic_publish(exchange=exchangename, routing_key="create_event.notification",body=message, properties=pika.BasicProperties(delivery_mode=2))
