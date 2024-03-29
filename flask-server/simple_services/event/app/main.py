@@ -44,9 +44,11 @@ def get_db():
         db.close()
 
 # Get all events
-@app.get("/event", response_model=list[schemas.EventResponse])
+@app.get("/event", response_model=list[schemas.Event])
 def get_events(db: Session = Depends(get_db)):
     res = crud.get_events(db)
+    if res == []:
+        return jsonable_encoder({"message": "No events found."})
     return jsonable_encoder(res)
 
 # Get event by ID
