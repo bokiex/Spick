@@ -4,6 +4,7 @@ import  schemas
 import amqp_connection
 import pika
 import sys
+from fastapi.responses import JSONResponse
 from os import environ
 from sqlalchemy.orm import Session
 from fastapi.encoders import jsonable_encoder
@@ -76,7 +77,8 @@ def reserve(reservation: schemas.Reservation):
 
     notification = {
         "notification_list": [i.telegram_tag for i in reservation.invitees],
-        "message": f"Reservation created for {reservation.reservation_name} at {reservation.reservation_address} on {reservation.start_time} for {reservation.num_guests} guests"
+        "message": f"{reservation.reservation_name} at {reservation.reservation_address} has been reserved at {reservation.datetime_start}. See you there!"
     }
     channel.basic_publish(exchange=exchangename, routing_key="reservation.notification", body=jsonable_encoder(notification))
+    return JSONResponse(status_code=201, content={"message": "Reservation created successfully."})
 
