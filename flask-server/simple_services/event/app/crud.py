@@ -52,8 +52,7 @@ def update_event(event_id:str, event: schemas.EventPut, db: Session ):
         
         return None
    
-    for key, value in event.dict(exclude_unset=True).items():
-   
+    for key, value in event.dict(exclude_unset=True, exclude={'invitees', 'recommendations'}).items():
         setattr(db_event, key, value)
     db.commit()
     db.refresh(db_event)

@@ -37,6 +37,8 @@ class EventPut(BaseModel):
     event_desc: Optional[str] = None
     datetime_start: Optional[datetime] = None
     datetime_end: Optional[datetime] = None
+    image: Optional[str] = None
+    invitees: Optional[List[Invitee]] = None
     time_out: Optional[datetime] = None
     user_id: Optional[int] = None
     recommendations: Optional[List[Recommendation]] = None
