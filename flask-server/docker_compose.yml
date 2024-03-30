@@ -1,5 +1,17 @@
+volumes:
+  rabbitmq_data: 
+  user_schedule_data: 
+
+networks:
+  schedula:
+    driver: bridge
+    name: schedula
+
 services:
 
+  #######################################
+  # Rabbit MQ
+  #######################################
   rabbitmq:
     image: rabbitmq:3-management
     hostname: esd-rabbit
@@ -14,6 +26,9 @@ services:
     networks:
       - schedula
 
+  #######################################
+  # User_schedule Microservice
+  #######################################
   user_schedule:
     build: 
       context: .\simple_services\user_schedule
@@ -26,7 +41,12 @@ services:
       PYTHONUNBUFFERED: 1
     networks:
       - schedula
+    volumes: 
+      - user_schedule_data: /var/lib/mysql
 
+  #######################################
+  # Optimizer Microservice
+  #######################################
   optimizer:
     build: 
       context: .\simple_services\optimizer
