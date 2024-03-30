@@ -1,6 +1,9 @@
 volumes:
   rabbitmq_data: 
   user_schedule_data: 
+  event_mysql_data:
+  reservation_mysql_data:
+
 
 networks:
   spick:
@@ -101,6 +104,8 @@ services:
     build:
       context: ./simple_services/mysql
       dockerfile: Dockerfile
+    volumes:
+      - event_mysql_data:/var/lib/mysql
     environment:
       MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: event
@@ -153,6 +158,8 @@ services:
     build:
       context: ./simple_services/mysql
       dockerfile: Dockerfile
+    volumes:
+      - reservation_mysql_data:/var/lib/mysql
     environment:
       MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: reservation
