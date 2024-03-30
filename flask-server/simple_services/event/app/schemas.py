@@ -35,8 +35,8 @@ class EventPut(BaseModel):
     time_out: Optional[datetime] = None
     user_id: Optional[int] = None
     recommendations: Optional[List[Recommendation]] = None
-    reservation_name: str
-    reservation_address: str
+    reservation_name: Optional[str] = None      #edited by kae
+    reservation_address: Optional[str] = None   #edited by kae
 
 class EventResponse(Event):
     event_id: str

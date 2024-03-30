@@ -22,6 +22,7 @@ UPDATE_OPTIMIZATION_URL = "http://127.0.0.1:8000/update_optimize"
 EVENT_URL = "http://127.0.0.1:8000/event/"
 USER_SCHEDULE_SERVICE_URL = "http://127.0.0.1:8007/user_schedule/"
 NOTIFICATION_URL = "http://127.0.0.1:8002/notification"
+USER_URL = "http://127.0.0.1:8001/users/user_id/"
 
 
 connection = None
@@ -205,31 +206,31 @@ def check_and_trigger_optimization(data):
             channel.basic_publish(exchange=exchangename, routing_key="update.error",body=opt_update, properties=pika.BasicProperties(delivery_mode=2))
             return opt_update
 
-    #if full response, set the timeout to NULL 
-        event_result = requests.get(f"{EVENT_URL}{event_id}")
-        if event_result.status_code not in range(200,300):
-            channel.basic_publish(exchange=exchangename, routing_key="timeout.error",body=json.dumps(event_result.json()), properties=pika.BasicProperties(delivery_mode=2))
-            return event_result
+        #get the event table entry 
+        event_details = requests.get(f"{EVENT_URL}{event_id}")
+        if event_details.status_code not in range(200,300):
+            channel.basic_publish(exchange=exchangename, routing_key="timeout.error",body=event_details, properties=pika.BasicProperties(delivery_mode=2))
+            return event_details
         
-        event_result = event_result.json()
-        print(event_result)
         # Update event timeout to null
-        event_result["time_out"] = None
-        print(event_result)
-        event_result = requests.put(f"{EVENT_URL}{event_id}", json=jsonable_encoder(event_result))
+        payload = {'time_out': None}
+
+        event_result = requests.put(f"{EVENT_URL}{event_id}", json=jsonable_encoder(payload))
+        if event_result.status_code not in range(200,300):
+            channel.basic_publish(exchange=exchangename, routing_key="event.error",body=event_result, properties=pika.BasicProperties(delivery_mode=2))
+            return event_result
+
+        host_id = event_details.json()["user_id"]
         
-        # if event_result.status_code not in range(200,300):
-        #     channel.basic_publish(exchange=exchangename, routing_key="timeout.error",body=json.dumps(event_result.json()), properties=pika.BasicProperties(delivery_mode=2))
-        #     return event_result
+        host_tag = requests.get(f"{USER_URL}{host_id}")
+        if host_tag.status_code not in range(200,300):
+            channel.basic_publish(exchange=exchangename, routing_key="user.error",body=host_tag, properties=pika.BasicProperties(delivery_mode=2))
 
-        # host_tag = requests.get(f"{EVENT_URL}{event_id}")
-        # if host_tag.status_code >300:
-        #     channel.basic_publish(exchange=exchangename, routing_key="timeout.error",body=host_tag, properties=pika.BasicProperties(delivery_mode=2))
-        #     return host_tag
-
-        # noti_payload = jsonable_encoder( {"notification_list":  [host_tag.json()["host_tag"]], "message": f"Event {event_id} Optimised." })
-                                                              
-        # channel.basic_publish(exchange=exchangename, routing_key="update_optimization.notification",body=noti_payload, properties=pika.BasicProperties(delivery_mode=2))
+        host_tag = host_tag.json()["telegram_tag"]
+        
+        noti_payload = {"notification_list": [host_tag], "message": f"Event {event_id} Optimised." }
+                                                   
+        channel.basic_publish(exchange=exchangename, routing_key="update_optimization.notification",body=json.dumps(noti_payload), properties=pika.BasicProperties(delivery_mode=2))
         
         
         return jsonable_encoder(opt)

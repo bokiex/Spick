@@ -8,6 +8,21 @@ networks:
     name: spick
 
 services:
+  #######################################
+  # user_schedule database
+  #######################################
+  user_schedule_db:
+    image: mysql:latest  #idk which version compatible
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: asscrack123
+      MYSQL_DATABASE: user_schedule
+      MYSQL_USER: is213
+      MYSQL_PASSWORD: 
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/user_schedule  
 
   #######################################
   # Rabbit MQ
@@ -42,7 +57,7 @@ services:
     networks:
       - spick
     volumes: 
-      - user_schedule_data: /var/lib/mysql
+      - user_schedule_data: /var/lib/user_schedule
 
   #######################################
   # Optimizer Microservice
