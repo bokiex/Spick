@@ -1,0 +1,29 @@
+_format_version: "2.1"
+services:
+  - name: authentication-service
+    url: http://127.0.0.1:8005
+    routes:
+      - name: signup-route
+        paths:
+          - /signup
+        methods:
+          - POST
+      - name: login-route
+        paths:
+          - /login
+        methods:
+          - POST
+          
+  - name: event-service
+    url: http://127.0.0.1:8000
+    routes:
+      - name:
+        paths:
+          -
+        methods:
+          - 
+      - name:
+        paths:
+          -
+        methods:
+          - 
