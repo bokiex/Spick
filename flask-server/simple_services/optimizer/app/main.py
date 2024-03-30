@@ -3,9 +3,24 @@ from typing import List, Dict
 from datetime import datetime
 from collections import defaultdict
 from schemas import OptimizedScheduleDay, OptimizedSchedules, ScheduleItem, CommonSlot
-
+from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
+
+origins = [
+    "http://localhost:5173",
+    "https://localhost.tiangolo.com",
+    "http://localhost",
+    "http://localhost:8080",
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 @app.post('/optimize_schedule', response_model=OptimizedSchedules)
 def optimize_schedule(schedule_list: List[ScheduleItem]):
@@ -68,86 +83,31 @@ def optimize_schedule(schedule_list: List[ScheduleItem]):
 
 
     return OptimizedSchedules(schedules=filtered_schedule_days)
+
+
 # Input
-# [
-#     {
-#         "event_id": 1,
-#         "user_id": 101,
-#         "start_time": "2024-04-01T09:00:00",
-#         "end_time": "2024-04-01T10:00:00",
-#         "schedule_id": 1
-#     },
-#     {
-#         "event_id": 1,
-#         "user_id": 102,
-#         "start_time": "2024-04-01T09:00:00",
-#         "end_time": "2024-04-01T10:00:00",
-#         "schedule_id": 1
-#     },
-#     {
-#         "event_id": 1,
-#         "user_id": 103,
-#         "start_time": "2024-04-01T22:00:00",
-#         "end_time": "2024-04-01T23:00:00",
-#         "schedule_id": 1
-#     },
-#     {
-#         "event_id": 2,
-#         "user_id": 104,
-#         "start_time": "2024-04-01T22:00:00",
-#         "end_time": "2024-04-01T23:00:00",
-#         "schedule_id": 1
-#     },
-#     {
-#         "event_id": 1,
-#         "user_id": 105,
-#         "start_time": "2024-04-02T10:00:00",
-#         "end_time": "2024-04-02T22:30:00",
-#         "schedule_id": 1
-#     }
-# ]
 """
-Output
+[
+    {
+        "schedule_id": 1,
+        "event_id": "123123",
+        "user_id": 101,
+        "start_time": "2024-04-01T11:00:00",
+        "end_time": "2024-04-01T12:00:00"
+    }
+]
+"""
+# Output
+"""
 {
     "schedules": [
         {
+            "event_id": "123123",
             "date": "2024-04-01",
-            "common_slot": {
-                "start": "2024-04-01T09:00:00",
-                "end": "2024-04-01T10:00:00"
-            },
+            "start": "2024-04-01T11:00:00",
+            "end": "2024-04-01T12:00:00",
             "attending_users": [
-                101,
-                102
-            ],
-            "non_attending_users": [
-                104,
-                103
-            ]
-        },
-        {
-            "date": "2024-04-01",
-            "common_slot": {
-                "start": "2024-04-01T22:00:00",
-                "end": "2024-04-01T23:00:00"
-            },
-            "attending_users": [
-                104,
-                103
-            ],
-            "non_attending_users": [
-                101,
-                102
-            ]
-        },
-        {
-            "date": "2024-04-02",
-            "common_slot": {
-                "start": "2024-04-02T10:00:00",
-                "end": "2024-04-02T22:30:00"
-            },
-            "attending_users": [
-                105
+                101
             ],
             "non_attending_users": []
         }

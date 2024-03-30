@@ -1,20 +1,41 @@
 services:
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    hostname: esd-rabbit
+    restart: always
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes: 
+      - ./rabbitmq.config:/etc/rabbitmq/rabbitmq.config
+      - ./rabbitmq_definitions.json:/etc/rabbitmq/rabbitmq_definitions.json
+      - rabbitmq_data:/var/lib/rabbitmq
+    networks:
+      - schedula
+
   user_schedule:
-    build: .\simple_services\user_schedule
+    build: 
+      context: .\simple_services\user_schedule
+      dockerfile: dockerfile
+    restart: always
     ports:
       - "8007:8007"
     environment:
-      - DATABASE_URL=mysql://mysql+mysqlconnector://root@localhost:3306/user_schedule
-        
-  screening:
-    build:
-      context: ./
-      dockerfile: screening.Dockerfile
-    restart: always
-    environment:
-      dbURL: mysql+mysqlconnector://is213@host.docker.internal:3306/screening
+      dbURL: mysql+mysqlconnector://is213@host.docker.internal:3306/user_schedule
       PYTHONUNBUFFERED: 1
-    ports:
-      - "5000:5000"
     networks:
-      - kong-net
+      - schedula
+
+  optimizer:
+    build: 
+      context: .\simple_services\optimizer
+      dockerfile: dockerfile
+    restart: always
+    ports:
+      - "8008:8008"
+    networks:
+      - schedula
+    
+        
+
