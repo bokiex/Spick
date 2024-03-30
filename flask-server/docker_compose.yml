@@ -3,6 +3,7 @@ volumes:
   user_schedule_data: 
   event_mysql_data:
   reservation_mysql_data:
+  user_mysql_data:
 
 
 networks:
@@ -76,6 +77,22 @@ services:
       - spick
   
   #######################################
+  # User_mysql database
+  #######################################
+  user_db:
+    image: mysql:latest
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD:
+      MYSQL_DATABASE: user
+      MYSQL_USER: root
+      MYSQL_PASSWORD: 
+    ports:
+      - "3307:3306"
+    volumes:
+      - user_mysql_data:/var/lib/mysql
+  
+  #######################################
   # User Microservice
   #######################################
   user:
@@ -90,8 +107,10 @@ services:
       PYTHONUNBUFFERED: 1
     networks:
       - schedula
-    volumes: 
-      - user_schedule_data: /var/lib/mysql 
+    depends_on:
+      user-mysql:
+        condition: service_healthy
+
 
   #######################################
   # Event_mysql Microservice
@@ -193,11 +212,21 @@ services:
       - spick
     environment:
       DATABASE_URL: mysql+mysqlconnector://root:root@reservation-mysql:3306/reservation
-   
     ports:
       - "8102:8102"
     depends_on:
       reservation-mysql:
         condition: service_healthy
         
-
+  #######################################
+  # Authentication Microservice
+  #######################################
+  authentication:
+    build: 
+      context: .\simple_services\authentication
+      dockerfile: dockerfile
+    restart: always
+    ports:
+      - "8005:8005"
+    networks:
+      - spick
