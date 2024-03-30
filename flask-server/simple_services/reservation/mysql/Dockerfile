@@ -1,8 +1,8 @@
 FROM mysql:latest
 
-ENV MYSQL_DATABASE=${MYSQL_DATABASE} \
-    MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+ENV MYSQL_DATABASE=reservations \
+    MYSQL_ROOT_PASSWORD=root 
 
 ADD reservation.sql /docker-entrypoint-initdb.d
 
-EXPOSE 9999
+EXPOSE 3306

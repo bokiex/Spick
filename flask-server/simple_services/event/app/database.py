@@ -6,12 +6,13 @@ from dotenv import load_dotenv
 load_dotenv()
 import os
 
+DATABASE_URL = os.getenv("DATABASE_URL")
 
 # SQLALCHEMY_DATABASE_URL = os.getenv("dbURL")
 #SQLALCHEMY_DATABASE_URL = 'mysql+mysqlconnector://is213@localhost:8889/event'
-SQLALCHEMY_DATABASE_URL = 'mysql+mysqlconnector://root@localhost:3306/event'
 
-engine = create_engine(SQLALCHEMY_DATABASE_URL, echo=True)
+
+engine = create_engine(DATABASE_URL, echo=True)
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 

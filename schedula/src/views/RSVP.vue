@@ -15,7 +15,7 @@ import {
     Separator
 } from 'radix-vue'
 import Button from '@/components/Button.vue'
-import { useRouter, useRoute } from 'vue-router'
+import { useRoute } from 'vue-router'
 
 // eventID placeholder
 const userID = localStorage.getItem('userID')
