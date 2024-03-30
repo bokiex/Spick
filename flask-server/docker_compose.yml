@@ -56,7 +56,28 @@ services:
       - "8008:8008"
     networks:
       - spick
-    
+  
+  #######################################
+  # User Microservice
+  #######################################
+  user:
+    build: 
+      context: .\simple_services\user
+      dockerfile: dockerfile
+    restart: always
+    ports:
+      - "8001:8001"
+    environment:
+      dbURL: mysql+mysqlconnector://is213@host.docker.internal:3306/user
+      PYTHONUNBUFFERED: 1
+    networks:
+      - schedula
+    volumes: 
+      - user_schedule_data: /var/lib/mysql 
+
+  #######################################
+  # Event_mysql Microservice
+  #######################################
   event-mysql:
     platform: linux/amd64
     networks:
@@ -86,7 +107,9 @@ services:
       timeout: 5s
       retries: 10
 
-
+  #######################################
+  # Event Microservice
+  #######################################
   event-simple:
     platform: linux/amd64
     build:
@@ -104,7 +127,9 @@ services:
       event-mysql:
         condition: service_healthy
 
-
+  #######################################
+  # Reservation_mysql Microservice
+  #######################################
   reservation-mysql:
     platform: linux/amd64
     networks:
@@ -134,7 +159,9 @@ services:
       timeout: 5s
       retries: 10
   
-   
+  #######################################
+  # Reservation Microservice
+  #######################################
   reservation-app:
     platform: linux/amd64
     build:

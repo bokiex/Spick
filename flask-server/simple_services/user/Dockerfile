@@ -1,8 +1,22 @@
-FROM mysql:latest
+# Use an official Python runtime as a parent image
+FROM python:3.8-slim
 
-ENV MYSQL_DATABASE=${MYSQL_DATABASE} \
-    MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+# Set the working directory in the container
+WORKDIR /app
 
-ADD event.sql /docker-entrypoint-initdb.d
+# Install any needed packages specified in requirements.txt
+RUN apt-get update && \
+    apt-get install -y pkg-config libmariadb-dev-compat libmariadb-dev gcc default-libmysqlclient-dev && \
+    rm -rf /var/lib/apt/lists/*
 
-EXPOSE 9999
+COPY requirements.txt ./
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy the current directory contents into the container at /usr/src/app
+COPY ./app .
+
+# Make port 8000 available to the world outside this container
+EXPOSE 8001
+
+# Run main.py when the container launches
+CMD ["python", "-m", "uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8001", "--reload"]
