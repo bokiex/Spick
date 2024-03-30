@@ -26,7 +26,7 @@ services:
     ports:
       - "3306:3306"
     volumes:
-      - mysql_data:/var/lib/user_schedule  
+      - mysql_data:/var/lib/mysql  
 
   #######################################
   # Rabbit MQ
@@ -110,7 +110,7 @@ services:
     depends_on:
       user-mysql:
         condition: service_healthy
-
+        
 
   #######################################
   # Event_mysql Microservice
