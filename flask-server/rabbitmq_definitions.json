@@ -1,0 +1,31 @@
+{
+    "exchanges": [
+      {
+        "name": "exchange_topic",
+        "type": "topic"
+      }
+    ],
+    "queues": [
+      {
+        "name": "error_queue",
+        "durable": true,
+        "bindings": [
+          {
+            "exchange": "exchange_topic",
+            "routing_key": "*.error"
+          }
+        ]
+      },
+      {
+        "name": "notification_queue",
+        "durable": true,
+        "bindings": [
+          {
+            "exchange": "exchange_topic",
+            "routing_key": "*.notification"
+          }
+        ]
+      }
+    ]
+  }
+  
