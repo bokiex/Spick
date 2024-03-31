@@ -1,21 +1,17 @@
--- Database: `reservations`
+-- Database: `reservation`
 --
-CREATE DATABASE IF NOT EXISTS `reservations` DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci;
-USE `reservations`;
+CREATE DATABASE IF NOT EXISTS `reservation` DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci;
+USE `reservation`;
 
 -- ---------------------------------------------------------------- --
---                              reservations TABLE                         --
+--                              reservation TABLE                         --
 -- ---------------------------------------------------------------- --
-DROP TABLE IF EXISTS `reservations`;
-CREATE TABLE IF NOT EXISTS `reservations` (
+DROP TABLE IF EXISTS `reservation`;
+CREATE TABLE IF NOT EXISTS `reservation` (
     `reservation_id` INT PRIMARY KEY AUTO_INCREMENT,
     `user_id` VARCHAR(64) NOT NULL,
-    `address` VARCHAR(256) NOT NULL,
-    `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-  
+    `reservation_name` VARCHAR(64) NOT NULL,
+    `reservation_start_time` TIMESTAMP NOT NULL,
+    `reservation_end_time` TIMESTAMP NOT NULL,
+    `reservation_address` VARCHAR(256) NOT NULL
 )   ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
-INSERT INTO reservations(user_id, location_lat, location_long) 
-VALUES 
-(1, 1.123, 1.123),
-(2, 2.123, 2.123);

@@ -6,12 +6,14 @@ def get_reservations(db: Session):
     return db.query(models.Reservation).all()
 
 def create_reservation(db: Session, reservation: schemas.Reservation):
-    print(jsonable_encoder(reservation))
     db_reservation = models.Reservation(**reservation.dict())
-    db.add(db_reservation)
-    db.commit()
-    db.refresh(db_reservation)
-
+    
+    try: 
+        db.add(db_reservation)
+        db.commit()
+        db.refresh(db_reservation)
+    except Exception as e:
+        return None
     return db_reservation
 
 def get_reservation_by_id(db: Session, reservation_id: int):

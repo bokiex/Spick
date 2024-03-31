@@ -1,0 +1,232 @@
+volumes:
+  rabbitmq_data: 
+  user_schedule_data: 
+  event_mysql_data:
+  reservation_mysql_data:
+  user_mysql_data:
+
+
+networks:
+  spick:
+    driver: bridge
+    name: spick
+
+services:
+  #######################################
+  # user_schedule database
+  #######################################
+  user_schedule_db:
+    image: mysql:latest  #idk which version compatible
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: asscrack123
+      MYSQL_DATABASE: user_schedule
+      MYSQL_USER: is213
+      MYSQL_PASSWORD: 
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql  
+
+  #######################################
+  # Rabbit MQ
+  #######################################
+  rabbitmq:
+    image: rabbitmq:3-management
+    hostname: esd-rabbit
+    restart: always
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes: 
+      - ./rabbitmq.config:/etc/rabbitmq/rabbitmq.config
+      - ./rabbitmq_definitions.json:/etc/rabbitmq/rabbitmq_definitions.json
+      - rabbitmq_data:/var/lib/rabbitmq
+    networks:
+      - spick
+
+  #######################################
+  # User_schedule Microservice
+  #######################################
+  user_schedule:
+    build: 
+      context: .\simple_services\user_schedule
+      dockerfile: dockerfile
+    restart: always
+    ports:
+      - "8007:8007"
+    environment:
+      dbURL: mysql+mysqlconnector://is213@host.docker.internal:3306/user_schedule
+      PYTHONUNBUFFERED: 1
+    networks:
+      - spick
+    volumes: 
+      - user_schedule_data: /var/lib/user_schedule
+
+  #######################################
+  # Optimizer Microservice
+  #######################################
+  optimizer:
+    build: 
+      context: .\simple_services\optimizer
+      dockerfile: dockerfile
+    restart: always
+    ports:
+      - "8008:8008"
+    networks:
+      - spick
+  
+  #######################################
+  # User_mysql database
+  #######################################
+  user_db:
+    image: mysql:latest
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD:
+      MYSQL_DATABASE: user
+      MYSQL_USER: root
+      MYSQL_PASSWORD: 
+    ports:
+      - "3307:3306"
+    volumes:
+      - user_mysql_data:/var/lib/mysql
+  
+  #######################################
+  # User Microservice
+  #######################################
+  user:
+    build: 
+      context: .\simple_services\user
+      dockerfile: dockerfile
+    restart: always
+    ports:
+      - "8001:8001"
+    environment:
+      dbURL: mysql+mysqlconnector://is213@host.docker.internal:3306/user
+      PYTHONUNBUFFERED: 1
+    networks:
+      - schedula
+    depends_on:
+      user-mysql:
+        condition: service_healthy
+        
+
+  #######################################
+  # Event_mysql Microservice
+  #######################################
+  event-mysql:
+    platform: linux/amd64
+    networks:
+      - spick
+    image: event-mysql
+    build:
+      context: ./simple_services/mysql
+      dockerfile: Dockerfile
+    volumes:
+      - event_mysql_data:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: event
+    ports:
+      - "8103:3306"
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "mysqladmin",
+          "ping",
+          "-h",
+          "localhost",
+          "-u",
+          "root",
+          "-p root",
+        ]
+      interval: 30s
+      timeout: 5s
+      retries: 10
+
+  #######################################
+  # Event Microservice
+  #######################################
+  event-simple:
+    platform: linux/amd64
+    build:
+      context: ./simple_services/event
+      dockerfile: Dockerfile
+    networks:
+      - spick
+    environment:
+      DATABASE_URL: mysql+mysqlconnector://root:root@event-mysql:3306/event
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+    ports:
+      - "8000:8000"
+    depends_on:
+      event-mysql:
+        condition: service_healthy
+
+  #######################################
+  # Reservation_mysql Microservice
+  #######################################
+  reservation-mysql:
+    platform: linux/amd64
+    networks:
+      - spick
+    image: reservation-mysql
+    build:
+      context: ./simple_services/mysql
+      dockerfile: Dockerfile
+    volumes:
+      - reservation_mysql_data:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: reservation
+    ports:
+      - "8106:3306"
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "mysqladmin",
+          "ping",
+          "-h",
+          "localhost",
+          "-u",
+          "root",
+          "-p root",
+        ]
+      interval: 30s
+      timeout: 5s
+      retries: 10
+  
+  #######################################
+  # Reservation Microservice
+  #######################################
+  reservation-app:
+    platform: linux/amd64
+    build:
+      context: ./simple_services/reservation
+      dockerfile: Dockerfile
+    networks:
+      - spick
+    environment:
+      DATABASE_URL: mysql+mysqlconnector://root:root@reservation-mysql:3306/reservation
+    ports:
+      - "8102:8102"
+    depends_on:
+      reservation-mysql:
+        condition: service_healthy
+        
+  #######################################
+  # Authentication Microservice
+  #######################################
+  authentication:
+    build: 
+      context: .\simple_services\authentication
+      dockerfile: dockerfile
+    restart: always
+    ports:
+      - "8005:8005"
+    networks:
+      - spick

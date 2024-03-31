@@ -3,12 +3,10 @@ from typing import Optional
 from datetime import datetime
 
 class Reservation(BaseModel):
-
     user_id: int
-    event_id: int
+    event_id: str
     reservation_address: str
-    num_guests: int
     reservation_name: str
-    start_time: datetime
-    end_time: datetime
+    datetime_start: datetime
+    datetime_end: datetime
     

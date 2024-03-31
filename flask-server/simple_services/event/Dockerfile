@@ -1,8 +1,13 @@
-FROM mysql:latest
+FROM python:3-slim
 
-ENV MYSQL_DATABASE=${MYSQL_DATABASE} \
-    MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+WORKDIR /usr/src/app
 
-ADD event.sql /docker-entrypoint-initdb.d
+ENV DATABASE_URL=mysql+mysqlconnector://root:root@localhost:8889/event
 
-EXPOSE 9999
+COPY ./requirements.txt ./
+
+RUN pip install -r ./requirements.txt
+
+COPY ./app ./
+
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]

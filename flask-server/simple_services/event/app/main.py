@@ -44,9 +44,11 @@ def get_db():
         db.close()
 
 # Get all events
-@app.get("/event", response_model=list[schemas.EventResponse])
+@app.get("/event", response_model=list[schemas.Event])
 def get_events(db: Session = Depends(get_db)):
     res = crud.get_events(db)
+    if res == []:
+        return jsonable_encoder({"message": "No events found."})
     return jsonable_encoder(res)
 
 # Get event by ID
@@ -61,7 +63,7 @@ async def get_event_by_id(event_id: str, db: Session = Depends(get_db)):
 
 # Update event
 @app.put("/event/{event_id}")
-async def update_event(event_id: int, event: schemas.EventPut, db: Session = Depends(get_db)):
+async def update_event(event_id: str, event: schemas.EventPut, db: Session = Depends(get_db)):
   
     res = crud.update_event(event_id, event, db)
     if res == []:
@@ -70,7 +72,7 @@ async def update_event(event_id: int, event: schemas.EventPut, db: Session = Dep
 
 # Delete event
 @app.delete("/event/{event_id}")
-async def delete_event(event_id: int):
+async def delete_event(event_id: str):
     res = crud.delete_event(event_id)
     if res == []:
         return jsonable_encoder({"message": "No event found."})
@@ -148,7 +150,7 @@ async def create_event(event: str = Form(...),  files: Optional[UploadFile] = Fi
 }
 """
 @app.get("/event/invitee/responded/{event_id}")
-def get_invitee_responded(event_id: int, db: Session = Depends(get_db)):
+def get_invitee_responded(event_id: str, db: Session = Depends(get_db)):
     res = crud.get_invitee_responded(db, event_id)
     if res == []:
         return jsonable_encoder({"message": "No invitees found."})
@@ -190,7 +192,7 @@ def get_invitee_responded(event_id: int, db: Session = Depends(get_db)):
 }
 """
 @app.get("/invitee/{event_id}")
-def get_invitees(event_id:int, db: Session = Depends(get_db)):
+def get_invitees(event_id:str, db: Session = Depends(get_db)):
     all_invitees = crud.get_invitee(db, event_id)
     if all_invitees == []:
         return jsonable_encoder({"message": "No invitees found."})

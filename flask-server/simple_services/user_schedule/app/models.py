@@ -14,7 +14,7 @@ class UserSchedule(Base):
     end_time = Column(DateTime)
 
 
-class ScheduleDelete(BaseModel):
+class ScheduleDelete(BaseModel): #dont need
     schedule_id: int
     event_id: int
     user_id: int

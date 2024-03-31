@@ -5,15 +5,75 @@ from typing import List
 import requests
 from fastapi.encoders import jsonable_encoder
 from flask import jsonify
+import sys
+import amqp_connection
+import pika
+from fastapi.middleware.cors import CORSMiddleware
+from contextlib import asynccontextmanager
+import json
 
-app = FastAPI()
 
 # URLs for the User Schedule, Optimize Schedule services, and Event Status Update
-USER_SCHEDULE_SERVICE_URL = "http://127.0.0.1:8003/user_schedule/"
-OPTIMIZE_SCHEDULE_SERVICE_URL = "http://127.0.0.1:8001/optimize_schedule"
-UPDATE_RESPONSES_URL = "http://127.0.0.1:8002/invitee"
-VALUE_RETRIEVE_URL = "http://127.0.0.1:8002/invitee/"
-UPDATE_OPTIMIZATION_URL = "http://127.0.0.1:8002/update_optimize"
+
+OPTIMIZE_SCHEDULE_SERVICE_URL = "http://127.0.0.1:8008/optimize_schedule"
+UPDATE_RESPONSES_URL = "http://127.0.0.1:8000/invitee"
+VALUE_RETRIEVE_URL = "http://127.0.0.1:8000/invitee/"
+UPDATE_OPTIMIZATION_URL = "http://127.0.0.1:8000/update_optimize"
+EVENT_URL = "http://127.0.0.1:8000/event/"
+USER_SCHEDULE_SERVICE_URL = "http://127.0.0.1:8007/user_schedule/"
+NOTIFICATION_URL = "http://127.0.0.1:8002/notification"
+USER_URL = "http://127.0.0.1:8001/users/user_id/"
+
+
+connection = None
+channel = None
+exchangename = "generic_topic"
+exchangetype = "topic"
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    global connection, channel
+    connection = amqp_connection.create_connection()
+    channel = connection.channel()
+
+    if not amqp_connection.check_exchange(channel, exchangename, exchangetype):
+        print("\nCreate the 'Exchange' before running this microservice. \nExiting the program.")
+        sys.exit(0)
+
+    yield
+    connection.close()
+
+app = FastAPI(lifespan=lifespan)
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    global connection, channel
+    connection = amqp_connection.create_connection()
+    channel = connection.channel()
+
+    if not amqp_connection.check_exchange(channel, exchangename, exchangetype):
+        print("\nCreate the 'Exchange' before running this microservice. \nExiting the program.")
+        sys.exit(0)
+
+    yield
+    connection.close()
+   
+app = FastAPI(lifespan=lifespan)
+
+origins = [
+    "http://localhost:5173",
+    "https://localhost.tiangolo.com",
+    "http://localhost",
+    "http://localhost:8080",
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 #Input
 # {   
@@ -52,7 +112,7 @@ def accept_invitation(request: AcceptInvitationSchema):
         "event_id": request.event_id,
         "user_id": request.user_id,
         "status": "Y"
-    }
+    } 
 
     status_response = requests.put(UPDATE_RESPONSES_URL, json=update_payload)
     if status_response.status_code > 300:
@@ -103,7 +163,7 @@ def decline_invitation(request: DeclineInvitationSchema):
         "user_id": request.user_id,
         "status": "N"  # Setting status to "N" for decline
     }
-
+    
     status_response = requests.put(UPDATE_RESPONSES_URL, json=update_payload)
     if status_response.status_code >300:
         raise HTTPException(status_code=status_response.status_code, detail=status_response)
@@ -113,7 +173,7 @@ def decline_invitation(request: DeclineInvitationSchema):
     opt_data = retrieve_response.json()
     opt_data["event_id"] = request.event_id
     # Assuming check_and_trigger_optimization exists and works as expected
-    x = check_and_trigger_optimization(jsonable_encoder(opt_data))  # Ensure this function is defined or adjusted for FastAPI
+    x = check_and_trigger_optimization((opt_data))  # Ensure this function is defined or adjusted for FastAPI
     x = jsonable_encoder(x)
 
     return x
@@ -125,21 +185,51 @@ def check_and_trigger_optimization(data):
     event_id = data['event_id']
     if invitees_left == 0 :
         response = requests.get(f"{USER_SCHEDULE_SERVICE_URL}{event_id}")
-        print(response)
         if response.status_code >300:
-            raise HTTPException(status_code=response.status_code, detail=response)
+            channel.basic_publish(exchange=exchangename, routing_key="user_schedule.error",body=response, properties=pika.BasicProperties(delivery_mode=2))
+            return response
+        
         payload = response.json()
+
         opt = requests.post(OPTIMIZE_SCHEDULE_SERVICE_URL, json=payload)
         if opt.status_code >300:
-            raise HTTPException(status_code=opt.status_code, detail=opt)
+            channel.basic_publish(exchange=exchangename, routing_key="optimize.error",body=opt, properties=pika.BasicProperties(delivery_mode=2))
+            return opt
+        
         opt = opt.json()
+
         opt_update = requests.post(UPDATE_OPTIMIZATION_URL, json = opt)
         if opt_update.status_code >300:
-            raise HTTPException(status_code=opt_update.status_code, detail="failed to update event db")
+            channel.basic_publish(exchange=exchangename, routing_key="update.error",body=opt_update, properties=pika.BasicProperties(delivery_mode=2))
+            return opt_update
+
+        #get the event table entry 
+        event_details = requests.get(f"{EVENT_URL}{event_id}")
+        if event_details.status_code not in range(200,300):
+            channel.basic_publish(exchange=exchangename, routing_key="timeout.error",body=event_details, properties=pika.BasicProperties(delivery_mode=2))
+            return event_details
         
-        # event_response = requests.get(f"{GET_EVENT_URL}{event_id}")
-        # if event_response.status_code >300:
-        #     raise HTTPException(status_code=event_response.status_code, detail=event_response)
+        # Update event timeout to null
+        payload = {'time_out': None}
+
+        event_result = requests.put(f"{EVENT_URL}{event_id}", json=jsonable_encoder(payload))
+        if event_result.status_code not in range(200,300):
+            channel.basic_publish(exchange=exchangename, routing_key="event.error",body=event_result, properties=pika.BasicProperties(delivery_mode=2))
+            return event_result
+
+        host_id = event_details.json()["user_id"]
+        
+        host_tag = requests.get(f"{USER_URL}{host_id}")
+        if host_tag.status_code not in range(200,300):
+            channel.basic_publish(exchange=exchangename, routing_key="user.error",body=host_tag, properties=pika.BasicProperties(delivery_mode=2))
+
+        host_tag = host_tag.json()["telegram_tag"]
+        
+        noti_payload = {"notification_list": [host_tag], "message": f"Event {event_id} Optimised." }
+                                                   
+        channel.basic_publish(exchange=exchangename, routing_key="update_optimization.notification",body=json.dumps(noti_payload), properties=pika.BasicProperties(delivery_mode=2))
+        
+        
         return jsonable_encoder(opt)
     else:
         # Condition where total_invitees != current_responses
@@ -180,9 +270,34 @@ def optimize_schedule(request: TimeoutOptimizeScheduleRequest):
     opt_update = requests.post(UPDATE_OPTIMIZATION_URL, json = opt_response.json())
     if opt_update.status_code >300:
         raise HTTPException(status_code=opt_update.status_code, detail="failed to update event db")
-    return opt_response.json()    
     
+    event_details = requests.get(f"{EVENT_URL}{request.event_id}")
+    if event_details.status_code not in range(200,300):
+        channel.basic_publish(exchange=exchangename, routing_key="timeout.error",body=event_details, properties=pika.BasicProperties(delivery_mode=2))
+        return event_details
+        
+    # Update event timeout to null
+    payload = {'time_out': None}
+
+    event_result = requests.put(f"{EVENT_URL}{request.event_id}", json=jsonable_encoder(payload))
+    if event_result.status_code not in range(200,300):
+        channel.basic_publish(exchange=exchangename, routing_key="event.error",body=event_result, properties=pika.BasicProperties(delivery_mode=2))
+        return event_result
+
+    host_id = event_details.json()["user_id"]
+        
+    host_tag = requests.get(f"{USER_URL}{host_id}")
+    if host_tag.status_code not in range(200,300):
+        channel.basic_publish(exchange=exchangename, routing_key="user.error",body=host_tag, properties=pika.BasicProperties(delivery_mode=2))
+
+    host_tag = host_tag.json()["telegram_tag"]
+        
+    noti_payload = {"notification_list": [host_tag], "message": f"Event {request.event_id} timed-out and optimised." }
+                                                   
+    channel.basic_publish(exchange=exchangename, routing_key="update_optimization.notification",body=json.dumps(noti_payload), properties=pika.BasicProperties(delivery_mode=2))
+        
     
+    return opt_response.json()
 
     
 

@@ -16,10 +16,11 @@ from fastapi.middleware.cors import CORSMiddleware
 from typing import Optional
 import httpx
 
-event_ms = environ.get('EVENT_URL') or "http://localhost:3800/event"
-notification_ms = environ.get("NOTIFICATION_URL") or "http://localhost:5005/notification"
-recommendation_ms = environ.get('RECOMMENDATION_URL') or "http://localhost:3500/recommendation"
-
+user_ms = environ.get('USER_URL') or "http://localhost:3000/users/"
+event_ms = environ.get('EVENT_URL') or "http://localhost:3600/event/"
+notification_ms = environ.get("NOTIFICATION_URL") or "http://localhost:5005/notification/"
+recommendation_ms = environ.get('RECOMMENDATION_URL') or "http://localhost:3500/recommendation/"
+rsvp_ms = environ.get('RSVP_URL') or "http://localhost:4000/rsvp/optimize/"
 connection = None
 channel = None
 exchangename = "generic_topic"
@@ -36,7 +37,7 @@ async def lifespan(app: FastAPI):
         print("\nCreate the 'Exchange' before running this microservice. \nExiting the program.")
         sys.exit(0)
 
-    jobstore = SQLAlchemyJobStore(url='mysql+mysqlconnector://is213@localhost:8889/scheduler')
+    jobstore = SQLAlchemyJobStore(url='mysql+mysqlconnector://is213@localhost:3306/scheduler')
     scheduler.add_jobstore(jobstore)
     scheduler.start()
 
@@ -61,6 +62,72 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+@app.get("/event")
+def get_events():
+    event_result = requests.get(event_ms)
+    if event_result.status_code not in range(200,300):
+        channel.basic_publish(exchange=exchangename, routing_key="get_event.error",body=event_result, properties=pika.BasicProperties(delivery_mode=2))
+        return event_result
+    event_result = event_result.json()
+
+    user_result = requests.get(user_ms)
+    if user_result.status_code not in range(200,300):
+        channel.basic_publish(exchange=exchangename, routing_key="get_event.error",body=json.dumps(user_result), properties=pika.BasicProperties(delivery_mode=2))
+        return user_result
+    user_result = user_result.json()
+
+    for event in event_result:
+        new_invitees = []
+        for invitee in event["invitees"]:
+            for user in user_result:
+                new_user = {
+                    'user_id': user['user_id'],
+                    'username': user['username'],
+                    'email': user['email'],
+                    'telegram_tag': user['telegram_tag'],
+                    'image': user['image']
+                }
+                if invitee['user_id'] == user['user_id']:
+                    new_invitees.append(new_user)
+                    break
+                if user['user_id'] == event["user_id"]:
+                    event["host"] = new_user
+        event["invitees"] = new_invitees
+    return event_result
+
+@app.get("/event/{event_id}")
+def get_event_by_id(event_id: str):
+    event_result = requests.get(event_ms + event_id)
+
+    if event_result.status_code not in range(200,300):
+        channel.basic_publish(exchange=exchangename, routing_key="get_event.error",body=event_result.json(), properties=pika.BasicProperties(delivery_mode=2))
+        return event_result
+    event_result = event_result.json()
+
+    user_result = requests.get(user_ms)
+    if user_result.status_code not in range(200,300):
+        channel.basic_publish(exchange=exchangename, routing_key="get_event.error",body=user_result.json(), properties=pika.BasicProperties(delivery_mode=2))
+        return user_result
+    user_result = user_result.json()
+
+    new_invitees = []
+    for invitee in event_result["invitees"]:
+        for user in user_result:
+            new_user = {
+                    'user_id': user['user_id'],
+                    'username': user['username'],
+                    'email': user['email'],
+                    'telegram_tag': user['telegram_tag'],
+                    'image': user['image']
+                }
+            if invitee['user_id'] == user['user_id']:
+                new_invitees.append(new_user)
+                break
+            if user['user_id'] == event_result["user_id"]:
+                event_result["host"] = new_user
+    event_result["invitees"] = new_invitees
+    return event_result
+
 """
 Sample event JSON input:
 {
@@ -184,19 +251,10 @@ def delete_event(event_id: int):
     return event_result
 
 def on_timeout(event_id: str):
-    event_result = requests.get(event_ms + f"/{event_id}")
-    if event_result.status_code not in range(200,300):
-        channel.basic_publish(exchange=exchangename, routing_key="timeout.error",body=json.dumps(event_result.json()), properties=pika.BasicProperties(delivery_mode=2))
-        return event_result
+
+    optimize_results = requests.post(rsvp_ms, json = jsonable_encoder({"event_id": event_id}))
+
+    if optimize_results.status_code not in range(200,300):
+        channel.basic_publish(exchange=exchangename, routing_key="timeout.error",body=json.dumps(optimize_results.json()), properties=pika.BasicProperties(delivery_mode=2))
+        return optimize_results
     
-    event_result = event_result.json()
-    # Update event timeout to null
-    event_result["time_out"] = None
-    event_result = requests.put(event_ms + f"/{event_id}", json=jsonable_encoder(event_result))
-    if event_result.status_code not in range(200,300):
-        channel.basic_publish(exchange=exchangename, routing_key="timeout.error",body=event_result, properties=pika.BasicProperties(delivery_mode=2))
-        return event_result
-    
-    # Send notification to host and invitees that event has timed out
-    # Notification check if timeout == null, if it is send to host only else send to invitees
-    channel.basic_publish(exchange=exchangename, routing_key="timeout.notification",body=event_result, properties=pika.BasicProperties(delivery_mode=2))
