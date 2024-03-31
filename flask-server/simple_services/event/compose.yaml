@@ -1,63 +1,50 @@
 version: "3.8"
 
 volumes:
-  event-mysql-data:
-    driver: local
-  event-mysql-logs:
-    driver: local
+    event-mysql-data:
+        driver: local
+    event-mysql-logs:
+        driver: local
 
 networks:
-  spick-net:
-    driver: bridge
+    spick:
+        driver: bridge
 
 services:
-  event-mysql:
-    platform: linux/amd64
-    networks:
-      - spick-net
-    image: event-mysql
-    build:
-      context: ./mysql
-      dockerfile: Dockerfile
-    environment:
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: event
-    ports:
-      - "8889:3306"
-    healthcheck:
-      test:
-        [
-          "CMD",
-          "mysqladmin",
-          "ping",
-          "-h",
-          "localhost",
-          "-u",
-          "root",
-          "-p root",
-        ]
-      interval: 30s
-      timeout: 5s
-      retries: 10
-  
-   
+    event-mysql:
+        platform: linux/amd64
+        networks:
+            - spick
+        image: event-mysql
+        build:
+            context: ./mysql
+            dockerfile: Dockerfile
+        environment:
+            MYSQL_ROOT_PASSWORD: root
+            MYSQL_DATABASE: event
+        ports:
+            - "8889:3306"
+        volumes:
+            - event-mysql-data:/var/lib/mysql
+        healthcheck:
+            test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p root"]
+            interval: 30s
+            timeout: 5s
+            retries: 10
 
-    ###############################################
-    # callbook: The test_invoke_http.py program
-    ###############################################
-  event-app:
-    platform: linux/amd64
-    build:
-      context: .
-      dockerfile: Dockerfile
-    networks:
-      - spick-net
-    environment:
-      DATABASE_URL: mysql+mysqlconnector://root:root@event-mysql:3306/event
-      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
-      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
-    ports:
-      - "8000:8000"
-    depends_on:
-      event-mysql:
-        condition: service_healthy
+    event:
+        platform: linux/amd64
+        build:
+            context: .
+            dockerfile: Dockerfile
+        networks:
+            - spick
+        environment:
+            DATABASE_URL: mysql+mysqlconnector://root@event-mysql:3306/event
+            AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+            AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+        ports:
+            - "8000:8000"
+        depends_on:
+            event-mysql:
+                condition: service_healthy
