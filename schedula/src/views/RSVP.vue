@@ -18,7 +18,7 @@ import Button from '@/components/Button.vue'
 import { useRoute } from 'vue-router'
 
 // eventID placeholder
-// const userID = localStorage.getItem('userID')
+const userID = localStorage.getItem('userID')
 
 const route = useRoute()
 
@@ -27,7 +27,6 @@ const event_id = route.params.eventToken
 var timeout = ref(null)
 var invited = false
 var event = null
-var userID = 1
 var minDate = ref(null)
 var maxDate = ref(null)
 var valid = ref(null)
