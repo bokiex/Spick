@@ -39,7 +39,7 @@ export default {
                 var event = response.data
                 this.valid = true
                 for (var user of event.invitees){
-                    if (user.user_id === this.userID){
+                    if (user.user_id === this.userID && user.status === null){
                         this.invited = true
                     }
                 }
@@ -132,7 +132,7 @@ export default {
 </script>
 
 <template>
-        <div class="container p-4" v-if="this.timeout === null">
+    <div class="container p-4" v-if="this.timeout === null">
         <div class="row justify-content-center">
             <!-- Form Start -->
             <div class="form-container" style="position: relative;">
