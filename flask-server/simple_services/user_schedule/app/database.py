@@ -11,10 +11,10 @@ import os
 # SQLALCHEMY_DATABASE_URL='mysql+mysqlconnector://is213@host.docker.internal:3306/user_schedule'
 # SQLALCHEMY_DATABASE_URL = 'mysql+mysqlconnector://is213@localhost:3306/event'
 
-SQLALCHEMY_DATABASE_URL = os.getenv("DATABASE_URL") or 'mysql+mysqlconnector://is213@host.docker.internal:3306/user_schedule'
+dbURL = os.getenv("SQLALCHEMY_DATABASE_URL") or 'mysql+mysqlconnector://is213@host.docker.internal:3306/user_schedule'
 
 
-engine = create_engine(SQLALCHEMY_DATABASE_URL, echo=True)
+engine = create_engine(dbURL, echo=True)
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 

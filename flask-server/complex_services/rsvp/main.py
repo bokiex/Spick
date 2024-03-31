@@ -256,7 +256,6 @@ def check_and_trigger_optimization(data):
 def optimize_schedule(request: TimeoutOptimizeScheduleRequest):
     if not request.event_id:
         raise HTTPException(status_code=400, detail="event_id is required.")
-
     response = requests.get(f"{user_schedule_ms}user_schedule/{request.event_id}")
     if response.status_code > 300:
         raise HTTPException(status_code=response.status_code, detail=response)
