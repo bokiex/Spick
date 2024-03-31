@@ -55,6 +55,8 @@ services:
         interval: 30s
         timeout: 5s
         retries: 10
+        volumes:
+            - user_schedule_data:/var/lib/mysql
   
    
 
@@ -91,7 +93,7 @@ services:
             ports:
                 - "3307:3306"
             volumes:
-                - user_schedule_data:/var/lib/mysql
+                - user-mysql-data:/var/lib/mysql
             healthcheck:
                 test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p root"]
                 interval: 30s
