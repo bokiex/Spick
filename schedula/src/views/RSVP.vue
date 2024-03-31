@@ -18,67 +18,83 @@ import Button from '@/components/Button.vue'
 import { useRoute } from 'vue-router'
 
 // eventID placeholder
-const userID = localStorage.getItem('userID')
+// const userID = localStorage.getItem('userID')
 
 const route = useRoute()
 
-const event_id = route.params.id
-const timeout = ref(null)
-const invited = false
-const valid = false
-const event = null
+const vuecal = ref()
+const event_id = route.params.eventToken
+var timeout = ref(null)
+var invited = false
+var event = null
+var userID = 1
+var minDate = ref(null)
+var maxDate = ref(null)
+var valid = ref(null)
 
 onMounted(() => {
-    axios.get(`http://localhost:3800/event/${event_id}`).then((response) => {
-        event = response.data
-
-    })
-    try {
-        const test = event.detail
-        valid = false
-    }
-    catch {
-        valid = true
-        const minDate = new Date(Date.parse(event.datetime_start))
-        const maxDate = new Date(Date.parse(event.datetime_end))
-        timeout.value = event.time_out
-        for (var user of event.invitees) {
-            if (user.status === null && user.user_id === userID) {
-                invited = true
+    axios.get(`http://127.0.0.1:8000/event/${event_id}`)
+        .then((response) => {
+            event = response.data
+            if (event.detail !== undefined) {
+                valid = false
             }
-        }
-    }
+            else {
+                valid = true
+                var startdate = new Date(Date.parse(event.datetime_start))
+                var enddate = new Date(Date.parse(event.datetime_end))
+                minDate = startdate.getFullYear()+'-'+(startdate.getMonth()+1)+'-'+startdate.getDate()
+                maxDate = enddate.getFullYear()+'-'+(enddate.getMonth()+1)+'-'+enddate.getDate()
+                timeout.value = event.time_out
+                for (var user of event.invitees) {
+                    if (user.status === null && user.user_id === userID) {
+                        invited = true
+                    }
+                }
+            }
+        })
 })
 
 // Get the Monday of the real time current week.
 function previousFirstDayOfWeek() {
     return new Date(new Date().setDate(new Date().getDate() - ((new Date().getDay() + 6) % 7)))
 }
-
-function sendAccept() {
-    this.nextStep()
-    var url = 'http://localhost:5100/rsvp/accept'
-    var events = this.getEvents()
+function sendDecline() {
+    var url = 'http://127.0.0.1:8101/rsvp/decline'
     var data = {
-        userID: this.userID,
-        token: this.eventToken,
-        eventID: eventID,
+        user_id: userID,
+        event_id: event_id
+    }
+    console.log(data)
+    axios.post(url, data).then(function (response) {
+        this.route.push({ path: '/calendarview' })
+    })
+}
+function sendAccept() {
+    var url = 'http://127.0.0.1:8101/rsvp/accept'
+    var events = getEvents()
+    var data = {
+        user_id: userID,
+        event_id: event_id,
         sched_list: events
     }
     console.log(data)
     axios.post(url, data).then(function (response) {
-        this.$route.push({ path: '/calendarview' })
+        console.log("success")
+        this.route.push({ path: '/calendarview' })
     })
 }
 function getEvents() {
-    var events = toRaw(this.$refs.vuecal.mutableEvents)
+    console.log(vuecal.value.mutableEvents)
+    var events = toRaw(vuecal.value.mutableEvents)
+    
     var result = []
     var index = 0
     for (var timeslot of events) {
         var event = {
-            scheduleID: this.index,
-            eventID: this.eventID,
-            userID: this.userID,
+            schedule_id: index,
+            event_id: event_id,
+            user_id: userID,
             start_time: timeslot.start
                 .format('YYYY-MM-DD')
                 .concat('T', timeslot.start.formatTime('HH:mm:00')),
@@ -115,7 +131,7 @@ function getEvents() {
                         <div class="center" style="text-align: center">
                             <div style="text-align: center">
                                 <h1 class="header form-input" style="font-size: x-large">
-                                    Event signup period is over
+                                    Event code is invalid
                                 </h1>
                                 <router-link class="btn exit" type="button" :to="`/`">Home</router-link>
                             </div>
@@ -130,7 +146,7 @@ function getEvents() {
                         <div class="center" style="text-align: center">
                             <div style="text-align: center">
                                 <h1 class="header form-input" style="font-size: x-large">
-                                    Event code is invalid
+                                    Event signup period is over
                                 </h1>
                                 <router-link class="btn exit" type="button" :to="`/`">Home</router-link>
                             </div>
@@ -178,16 +194,16 @@ function getEvents() {
                 <!-- Step 2 start -->
 
                 <div class="h-[500px]">
-                    <vue-cal id="calendar" ref="vuecal" :time-from="0 * 60" :time-to="24 * 60"
+                    <VueCal id="calendar" ref="vuecal" :time-from="0 * 60" :time-to="24 * 60"
                         :disable-views="['years', 'year']" hide-view-selector resize-x :editable-events="{
                 title: false,
                 drag: false,
                 resize: true,
                 delete: true,
                 create: true
-            }" :snap-to-time="15" :events="events" :min-date="this.minDate" :max-date="this.maxDate"
-                        :selected-date="this.minDate">
-                    </vue-cal>
+            }" :snap-to-time="15" :events="events" :min-date="minDate" :max-date="maxDate"
+                        :selected-date="minDate">
+                    </VueCal>
                 </div>
 
                 <!-- Step 2 end -->
@@ -196,11 +212,11 @@ function getEvents() {
                     <div class="flex justify-between m-5">
                         <DialogRoot>
                             <DialogTrigger>
-                                <Button type="button">Decline</Button>
+                                <Button type="button" @click = "sendDecline">Decline</Button>
                             </DialogTrigger>
 
                             <DialogTrigger>
-                                <Button type="button"> Submit </Button>
+                                <Button type="button" @click = "sendAccept"> Submit </Button>
                             </DialogTrigger>
                             <DialogPortal>
                                 <DialogOverlay
