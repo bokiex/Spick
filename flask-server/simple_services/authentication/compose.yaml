@@ -1,0 +1,16 @@
+version: "3.8"
+
+networks:
+  spick-net:
+    driver: bridge
+    external: true
+
+services:
+  authentication:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    networks:
+      - spick-net
+    ports:
+      - "8005:8005"

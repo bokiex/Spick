@@ -21,7 +21,7 @@ onMounted(async () => {
     // userID.value = localStorage.getItem('user_id')
 
     await axios
-        .get(`http://127.0.0.1:3000/users/user_id/${userID.value}`)
+        .get(`http://localhost:8001/users/user_id/${userID.value}`)
         .then((response) => {
             user.value.name = response.data.username
             user.value.tele = response.data.telegram_tag
@@ -55,7 +55,7 @@ async function saveSettings() {
     formData.append('files', user.value.image)
 
     try {
-        const res = await fetch(`http://127.0.0.1:3000/users/user_id/${userID.value}`, {
+        const res = await fetch(`http://localhost:8001/users/user_id/${userID.value}`, {
             method: 'PUT',
             body: formData
         })
@@ -92,7 +92,7 @@ async function updatePassword() {
             email: user.value.email,
             password: user.value.confirmPwd
         })
-        const res = await fetch(`http://127.0.0.1:3000/users/user_id/${userID.value}/password`, {
+        const res = await fetch(`http://localhost:8001/users/user_id/${userID.value}/password`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json', // Specify that we're sending JSON data
