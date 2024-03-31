@@ -101,9 +101,9 @@ function getEvents() {
                                 <h1 class="header form-input" style="font-size: x-large">
                                     Event signup period is over
                                 </h1>
-                                <router-link class="btn exit" type="button" :to="`/`"
-                                    >Home</router-link
-                                >
+                                <router-link class="btn exit" type="button" :to="`/`">
+                                    Home
+                                </router-link>
                             </div>
                         </div>
                     </div>
@@ -118,9 +118,9 @@ function getEvents() {
                                 <h1 class="header form-input" style="font-size: x-large">
                                     Event code is invalid
                                 </h1>
-                                <router-link class="btn exit" type="button" :to="`/`"
-                                    >Home</router-link
-                                >
+                                <router-link class="btn exit" type="button" :to="`/`">
+                                    Home
+                                </router-link>
                             </div>
                         </div>
                     </div>
@@ -135,8 +135,9 @@ function getEvents() {
                                 <h1 class="header form-input" style="font-size: x-large">
                                     You are not invited
                                 </h1>
-                                <router-link class="btn exit" type="button" :to="`/`">Home</router-link
-                                >
+                                <router-link class="btn exit" type="button" :to="`/`">
+                                    Home
+                                </router-link>
                             </div>
                         </div>
                     </div>

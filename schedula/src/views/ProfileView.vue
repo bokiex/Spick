@@ -3,6 +3,106 @@ import axios from 'axios'
 import router from '../router'
 import { Separator, Label } from 'radix-vue'
 import Button from '../components/Button.vue'
+import Avatar from '../components/Avatar.vue'
+import { ref, onMounted } from 'vue'
+
+const userID = ref(1)
+const user = ref({
+    name: '',
+    password: '',
+    image: '',
+    preview_image: '',
+    tele: '',
+    email: '',
+    newPwd: '',
+    confirmPwd: ''
+})
+onMounted(async () => {
+    console.log(userID.value)
+    await axios
+        .get(`http://127.0.0.1:3000/users/user_id/${userID.value}`)
+        .then((response) => {
+            user.value.name = response.data.username
+            user.value.tele = response.data.telegram_tag
+            user.value.email = response.data.email
+            user.value.image = response.data.image
+            user.value.preview_image= response.data.image
+            console.log(response.data)
+        })
+        .catch((error) => console.error(error))
+})
+
+function previewFile(event) {
+    const file = event.target.files[0]
+
+    user.value.preview_image = URL.createObjectURL(file)
+    user.value.image = file
+    console.log(user.value.image)
+}
+
+async function saveSettings() {
+    // Logic to save user settings
+
+
+        const formData = new FormData();
+        formData.append("user", JSON.stringify({
+            username: user.value.name,
+            telegram_tag: user.value.tele,
+            email: user.value.email,
+            image: user.value.image.name,
+
+        })); // eventData is your form's data as a JS object
+        formData.append("files", user.value.image);
+     
+
+        try {
+            const res = await fetch(`http://127.0.0.1:3000/users/user_id/${userID.value}`, {
+                method: 'PUT',
+                body: formData
+            })
+
+            if (!res.ok) {
+                const data = await res.json()
+
+                throw new Error(data.error)
+            }
+        } catch (error) {
+            console.log(error)
+            console.error('Error fetching data: ', error)
+        }
+    }
+
+function updatePassword() {
+    // Check if new password matches confirm password
+    if (this.user.newPwd !== this.user.confirmPwd) {
+        alert('New password and confirm password do not match')
+        return
+    }
+
+    // Check if new password is different from the old password
+    if (this.user.password === this.user.newPwd) {
+        alert("New password can't be the same as the old password")
+        return
+    }
+
+    // Send a request to the microservice to update the password
+    axios
+        .put(`http://127.0.0.1:3000/users/user_id/${userID}/password`, {
+            oldPassword: this.user.password,
+            newPassword: this.user.newPwd
+        })
+        .then((response) => {
+            console.log('Password updated', response.data)
+            // Additional logic upon success
+        })
+        .catch((error) => {
+            console.error(error.response.data)
+        })
+}
+function logout() {
+    localStorage.removeItem('user_id')
+    router.push({ name: 'SignInSignUp' })
+}
 </script>
 
 <template>
@@ -14,6 +114,30 @@ import Button from '../components/Button.vue'
                     <p class="text-sm text-muted-foreground">Edit your account information here!</p>
                 </div>
                 <Separator class="shrink-0 bg-border h-px w-full" />
+                <div class="space-y-2">
+                    <div class="flex flex-col space-y-2">
+                        <Label
+                            class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                        >
+                            Profile Picture
+                        </Label>
+
+                        <Avatar
+                            onload="() => URL.revokeObjectURL(user.preview_image)"
+                            :src="user.preview_image"
+                            class="w-12 h-12 rounded-full"
+                        ></Avatar>
+
+                        <input
+                            name="image"
+                            type="file"
+                            @change="(event) => previewFile(event)"
+                            required
+                            id="image"
+                            class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                        />
+                    </div>
+                </div>
                 <div class="space-y-2">
                     <Label
                         class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
@@ -110,99 +234,3 @@ import Button from '../components/Button.vue'
 
     <!-- Button -->
 </template>
-
-<style>
-* {
-    font-family: 'Poppins', sans-serif;
-}
-.card-header {
-    background-color: #f5f5f5;
-    font-weight: bold;
-}
-
-.btn-link {
-    padding: 0;
-    margin-left: 10px;
-}
-</style>
-
-<script>
-export default {
-    data() {
-        return {
-            userID: localStorage.getItem('userID'),
-            user: {
-                name: '',
-                password: '',
-                tele: '',
-                email: '',
-                newPwd: '',
-                confirmPwd: ''
-            }
-        }
-    },
-    mounted() {
-        this.loadUserData()
-    },
-    components: { Separator, Label },
-    methods: {
-        loadUserData() {
-            console.log(this.userID)
-            axios
-                .get(`http://127.0.0.1:3000/users/user_id/${this.userID}`)
-                .then((response) => {
-                    this.user.name = response.data.username
-                    this.user.tele = response.data.telegram_tag
-                    this.user.email = response.data.email
-                })
-                .catch((error) => console.error(error))
-        },
-        saveSettings() {
-            // Logic to save user settings
-            axios
-                .put(`http://127.0.0.1:3000/users/user_id/${this.userID}`, {
-                    username: this.user.name,
-                    telegram_tag: this.user.tele,
-                    email: this.user.email
-                })
-                .then((response) => {
-                    console.log('Settings saved', response.data)
-                    alert('Changed!')
-                    // Additional logic upon success
-                })
-                .catch((error) => console.error(error))
-        },
-        updatePassword() {
-            // Check if new password matches confirm password
-            if (this.user.newPwd !== this.user.confirmPwd) {
-                alert('New password and confirm password do not match')
-                return
-            }
-
-            // Check if new password is different from the old password
-            if (this.user.password === this.user.newPwd) {
-                alert("New password can't be the same as the old password")
-                return
-            }
-
-            // Send a request to the microservice to update the password
-            axios
-                .put(`http://127.0.0.1:3000/users/user_id/${userID}/password`, {
-                    oldPassword: this.user.password,
-                    newPassword: this.user.newPwd
-                })
-                .then((response) => {
-                    console.log('Password updated', response.data)
-                    // Additional logic upon success
-                })
-                .catch((error) => {
-                    console.error(error.response.data)
-                })
-        },
-        logout() {
-            localStorage.removeItem('user_id')
-            router.push({ name: 'SignInSignUp' })
-        }
-    }
-}
-</script>
