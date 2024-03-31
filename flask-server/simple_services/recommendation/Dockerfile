@@ -1,8 +1,11 @@
-FROM mysql:latest
+FROM python:3-slim
 
-ENV MYSQL_DATABASE=${MYSQL_DATABASE} \
-    MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+WORKDIR /usr/src/app
 
-ADD recommendation.sql /docker-entrypoint-initdb.d
+COPY ./requirements.txt ./
 
-EXPOSE 9999
+RUN pip install -r ./requirements.txt
+
+COPY ./app ./
+
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8003"]

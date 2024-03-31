@@ -1,7 +1,6 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.encoders import jsonable_encoder
-import  schemas
-from sqlalchemy.orm import Session
+import schemas
 from fastapi.responses import JSONResponse
 import json
 import requests as rq
@@ -20,7 +19,7 @@ async def exception_handler(request, exc):
     )
 
 
-api_key = ""
+api_key = "AIzaSyBzngjKb-03Hh8vC0r9rd0ultuCezKLUaQ"
 
 """
 format of input

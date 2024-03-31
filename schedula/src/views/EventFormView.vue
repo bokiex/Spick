@@ -26,8 +26,8 @@ import * as z from 'zod'
 import { CircleX } from 'lucide-vue-next'
 import Label from '@/components/Label.vue'
 
-const event_ms = 'http://localhost:3600/create_event'
-const user_ms = 'http://0.0.0.0:3000/users'
+const event_ms = 'http://localhost:8000/create_event'
+const user_ms = 'http://localhost:3000/users'
 
 const user_id = localStorage.getItem('userID')
 const friends = ref([])
@@ -114,7 +114,7 @@ function prevStep() {
 
 function previewFile(event) {
     const file = event.target.files[0]
-    
+
     image.value = file
     console.log(image.value)
 }
@@ -137,11 +137,10 @@ async function submitForm() {
             time_out: time_out.value
         }
         console.log(JSON.stringify(create_event))
-        
-        const formData = new FormData();
-        formData.append("event", JSON.stringify(create_event)); // eventData is your form's data as a JS object
-        formData.append("file", image.value);
-        
+
+        const formData = new FormData()
+        formData.append('event', JSON.stringify(create_event)) // eventData is your form's data as a JS object
+        formData.append('file', image.value)
 
         try {
             const res = await fetch(event_ms, {
@@ -152,7 +151,7 @@ async function submitForm() {
             if (!res.ok) {
                 const data = await res.json()
 
-                throw new Error(data.error)
+                throw new Error(data)
             }
         } catch (error) {
             console.log(error)

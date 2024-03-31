@@ -12,15 +12,6 @@ from fastapi.encoders import jsonable_encoder
 
 e_queue_name = environ.get('Error') or "Error" #Error
 
-@asynccontextmanager
-async def lifespan(app:FastAPI):
-    print("Error microservice: Getting Connection")
-    connection = amqp_connection.create_connection()
-    print("Error microservice: Connection established successfully")
-    channel = connection.channel()
-    receiveError(channel)
-    yield
-    connection.close()
 
 def receiveError(channel):
     try:

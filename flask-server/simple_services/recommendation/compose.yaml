@@ -1,0 +1,16 @@
+version: "3.8"
+
+networks:
+    spick-net:
+        driver: bridge
+
+services:
+    recommendation-app:
+        platform: linux/amd64
+        build:
+            context: .
+            dockerfile: Dockerfile
+        networks:
+            - spick-net
+        ports:
+            - "8003:8003"

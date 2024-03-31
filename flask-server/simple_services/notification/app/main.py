@@ -13,8 +13,7 @@ from contextlib import asynccontextmanager
 from fastapi.responses import JSONResponse
 
 bot_token = environ.get('BOT_TOKEN') or "6996801409:AAGDWkgPaCtRAqH08y9lwYJQif6ESOnQ984"
-user_ms = environ.get("USER_URL") or "http://127.0.0.1:8001/users/"  #change back to your own localhost @john
-notification_ms = environ.get("NOTIFICATION_URL") or "http://localhost:8002/notification/"  #^^
+user_ms = environ.get("USER_URL") or "http://127.0.0.1:3000/users/"  #change back to your own localhost @john
 bot = TeleBot(bot_token)
 
 def receiver():
