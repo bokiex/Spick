@@ -4,7 +4,6 @@ from typing import List
 
 # This is aligned with the structure expected by the UserSchedule service
 class ScheduleItem(BaseModel):
-    schedule_id: int
     event_id: str
     user_id: int
     start_time: datetime

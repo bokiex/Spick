@@ -36,9 +36,8 @@ async def lifespan(app: FastAPI):
     if not amqp_connection.check_exchange(channel, exchangename, exchangetype):
         print("\nCreate the 'Exchange' before running this microservice. \nExiting the program.")
         sys.exit(0)
-
-    jobstore = SQLAlchemyJobStore(url='mysql+mysqlconnector://is213@localhost:3306/scheduler')
-    scheduler.add_jobstore(jobstore)
+    
+    scheduler.add_jobstore('sqlalchemy', url='mysql+mysqlconnector://is213@localhost:3306/scheduler')
     scheduler.start()
 
     yield

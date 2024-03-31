@@ -4,7 +4,6 @@ import pika
 from os import environ
 from fastapi import FastAPI, Depends
 from datetime import datetime
-from invokes import invoke_http
 from os import environ
 from contextlib import asynccontextmanager
 from sqlalchemy.orm import Session
