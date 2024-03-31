@@ -27,14 +27,15 @@ def get_user_by_telegram_tag(db: Session, telegram_tag: str):
     return db_user
 
 def update_user(db: Session, user: schemas.User, user_id: int):
+    print(user)
+   
     db_user = db.query(models.User).filter(models.User.user_id == user_id).first()
     if db_user is None:
         return None
-    db_user.username = user.username
-    db_user.email = user.email
-    db_user.password_hash = user.password_hash
-    db_user.telegram_id = user.telegram_id
-    db_user.telegram_tag = user.telegram_tag
+
+    for key, value in user.dict(exclude_unset=True).items():
+        setattr(db_user, key, value)
+  
     db.commit()
     db.refresh(db_user)
     return db_user
