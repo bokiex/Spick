@@ -1,59 +1,47 @@
 version: "3.8"
 
 volumes:
-  user_schedule-mysql-data:
-    driver: local
-  user_schedule-mysql-logs:
-    driver: local
+    user_schedule-mysql-data:
+        driver: local
+    user_schedule-mysql-logs:
+        driver: local
 
 networks:
-  spick:
-    driver: bridge
+    spick:
+        driver: bridge
 
 services:
-  user_schedule-mysql:
-    networks:
-      - spick
-    image: user_schedule-mysql
-    build:
-      context: ./mysql
-      dockerfile: Dockerfile
-    environment:
-      MYSQL_ROOT_PASSWORD:
-      MYSQL_DATABASE: user_schedule
-    ports:
-      - "3307:3306"
-    healthcheck:
-      test:
-        [
-          "CMD",
-          "mysqladmin",
-          "ping",
-          "-h",
-          "localhost",
-          "-u",
-          "root",
-          "-p root",
-        ]
-      interval: 30s
-      timeout: 5s
-      retries: 10
-  
-   
+    user_schedule-mysql:
+        networks:
+            - spick
+        image: user_schedule-mysql
+        build:
+            context: ./mysql
+            dockerfile: Dockerfile
+        environment:
+            MYSQL_ROOT_PASSWORD: root
+            MYSQL_DATABASE: user_schedule
+        ports:
+            - "3307:3306"
+        healthcheck:
+            test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p root"]
+            interval: 30s
+            timeout: 5s
+            retries: 10
 
-    ###############################################
-    # user_schedule MS
-    ###############################################
-  user_schedule:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    networks:
-      - spick
-    environment:
-      dbURL: mysql+mysqlconnector://is213@user_schedule-mysql:3306/user_schedule
-    ports:
-      - "8007:8007"
-    depends_on:
-      user_schedule-mysql:
-        condition: service_healthy
+        ###############################################
+        # user_schedule MS
+        ###############################################
+    user_schedule:
+        build:
+            context: .
+            dockerfile: Dockerfile
+        networks:
+            - spick
+        environment:
+            dbURL: mysql+mysqlconnector://is213@user_schedule-mysql:3306/user_schedule
+        ports:
+            - "8007:8007"
+        depends_on:
+            user_schedule-mysql:
+                condition: service_healthy
