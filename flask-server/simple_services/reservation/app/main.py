@@ -16,9 +16,9 @@ def get_db():
     finally:
         db.close()
         
-@app.get("/ping")
-def ping():
-    return {"message": "pong"}
+@app.get("/online")
+def online():
+    return {"message": "Reservation is online."}
 
 @app.get("/reservation", response_model=list[schemas.ReservationResponse])
 def get_reservation(db: Session = Depends(get_db)):

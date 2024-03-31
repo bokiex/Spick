@@ -329,6 +329,11 @@ def processImage(resource_name):
     res = rq.get(url)
     print("\nReceived photos result:", res.json())
    
+
+@app.get("/online")
+def online():
+    return {"message": "Recommendation service is online."}
+
 # Get recommendations from Places API
 @app.post("/recommendation", response_model=list[schemas.Recommendation])
 def get_recommendation( search: schemas.Search):
