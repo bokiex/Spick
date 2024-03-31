@@ -10,8 +10,8 @@ DATABASE_URL = os.getenv("DATABASE_URL")
 
 # SQLALCHEMY_DATABASE_URL = os.getenv("dbURL")
 #SQLALCHEMY_DATABASE_URL = 'mysql+mysqlconnector://is213@localhost:8889/event'
-db_host = os.getenv("MYSQL_HOST")
-db_port = os.getenv("EVENT_MYSQL_PORT") 
+db_host = os.getenv("EVENT_MYSQL_DATABASE")
+db_port = os.getenv("MYSQL_PORT") 
 db_pwd = os.getenv("MYSQL_ROOT_PASSWORD") 
 
 dbURL = f'mysql+mysqlconnector://root:{db_pwd}@{db_host}:{db_port}/event'

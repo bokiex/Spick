@@ -20,6 +20,7 @@ services:
     #    networks:
     #        - spick
 
+    # User Schedule Microservice
     user_schedule-mysql:
         networks:
             - spick
@@ -29,13 +30,9 @@ services:
             - .env
         healthcheck:
             test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p root"]
-            interval: 30s
-            timeout: 5s
-            retries: 10
+            interval: 1s
+            retries: 50
 
-    ###############################################
-    # User_Schedule Microservice
-    ###############################################
     user_schedule:
         container_name: user_schedule
         build:
@@ -46,8 +43,64 @@ services:
         env_file:
             - .env
         ports:
-            - "8007:8007"
+            - "8107:8107"
         restart: always
         depends_on:
             user_schedule-mysql:
+                condition: service_healthy
+
+    # Event Microservice
+    event-mysql:
+        networks:
+            - spick
+        container_name: event-mysql
+        build: ./simple_services/event/mysql
+        env_file:
+            - .env
+        healthcheck:
+            test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p root"]
+            interval: 1s
+            retries: 50
+    event:
+        container_name: event
+        build:
+            context: ./simple_services/event/
+            dockerfile: Dockerfile
+        networks:
+            - spick
+        env_file:
+            - .env
+        ports:
+            - "8100:8100"
+        restart: always
+        depends_on:
+            event-mysql:
+                condition: service_healthy
+
+    # User Microservice
+    user-mysql:
+        networks:
+            - spick
+        container_name: user-mysql
+        build: ./simple_services/user/mysql
+        env_file:
+            - .env
+        healthcheck:
+            test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p root"]
+            interval: 1s
+            retries: 50
+    user:
+        container_name: user
+        build:
+            context: ./simple_services/user/
+            dockerfile: Dockerfile
+        networks:
+            - spick
+        env_file:
+            - .env
+        ports:
+            - "8101:8101"
+        restart: always
+        depends_on:
+            user-mysql:
                 condition: service_healthy
