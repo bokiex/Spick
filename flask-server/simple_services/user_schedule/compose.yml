@@ -11,6 +11,7 @@ networks:
         driver: bridge
 
 services:
+<<<<<<< HEAD
     user_schedule-mysql:
         networks:
             - spick
@@ -28,6 +29,39 @@ services:
             interval: 30s
             timeout: 5s
             retries: 10
+=======
+  user_schedule-mysql:
+    networks:
+      - spick
+    image: user_schedule-mysql
+    build:
+      context: ./mysql
+      dockerfile: Dockerfile
+    environment:
+      MYSQL_ROOT_PASSWORD:
+      MYSQL_DATABASE: user_schedule
+    ports:
+      - "3307:3306"
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "mysqladmin",
+          "ping",
+          "-h",
+          "localhost",
+          "-u",
+          "root",
+          "-p root",
+        ]
+      interval: 30s
+      timeout: 5s
+      retries: 10
+    volumes:
+      - user_schedule-mysql-data:/var/lib/mysql
+  
+   
+>>>>>>> 3ca63b64d2ef2d63865c390f17552a91d3b8a7de
 
         ###############################################
         # user_schedule MS
