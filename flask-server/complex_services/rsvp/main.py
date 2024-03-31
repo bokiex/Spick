@@ -15,9 +15,9 @@ import json
 
 # URLs for the User Schedule, Optimize Schedule services, and Event Status Update
 
-optimize_ms = "http://127.0.0.1:8008/"
+optimize_ms = "http://optimizer:8008/"
 event_ms = "http://127.0.0.1:8000/"
-user_schedule_ms = "http://127.0.0.1:8007/"
+user_schedule_ms = "http://user_schedule:8007/"
 user_ms = "http://127.0.0.1:8001/"
 
 
