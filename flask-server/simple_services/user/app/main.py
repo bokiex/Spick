@@ -42,6 +42,10 @@ def get_db():
     finally:
         db.close()
 
+@app.get("/online")
+def online():
+    return {"message": "User is online."}
+
 # Get all users
 @app.get("/users", response_model=list[schemas.UserResponse])
 def get_all_users(db: Session = Depends(get_db)):

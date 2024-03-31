@@ -20,7 +20,7 @@ async def exception_handler(request, exc):
     )
 
 
-api_key = "AIzaSyCviJPB1AYuNDE3k51tPnoLsnU39QJDOaY"
+api_key = ""
 
 """
 format of input
@@ -314,7 +314,7 @@ def processSearch(search):
     data = {"textQuery" : searchstr, "maxResultCount": 3}
     json_data = json.dumps(data)
     headers = {'Content-Type':'application/json', 'X-Goog-Api-Key':api_key, 
-            'X-Goog-FieldMask': 'places.displayName,places.formattedAddress,places.priceLevel'}
+            'X-Goog-FieldMask': 'places.displayName,places.formattedAddress,places.priceLevel,places.photos,places.rating,places.priceLevel'}
     print('\n-----calling places API-----')
     reply = rq.post(url, data = json_data, headers=headers)
     response = reply.json()
@@ -329,6 +329,11 @@ def processImage(resource_name):
     res = rq.get(url)
     print("\nReceived photos result:", res.json())
    
+
+@app.get("/online")
+def online():
+    return {"message": "Recommendation service is online."}
+
 # Get recommendations from Places API
 @app.post("/recommendation", response_model=list[schemas.Recommendation])
 def get_recommendation( search: schemas.Search):

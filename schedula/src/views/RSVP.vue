@@ -24,14 +24,30 @@ const route = useRoute()
 
 const event_id = route.params.id
 const timeout = ref(null)
+const invited = false
+const valid = false
+const event = null
 
 onMounted(() => {
     axios.get(`http://localhost:3800/event/${event_id}`).then((response) => {
-        const event = response.data
+        event = response.data
+
+    })
+    try {
+        const test = event.detail
+        valid = false
+    }
+    catch {
+        valid = true
         const minDate = new Date(Date.parse(event.datetime_start))
         const maxDate = new Date(Date.parse(event.datetime_end))
         timeout.value = event.time_out
-    })
+        for (var user of event.invitees) {
+            if (user.status === null && user.user_id === userID) {
+                invited = true
+            }
+        }
+    }
 })
 
 // Get the Monday of the real time current week.
@@ -92,7 +108,7 @@ function getEvents() {
 <template>
     <div class="m-auto relative w-full h-screen space-y-6 sm:w-[450px]">
         <div class="my-10 relative h-[700px] space-y-6">
-            <div class="container p-4" v-if="timeout === null">
+            <div class="container p-4" v-if="valid === false">
                 <div class="row justify-content-center">
                     <!-- Form Start -->
                     <div class="form-container" style="position: relative">
@@ -101,15 +117,19 @@ function getEvents() {
                                 <h1 class="header form-input" style="font-size: x-large">
                                     Event signup period is over
                                 </h1>
+<<<<<<< HEAD
                                 <router-link class="btn exit" type="button" :to="`/`">
                                     Home
                                 </router-link>
+=======
+                                <router-link class="btn exit" type="button" :to="`/`">Home</router-link>
+>>>>>>> 6a754baedbae90d41552a9053f0c83f8b3caf82e
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-            <div class="container p-4" v-else-if="this.valid === false">
+            <div class="container p-4" v-else-if="timeout === null">
                 <div class="row justify-content-center">
                     <!-- Form Start -->
                     <div class="form-container" style="position: relative">
@@ -126,7 +146,7 @@ function getEvents() {
                     </div>
                 </div>
             </div>
-            <div class="container p-4" v-else-if="this.invited === false">
+            <div class="container p-4" v-else-if="invited === false">
                 <div class="row justify-content-center">
                     <!-- Form Start -->
                     <div class="form-container" style="position: relative">
@@ -168,27 +188,15 @@ function getEvents() {
                 <!-- Step 2 start -->
 
                 <div class="h-[500px]">
-                    <vue-cal
-                        id="calendar"
-                        ref="vuecal"
-                        :time-from="0 * 60"
-                        :time-to="24 * 60"
-                        :disable-views="['years', 'year']"
-                        hide-view-selector
-                        resize-x
-                        :editable-events="{
-                            title: false,
-                            drag: false,
-                            resize: true,
-                            delete: true,
-                            create: true
-                        }"
-                        :snap-to-time="15"
-                        :events="events"
-                        :min-date="this.minDate"
-                        :max-date="this.maxDate"
-                        :selected-date="this.minDate"
-                    >
+                    <vue-cal id="calendar" ref="vuecal" :time-from="0 * 60" :time-to="24 * 60"
+                        :disable-views="['years', 'year']" hide-view-selector resize-x :editable-events="{
+                title: false,
+                drag: false,
+                resize: true,
+                delete: true,
+                create: true
+            }" :snap-to-time="15" :events="events" :min-date="this.minDate" :max-date="this.maxDate"
+                        :selected-date="this.minDate">
                     </vue-cal>
                 </div>
 
@@ -206,34 +214,27 @@ function getEvents() {
                             </DialogTrigger>
                             <DialogPortal>
                                 <DialogOverlay
-                                    class="fixed inset-0 z-50 bg-black/80 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0"
-                                />
+                                    class="fixed inset-0 z-50 bg-black/80 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0" />
                                 <DialogContent
-                                    class="data-[state=open]:animate-contentShow fixed top-[50%] left-[50%] max-h-[85vh] w-[90vw] max-w-[450px] translate-x-[-50%] translate-y-[-50%] rounded-[6px] bg-white p-[25px] shadow-[hsl(206_22%_7%_/_35%)_0px_10px_38px_-10px,_hsl(206_22%_7%_/_20%)_0px_10px_20px_-15px] focus:outline-none z-[100]"
-                                >
+                                    class="data-[state=open]:animate-contentShow fixed top-[50%] left-[50%] max-h-[85vh] w-[90vw] max-w-[450px] translate-x-[-50%] translate-y-[-50%] rounded-[6px] bg-white p-[25px] shadow-[hsl(206_22%_7%_/_35%)_0px_10px_38px_-10px,_hsl(206_22%_7%_/_20%)_0px_10px_20px_-15px] focus:outline-none z-[100]">
                                     <DialogTitle class="text-mauve12 m-0 text-[17px] font-semibold">
                                         Thank you!
                                     </DialogTitle>
-                                    <DialogDescription
-                                        class="text-mauve11 mt-[10px] mb-5 text-[15px] leading-normal"
-                                    >
+                                    <DialogDescription class="text-mauve11 mt-[10px] mb-5 text-[15px] leading-normal">
                                         You have submitted your availability.
                                     </DialogDescription>
 
                                     <div class="mt-[25px] flex justify-end">
                                         <DialogClose as-child>
-                                            <button
-                                                variant="outline"
-                                                class="inline-flex h-[35px] items-center justify-center rounded-[4px] px-[15px] font-semibold leading-none focus:shadow-[0_0_0_2px] focus:outline-none"
-                                            >
+                                            <button variant="outline"
+                                                class="inline-flex h-[35px] items-center justify-center rounded-[4px] px-[15px] font-semibold leading-none focus:shadow-[0_0_0_2px] focus:outline-none">
                                                 Exit
                                             </button>
                                         </DialogClose>
                                     </div>
                                     <DialogClose
                                         class="text-grass11 hover:bg-green4 focus:shadow-green7 absolute top-[10px] right-[10px] inline-flex h-[25px] w-[25px] appearance-none items-center justify-center rounded-full focus:shadow-[0_0_0_2px] focus:outline-none"
-                                        aria-label="Close"
-                                    >
+                                        aria-label="Close">
                                         <Icon icon="lucide:x" />
                                     </DialogClose>
                                 </DialogContent>
@@ -258,6 +259,7 @@ function getEvents() {
     width: 50%;
     padding: 10px;
 }
+
 nav {
     border-radius: 15px;
 }
@@ -577,6 +579,7 @@ form .error {
 }
 
 @media (max-width: 600px) {
+
     /* Stack sidebar above the form content on small screens */
     .form-container {
         flex-direction: column;
