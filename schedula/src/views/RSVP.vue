@@ -18,7 +18,7 @@ import Button from '@/components/Button.vue'
 import { useRoute } from 'vue-router'
 
 // eventID placeholder
-// const userID = localStorage.getItem('userID')
+const userID = localStorage.getItem('userID')
 
 const route = useRoute()
 
@@ -27,7 +27,6 @@ const event_id = route.params.eventToken
 var timeout = ref(null)
 var invited = false
 var event = null
-var userID = 1
 var minDate = ref(null)
 var maxDate = ref(null)
 var valid = ref(null)
@@ -89,10 +88,10 @@ function getEvents() {
     var events = toRaw(vuecal.value.mutableEvents)
     
     var result = []
-    var index = 0
+    
     for (var timeslot of events) {
         var event = {
-            schedule_id: index,
+            
             event_id: event_id,
             user_id: userID,
             start_time: timeslot.start
@@ -103,7 +102,7 @@ function getEvents() {
                 .concat('T', timeslot.end.formatTime('HH:mm:00'))
         }
         result.push(event)
-        index++
+        
     }
     return result
 }

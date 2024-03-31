@@ -4,7 +4,6 @@ from datetime import datetime
 from typing import List
 
 class UserScheduleCreate(BaseModel):
-    schedule_id: int
     event_id: str
     user_id: int
     start_time: datetime

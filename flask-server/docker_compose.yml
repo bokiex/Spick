@@ -3,7 +3,7 @@ volumes:
   user_schedule_data: 
   event_mysql_data:
   reservation_mysql_data:
-  user_mysql_data:
+  user-mysql-data:
 
 
 networks:
@@ -78,34 +78,49 @@ services:
   #######################################
   # User_mysql database
   #######################################
-  # user_db:
-  #   image: mysql:latest
-  #   restart: always
-  #   environment:
-  #     MYSQL_ROOT_PASSWORD:
-  #     MYSQL_DATABASE: user
-  #     MYSQL_USER: root
-  #     MYSQL_PASSWORD: 
-  #   ports:
-  #     - "3307:3306"
-  #   volumes:
-  #     - user_mysql_data:/var/lib/mysql
+  user-mysql:
+    networks:
+      - spick
+    image: user-mysql
+    build:
+      context: ./simple_services/user/mysql
+      dockerfile: Dockerfile
+    environment:
+      MYSQL_ROOT_PASSWORD:
+      MYSQL_DATABASE: user
+    ports:
+      - "3307:3306"
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "mysqladmin",
+          "ping",
+          "-h",
+          "localhost",
+          "-u",
+          "root",
+          "-p root",
+        ]
+      interval: 30s
+      timeout: 5s
+      retries: 10
   
   #######################################
   # User Microservice
   #######################################
   user:
     build: 
-      context: .\simple_services\user
+      context: ./simple_services/user
       dockerfile: dockerfile
     restart: always
     ports:
       - "8001:8001"
     environment:
-      dbURL: mysql+mysqlconnector://is213@host.docker.internal:3306/user
+      SQLALCHEMY_DATABASE_URL: mysql+mysqlconnector://root:password@user-mysql:3306/user
       PYTHONUNBUFFERED: 1
     networks:
-      - schedula
+      - spick
     depends_on:
       user-mysql:
         condition: service_healthy
@@ -220,12 +235,12 @@ services:
   #######################################
   # Authentication Microservice
   #######################################
-  # authentication:
-  #   build: 
-  #     context: .\simple_services\authentication
-  #     dockerfile: dockerfile
-  #   restart: always
-  #   ports:
-  #     - "8005:8005"
-  #   networks:
-  #     - spick
+  authentication:
+    build: 
+      context: .\simple_services\authentication
+      dockerfile: dockerfile
+    restart: always
+    ports:
+      - "8005:8005"
+    networks:
+      - spick

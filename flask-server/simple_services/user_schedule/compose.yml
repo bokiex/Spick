@@ -1,0 +1,64 @@
+volumes:
+  user_schedule_data: 
+
+networks:
+  spick:
+    driver: bridge
+    name: spick
+
+services:
+  #######################################
+  # user_schedule database
+  #######################################
+
+  user_schedule-mysql:
+      networks:
+        - spick
+      image: user_schedule-mysql
+      build:
+        context: ./mysql
+        dockerfile: Dockerfile
+      environment:
+        MYSQL_ROOT_PASSWORD: root
+        MYSQL_DATABASE: user_schedule
+      ports:
+        - "8889:3306"
+      volumes: 
+        - user_schedule_data:/var/lib/mysql
+      healthcheck:
+        test:
+          [
+            "CMD",
+            "mysqladmin",
+            "ping",
+            "-h",
+            "localhost",
+            "-u",
+            "root",
+            "-p root",
+          ]
+        interval: 30s
+        timeout: 5s
+        retries: 10
+
+  #######################################
+  # User_schedule Microservice
+  #######################################
+  user_schedule:
+    build: 
+      context: ./app
+      dockerfile: dockerfile
+    networks:
+      - spick
+    restart: always
+    ports:
+      - "8017:8007"
+    environment:
+      dbURL: mysql+mysqlconnector://is213@host.docker.internal:3306/user_schedule
+      PYTHONUNBUFFERED: 1
+    depends_on:
+      user_schedule-mysql:
+        condition: service_healthy
+
+
+  
