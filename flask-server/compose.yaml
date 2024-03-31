@@ -28,34 +28,52 @@ services:
         networks:
             - spick
 
-        #######################################
-        # User_schedule Microservice
-        #######################################
-        # user_schedule:
-        #   build:
-        #     context: .\simple_services\user_schedule
-        #     dockerfile: dockerfile
-        #   restart: always
-        #   ports:
-        #     - "8007:8007"
-        #   environment:
-        #     dbURL: mysql+mysqlconnector://is213@host.docker.internal:3306/user_schedule
-        #     PYTHONUNBUFFERED: 1
-        #   networks:
-        #     - spick
+    user_schedule-mysql:
+        networks:
+            - spick
+        image: user_schedule-mysql
+        build:
+            context: ./mysql
+            dockerfile: Dockerfile
+        environment:
+            MYSQL_ROOT_PASSWORD:
+            MYSQL_DATABASE: user_schedule
+        ports:
+            - "3307:3306"  #i dont think all can user 3307 but small issues we just increment it 
+        healthcheck:
+        test:
+            [
+            "CMD",
+            "mysqladmin",
+            "ping",
+            "-h",
+            "localhost",
+            "-u",
+            "root",
+            "-p root",
+            ]
+        interval: 30s
+        timeout: 5s
+        retries: 10
+  
+   
 
-        #######################################
-        # Optimizer Microservice
-        #######################################
-        # optimizer:
-        #   build:
-        #     context: .\simple_services\optimizer
-        #     dockerfile: dockerfile
-        #   restart: always
-        #   ports:
-        #     - "8008:8008"
-        #   networks:
-        #     - spick
+        ###############################################
+        # User_Schedule Microservice
+        ###############################################
+        user_schedule:
+            build:
+                context: .
+                dockerfile: Dockerfile
+            networks:
+                - spick
+            environment:
+                dbURL: mysql+mysqlconnector://is213@user_schedule-mysql:3306/user_schedule
+            ports:
+                - "8007:8007"
+            depends_on:
+            user_schedule-mysql:
+                condition: service_healthy
 
         #######################################
         # User_mysql database
@@ -197,3 +215,17 @@ services:
                 - "8005:8005"
             networks:
                 - spick
+
+        #######################################
+        # Optimizer Microservice
+        #######################################
+        optimizer:
+            build:
+                context: .\simple_services\optimizer
+                dockerfile: Dockerfile
+            restart: always
+            networks:
+            - spick
+            ports:
+            - "8008:8008"
+

@@ -42,7 +42,7 @@ services:
    
 
     ###############################################
-    # callbook: The test_invoke_http.py program
+    # user_schedule MS
     ###############################################
   user_schedule:
     build:

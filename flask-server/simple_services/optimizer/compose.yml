@@ -1,0 +1,17 @@
+version: "3.8"
+
+networks:
+  spick:
+    driver: bridge
+
+services:
+
+  optimizer:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    networks:
+      - spick
+    ports:
+      - "8008:8008"
+
