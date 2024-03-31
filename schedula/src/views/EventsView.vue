@@ -1,13 +1,10 @@
 <script setup>
 import Card from '@/components/Card.vue'
-
 import Button from '@/components/Button.vue'
-import { useRouter, useRoute } from 'vue-router'
-
+import { useRouter} from 'vue-router'
 import { ref, onMounted } from 'vue'
 
 const router = useRouter()
-const route = useRoute()
 const userID = localStorage.getItem('userID')
 
 const events = ref(null)

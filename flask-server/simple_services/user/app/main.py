@@ -105,7 +105,7 @@ def upload_file(files: UploadFile, object_name=None):
         return JSONResponse(status_code=200, content={"message": "File uploaded successfully."})
     except:
         return JSONResponse(status_code=400, content={"message": "File upload failed."})
-# Update user
+# Update user information
 @app.put("/users/user_id/{user_id}")
 async def update_user(user_id: int, user: str = Form(...),  files: Optional[UploadFile] = File(default=None), db: Session = Depends(get_db)):
     print(user)
@@ -115,10 +115,22 @@ async def update_user(user_id: int, user: str = Form(...),  files: Optional[Uplo
     user = schemas.User(**user)
 
     result = crud.update_user(db, user, user_id)
-    upload_file(files)
+    if files:
+        upload_file(files)
     if result is None:
         raise HTTPException(status_code=404, detail="User not found.")
     return result
+
+
+# Update user password
+@app.put("/users/user_id/{user_id}/password")
+async def update_user_password(user_id: int, user: schemas.User, db: Session = Depends(get_db)):
+    
+    result = crud.update_user_password(db, user, user_id)
+    if result is None:
+        raise HTTPException(status_code=404, detail="User not found.")
+    return result
+
 
 # Get user by user_id
 @app.get("/users/user_id/{user_id}", response_model=schemas.UserResponse)

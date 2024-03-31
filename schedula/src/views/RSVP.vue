@@ -117,13 +117,9 @@ function getEvents() {
                                 <h1 class="header form-input" style="font-size: x-large">
                                     Event signup period is over
                                 </h1>
-<<<<<<< HEAD
                                 <router-link class="btn exit" type="button" :to="`/`">
                                     Home
                                 </router-link>
-=======
-                                <router-link class="btn exit" type="button" :to="`/`">Home</router-link>
->>>>>>> 6a754baedbae90d41552a9053f0c83f8b3caf82e
                             </div>
                         </div>
                     </div>
