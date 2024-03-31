@@ -22,6 +22,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+@app.get("/online")
+def online():
+    return {"message": "Optimizer is online."}
+
 @app.post('/optimize_schedule', response_model=OptimizedSchedules)
 def optimize_schedule(schedule_list: List[ScheduleItem]):
     schedules_by_day: Dict[datetime, List] = defaultdict(list)

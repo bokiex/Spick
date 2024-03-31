@@ -15,14 +15,11 @@ import json
 
 # URLs for the User Schedule, Optimize Schedule services, and Event Status Update
 
-OPTIMIZE_SCHEDULE_SERVICE_URL = "http://127.0.0.1:8008/optimize_schedule"
-UPDATE_RESPONSES_URL = "http://127.0.0.1:8000/invitee"
-VALUE_RETRIEVE_URL = "http://127.0.0.1:8000/invitee/"
-UPDATE_OPTIMIZATION_URL = "http://127.0.0.1:8000/update_optimize"
-EVENT_URL = "http://127.0.0.1:8000/event/"
-USER_SCHEDULE_SERVICE_URL = "http://127.0.0.1:8007/user_schedule/"
-NOTIFICATION_URL = "http://127.0.0.1:8002/notification"
-USER_URL = "http://127.0.0.1:8001/users/user_id/"
+optimize_ms = "http://127.0.0.1:8008/"
+invitee_ms = "http://127.0.0.1:8000/"
+event_ms = "http://127.0.0.1:8001/"
+user_schedule_ms = "http://127.0.0.1:8007/"
+user_ms = "http://127.0.0.1:8001/"
 
 
 connection = None
@@ -114,15 +111,15 @@ def accept_invitation(request: AcceptInvitationSchema):
         "status": "Y"
     } 
 
-    status_response = requests.put(UPDATE_RESPONSES_URL, json=update_payload)
+    status_response = requests.put(invitee_ms + "invitee", json=update_payload)
     if status_response.status_code > 300:
         raise HTTPException(status_code=status_response.status_code, detail=status_response)
     
-    schedule_response = requests.post(USER_SCHEDULE_SERVICE_URL, json= jsonable_encoder({"sched_list": request.sched_list}))
+    schedule_response = requests.post(user_schedule_ms + "user_schedule", json= jsonable_encoder({"sched_list": request.sched_list}))
     if schedule_response.status_code > 300:
         raise HTTPException(status_code=schedule_response.status_code, detail=schedule_response)
     
-    retrieve_response = requests.get(f"{VALUE_RETRIEVE_URL}{request.event_id}")
+    retrieve_response = requests.get(f"{invitee_ms}invitee/{request.event_id}")
     if retrieve_response.status_code > 300:
         raise HTTPException(status_code=retrieve_response.status_code, detail=retrieve_response)
     opt_data = retrieve_response.json()  # Process opt_data as needed
@@ -164,10 +161,10 @@ def decline_invitation(request: DeclineInvitationSchema):
         "status": "N"  # Setting status to "N" for decline
     }
     
-    status_response = requests.put(UPDATE_RESPONSES_URL, json=update_payload)
+    status_response = requests.put(invitee_ms + "invitee", json=update_payload)
     if status_response.status_code >300:
         raise HTTPException(status_code=status_response.status_code, detail=status_response)
-    retrieve_response = requests.get(f"{VALUE_RETRIEVE_URL}{request.event_id}")
+    retrieve_response = requests.get(f"{invitee_ms}invitee/{request.event_id}")
     if retrieve_response.status_code >300:
         raise HTTPException(status_code=retrieve_response.status_code, detail=retrieve_response)
     opt_data = retrieve_response.json()
@@ -184,27 +181,27 @@ def check_and_trigger_optimization(data):
     invitees_left = data['invitees_left']
     event_id = data['event_id']
     if invitees_left == 0 :
-        response = requests.get(f"{USER_SCHEDULE_SERVICE_URL}{event_id}")
+        response = requests.get(f"{user_schedule_ms}user_schedule/{event_id}")
         if response.status_code >300:
             channel.basic_publish(exchange=exchangename, routing_key="user_schedule.error",body=response, properties=pika.BasicProperties(delivery_mode=2))
             return response
         
         payload = response.json()
 
-        opt = requests.post(OPTIMIZE_SCHEDULE_SERVICE_URL, json=payload)
+        opt = requests.post(optimize_ms + "optimize_schedule", json=payload)
         if opt.status_code >300:
             channel.basic_publish(exchange=exchangename, routing_key="optimize.error",body=opt, properties=pika.BasicProperties(delivery_mode=2))
             return opt
         
         opt = opt.json()
 
-        opt_update = requests.post(UPDATE_OPTIMIZATION_URL, json = opt)
+        opt_update = requests.post(event_ms + "update_optimize", json = opt)
         if opt_update.status_code >300:
             channel.basic_publish(exchange=exchangename, routing_key="update.error",body=opt_update, properties=pika.BasicProperties(delivery_mode=2))
             return opt_update
 
         #get the event table entry 
-        event_details = requests.get(f"{EVENT_URL}{event_id}")
+        event_details = requests.get(f"{event_ms}event/{event_id}")
         if event_details.status_code not in range(200,300):
             channel.basic_publish(exchange=exchangename, routing_key="timeout.error",body=event_details, properties=pika.BasicProperties(delivery_mode=2))
             return event_details
@@ -212,14 +209,14 @@ def check_and_trigger_optimization(data):
         # Update event timeout to null
         payload = {'time_out': None}
 
-        event_result = requests.put(f"{EVENT_URL}{event_id}", json=jsonable_encoder(payload))
+        event_result = requests.put(f"{event_ms}event/{event_id}", json=jsonable_encoder(payload))
         if event_result.status_code not in range(200,300):
             channel.basic_publish(exchange=exchangename, routing_key="event.error",body=event_result, properties=pika.BasicProperties(delivery_mode=2))
             return event_result
 
         host_id = event_details.json()["user_id"]
         
-        host_tag = requests.get(f"{USER_URL}{host_id}")
+        host_tag = requests.get(f"{user_ms}users/user_id/{host_id}")
         if host_tag.status_code not in range(200,300):
             channel.basic_publish(exchange=exchangename, routing_key="user.error",body=host_tag, properties=pika.BasicProperties(delivery_mode=2))
 
@@ -260,18 +257,18 @@ def optimize_schedule(request: TimeoutOptimizeScheduleRequest):
     if not request.event_id:
         raise HTTPException(status_code=400, detail="event_id is required.")
 
-    response = requests.get(f"{USER_SCHEDULE_SERVICE_URL}{request.event_id}")
+    response = requests.get(f"{user_schedule_ms}user_schedule/{request.event_id}")
     if response.status_code > 300:
         raise HTTPException(status_code=response.status_code, detail=response)
     schedule_data = response.json()
-    opt_response = requests.post(OPTIMIZE_SCHEDULE_SERVICE_URL, json=schedule_data)
+    opt_response = requests.post(optimize_ms + "optimize_schedule", json=schedule_data)
     if opt_response.status_code >300 :
         raise HTTPException(status_code=opt_response.status_code, detail=opt_response)
-    opt_update = requests.post(UPDATE_OPTIMIZATION_URL, json = opt_response.json())
+    opt_update = requests.post(event_ms + "update_optimize", json = opt_response.json())
     if opt_update.status_code >300:
         raise HTTPException(status_code=opt_update.status_code, detail="failed to update event db")
     
-    event_details = requests.get(f"{EVENT_URL}{request.event_id}")
+    event_details = requests.get(f"{event_ms}event/{request.event_id}")
     if event_details.status_code not in range(200,300):
         channel.basic_publish(exchange=exchangename, routing_key="timeout.error",body=event_details, properties=pika.BasicProperties(delivery_mode=2))
         return event_details
@@ -279,14 +276,14 @@ def optimize_schedule(request: TimeoutOptimizeScheduleRequest):
     # Update event timeout to null
     payload = {'time_out': None}
 
-    event_result = requests.put(f"{EVENT_URL}{request.event_id}", json=jsonable_encoder(payload))
+    event_result = requests.put(f"{event_ms}event/{request.event_id}", json=jsonable_encoder(payload))
     if event_result.status_code not in range(200,300):
         channel.basic_publish(exchange=exchangename, routing_key="event.error",body=event_result, properties=pika.BasicProperties(delivery_mode=2))
         return event_result
 
     host_id = event_details.json()["user_id"]
         
-    host_tag = requests.get(f"{USER_URL}{host_id}")
+    host_tag = requests.get(f"{user_ms}users/user_id/{host_id}")
     if host_tag.status_code not in range(200,300):
         channel.basic_publish(exchange=exchangename, routing_key="user.error",body=host_tag, properties=pika.BasicProperties(delivery_mode=2))
 

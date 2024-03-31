@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
 import models, schemas
-
+from werkzeug.security import generate_password_hash, check_password_hash
 
 def get_users(db: Session):
     return db.query(models.User).all()
@@ -27,14 +27,35 @@ def get_user_by_telegram_tag(db: Session, telegram_tag: str):
     return db_user
 
 def update_user(db: Session, user: schemas.User, user_id: int):
+    print(user)
+   
     db_user = db.query(models.User).filter(models.User.user_id == user_id).first()
     if db_user is None:
         return None
-    db_user.username = user.username
-    db_user.email = user.email
-    db_user.password_hash = user.password_hash
-    db_user.telegram_id = user.telegram_id
-    db_user.telegram_tag = user.telegram_tag
+
+    for key, value in user.dict(exclude_unset=True).items():
+        setattr(db_user, key, value)
+  
+    db.commit()
+    db.refresh(db_user)
+    return db_user
+
+
+
+def check_password(self, password):
+    return check_password_hash(self.password_hash, password)
+
+def update_user_password(db: Session, user: schemas.User, user_id: int):
+   
+    db_user = db.query(models.User).filter(models.User.user_id == user_id).first()
+    if db_user is None:
+        return None
+
+    user.password_hash = generate_password_hash(user.password, method='pbkdf2:sha256')
+  
+    for key, value in user.dict(exclude_unset=True).items():
+        setattr(db_user, key, value)
+    
     db.commit()
     db.refresh(db_user)
     return db_user

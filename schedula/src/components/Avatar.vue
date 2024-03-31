@@ -1,7 +1,18 @@
 <script setup lang="ts">
 import { AvatarFallback, AvatarImage, AvatarRoot } from 'radix-vue'
+import { computed, defineProps } from 'vue'
 
+const props = defineProps<{
+    src: string
+    alt: string
+    onload: () => void
+}>()
 
+const imageSrc = computed(() => {
+    return (
+        props.src || 'https://source.unsplash.com/black-dog-wearing-blue-denim-collar-K4mSJ7kc0As'
+    )
+})
 </script>
 
 <template>
@@ -9,9 +20,10 @@ import { AvatarFallback, AvatarImage, AvatarRoot } from 'radix-vue'
         class="bg-blackA3 inline-flex h-[45px] w-[45px] select-none items-center justify-center overflow-hidden rounded-full align-middle"
     >
         <AvatarImage
+            :src="imageSrc"
+            @load="props.onload"
+            :alt="props.alt"
             class="h-full w-full rounded-[inherit] object-cover"
-            src="https://images.unsplash.com/photo-1492633423870-43d1cd2775eb?&w=128&h=128&dpr=2&q=80"
-            alt="Colm Tuite"
         />
         <AvatarFallback
             class="text-grass11 leading-1 flex h-full w-full items-center justify-center bg-white text-[15px] font-medium"

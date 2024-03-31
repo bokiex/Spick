@@ -48,49 +48,48 @@ services:
   #######################################
   # User_schedule Microservice
   #######################################
-  user_schedule:
-    build: 
-      context: .\simple_services\user_schedule
-      dockerfile: dockerfile
-    restart: always
-    ports:
-      - "8007:8007"
-    environment:
-      dbURL: mysql+mysqlconnector://is213@host.docker.internal:3306/user_schedule
-      PYTHONUNBUFFERED: 1
-    networks:
-      - spick
-    volumes: 
-      - user_schedule_data: /var/lib/user_schedule
+  # user_schedule:
+  #   build: 
+  #     context: .\simple_services\user_schedule
+  #     dockerfile: dockerfile
+  #   restart: always
+  #   ports:
+  #     - "8007:8007"
+  #   environment:
+  #     dbURL: mysql+mysqlconnector://is213@host.docker.internal:3306/user_schedule
+  #     PYTHONUNBUFFERED: 1
+  #   networks:
+  #     - spick
+    
 
   #######################################
   # Optimizer Microservice
   #######################################
-  optimizer:
-    build: 
-      context: .\simple_services\optimizer
-      dockerfile: dockerfile
-    restart: always
-    ports:
-      - "8008:8008"
-    networks:
-      - spick
+  # optimizer:
+  #   build: 
+  #     context: .\simple_services\optimizer
+  #     dockerfile: dockerfile
+  #   restart: always
+  #   ports:
+  #     - "8008:8008"
+  #   networks:
+  #     - spick
   
   #######################################
   # User_mysql database
   #######################################
-  user_db:
-    image: mysql:latest
-    restart: always
-    environment:
-      MYSQL_ROOT_PASSWORD:
-      MYSQL_DATABASE: user
-      MYSQL_USER: root
-      MYSQL_PASSWORD: 
-    ports:
-      - "3307:3306"
-    volumes:
-      - user_mysql_data:/var/lib/mysql
+  # user_db:
+  #   image: mysql:latest
+  #   restart: always
+  #   environment:
+  #     MYSQL_ROOT_PASSWORD:
+  #     MYSQL_DATABASE: user
+  #     MYSQL_USER: root
+  #     MYSQL_PASSWORD: 
+  #   ports:
+  #     - "3307:3306"
+  #   volumes:
+  #     - user_mysql_data:/var/lib/mysql
   
   #######################################
   # User Microservice
@@ -221,12 +220,12 @@ services:
   #######################################
   # Authentication Microservice
   #######################################
-  authentication:
-    build: 
-      context: .\simple_services\authentication
-      dockerfile: dockerfile
-    restart: always
-    ports:
-      - "8005:8005"
-    networks:
-      - spick
+  # authentication:
+  #   build: 
+  #     context: .\simple_services\authentication
+  #     dockerfile: dockerfile
+  #   restart: always
+  #   ports:
+  #     - "8005:8005"
+  #   networks:
+  #     - spick

@@ -27,7 +27,7 @@ def receiveError(channel):
         channel.basic_consume(queue=e_queue_name, on_message_callback=callback, auto_ack=True)
         print('Error microservice: Consuming from queue:', e_queue_name)
         channel.start_consuming()
-        
+       
     except pika.exceptions.AMQPError as e:
         print(f"Error microservice: Failed to connect: {e}")
         

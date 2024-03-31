@@ -43,6 +43,11 @@ def get_db():
     finally:
         db.close()
 
+
+@app.get("/online")
+def online():
+    return {"message": "Event is online."}
+
 # Get all events
 @app.get("/event", response_model=list[schemas.Event])
 def get_events(db: Session = Depends(get_db)):
@@ -53,7 +58,7 @@ def get_events(db: Session = Depends(get_db)):
 
 # Get event by ID
 @app.get("/event/{event_id}", response_model=schemas.Event)
-async def get_event_by_id(event_id: str, db: Session = Depends(get_db)):
+def get_event_by_id(event_id: str, db: Session = Depends(get_db)):
  
     res = crud.get_event_by_id(event_id, db)
     if res == []:
@@ -63,7 +68,7 @@ async def get_event_by_id(event_id: str, db: Session = Depends(get_db)):
 
 # Update event
 @app.put("/event/{event_id}")
-async def update_event(event_id: str, event: schemas.EventPut, db: Session = Depends(get_db)):
+def update_event(event_id: str, event: schemas.EventPut, db: Session = Depends(get_db)):
   
     res = crud.update_event(event_id, event, db)
     if res == []:
@@ -72,7 +77,7 @@ async def update_event(event_id: str, event: schemas.EventPut, db: Session = Dep
 
 # Delete event
 @app.delete("/event/{event_id}")
-async def delete_event(event_id: str):
+def delete_event(event_id: str):
     res = crud.delete_event(event_id)
     if res == []:
         return jsonable_encoder({"message": "No event found."})
@@ -115,7 +120,7 @@ def upload_file(files: UploadFile, object_name=None):
 
 # Create event
 @app.post("/event")
-async def create_event(event: str = Form(...),  files: Optional[UploadFile] = File(default=None), db: Session = Depends(get_db)):
+def create_event(event: str = Form(...),  files: Optional[UploadFile] = File(default=None), db: Session = Depends(get_db)):
     
     print(event)
     print(files)
@@ -205,7 +210,7 @@ def get_invitees(event_id:str, db: Session = Depends(get_db)):
     return jsonable_encoder({"all_invitees": all_invitees, "respondents": respondents, "invitees_left": invitees_left, "message": "Invitees found."})
 
 @app.put("/invitee")
-async def update_invitee(invitee: schemas.Invitee, db: Session = Depends(get_db)):
+def update_invitee(invitee: schemas.Invitee, db: Session = Depends(get_db)):
     res = crud.update_invitee(db, invitee)
     if res is None:
         return jsonable_encoder({"message": "No invitee found."})
@@ -219,7 +224,7 @@ async def update_invitee(invitee: schemas.Invitee, db: Session = Depends(get_db)
 }
 """
 @app.post("/invitee")
-async def create_invitees(invitee: schemas.Invitee, db: Session = Depends(get_db)):
+def create_invitees(invitee: schemas.Invitee, db: Session = Depends(get_db)):
     
     res = crud.create_invitee(db, invitee)
     if res is None:
