@@ -15,18 +15,18 @@ services:
   #######################################
   # user_schedule database
   #######################################
-  user_schedule_db:
-    image: mysql:latest  #idk which version compatible
-    restart: always
-    environment:
-      MYSQL_ROOT_PASSWORD: asscrack123
-      MYSQL_DATABASE: user_schedule
-      MYSQL_USER: is213
-      MYSQL_PASSWORD: 
-    ports:
-      - "3306:3306"
-    volumes:
-      - mysql_data:/var/lib/mysql  
+  # user_schedule_db:
+  #   image: mysql:latest  #idk which version compatible
+  #   restart: always
+  #   environment:
+  #     MYSQL_ROOT_PASSWORD: asscrack123
+  #     MYSQL_DATABASE: user_schedule
+  #     MYSQL_USER: is213
+  #     MYSQL_PASSWORD: 
+  #   ports:
+  #     - "3306:3306"
+  #   volumes:
+  #     - mysql_data:/var/lib/mysql  
 
   #######################################
   # Rabbit MQ
@@ -94,21 +94,21 @@ services:
   #######################################
   # User Microservice
   #######################################
-  user:
-    build: 
-      context: .\simple_services\user
-      dockerfile: dockerfile
-    restart: always
-    ports:
-      - "8001:8001"
-    environment:
-      dbURL: mysql+mysqlconnector://is213@host.docker.internal:3306/user
-      PYTHONUNBUFFERED: 1
-    networks:
-      - schedula
-    depends_on:
-      user-mysql:
-        condition: service_healthy
+  # user:
+  #   build: 
+  #     context: .\simple_services\user
+  #     dockerfile: dockerfile
+  #   restart: always
+  #   ports:
+  #     - "8001:8001"
+  #   environment:
+  #     dbURL: mysql+mysqlconnector://is213@host.docker.internal:3306/user
+  #     PYTHONUNBUFFERED: 1
+  #   networks:
+  #     - schedula
+  #   depends_on:
+  #     user-mysql:
+  #       condition: service_healthy
         
 
   #######################################

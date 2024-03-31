@@ -33,6 +33,7 @@ const user_id = localStorage.getItem('userID')
 const friends = ref([])
 const selected_friend = ref(null)
 const loading = ref(true)
+const error = ref(null)
 onMounted(async () => {
     try {
         // Example API call - replace with your actual API call
@@ -114,7 +115,7 @@ function prevStep() {
 
 function previewFile(event) {
     const file = event.target.files[0]
-    
+
     image.value = file
     console.log(image.value)
 }
@@ -137,11 +138,10 @@ async function submitForm() {
             time_out: time_out.value
         }
         console.log(JSON.stringify(create_event))
-        
-        const formData = new FormData();
-        formData.append("event", JSON.stringify(create_event)); // eventData is your form's data as a JS object
-        formData.append("file", image.value);
-        
+
+        const formData = new FormData()
+        formData.append('event', JSON.stringify(create_event)) // eventData is your form's data as a JS object
+        formData.append('file', image.value)
 
         try {
             const res = await fetch(event_ms, {
@@ -154,8 +154,8 @@ async function submitForm() {
 
                 throw new Error(data.error)
             }
-        } catch (error) {
-            console.log(error)
+        } catch (err) {
+            error.value = err.message
             console.error('Error fetching data: ', error)
         }
     }
@@ -259,15 +259,15 @@ async function submitForm() {
                         </div>
                         <Separator class="shrink-0 bg-border h-px w-full" />
 
-                        <RadioGroupRoot default-value="school" v-model="type">
+                        <RadioGroupRoot default-value="restaurant" v-model="type">
                             <div class="grid grid-row-3 gap-7 space-y-2">
                                 <Label
-                                    for="school"
+                                    for="restaurant"
                                     class="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary"
                                 >
                                     <RadioGroupItem
-                                        id="school"
-                                        value="school"
+                                        id="restaurant"
+                                        value="restaurant"
                                         class="peer sr-only aspect-square h-4 w-4 rounded-full border border-primary text-primary ring-offset-background focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                                     >
                                         <RadioGroupIndicator
@@ -277,18 +277,18 @@ async function submitForm() {
                                         </RadioGroupIndicator>
                                     </RadioGroupItem>
 
-                                    <p class="text-sm font-medium leading-none">School Meeting</p>
+                                    <p class="text-sm font-medium leading-none">Restaurant</p>
                                     <p class="text-sm text-muted-foreground">
-                                        School project meeting done in school.
+                                        Recommended for a casual event.
                                     </p>
                                 </Label>
                                 <Label
-                                    for="personal"
+                                    for="bar"
                                     class="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary"
                                 >
                                     <RadioGroupItem
-                                        id="personal"
-                                        value="personal"
+                                        id="bar"
+                                        value="bar"
                                         class="peer sr-only aspect-square h-4 w-4 rounded-full border border-primary text-primary ring-offset-background focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                                     >
                                         <RadioGroupIndicator
@@ -297,18 +297,18 @@ async function submitForm() {
                                             <Circle class="h-2.5 w-2.5 fill-current text-current" />
                                         </RadioGroupIndicator>
                                     </RadioGroupItem>
-                                    <p class="text-sm font-medium leading-none">Personal</p>
+                                    <p class="text-sm font-medium leading-none">Bar</p>
                                     <p class="text-sm text-muted-foreground">
-                                        Meeting with friends
+                                        If you want to have a drink and have a good time
                                     </p>
                                 </Label>
                                 <Label
-                                    for="celebration"
+                                    for="hotel"
                                     class="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary"
                                 >
                                     <RadioGroupItem
-                                        id="celebration"
-                                        value="celebration"
+                                        id="hotel"
+                                        value="hotel"
                                         class="peer sr-only aspect-square h-4 w-4 rounded-full border border-primary text-primary ring-offset-background focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                                     >
                                         <RadioGroupIndicator
@@ -317,9 +317,29 @@ async function submitForm() {
                                             <Circle class="h-2.5 w-2.5 fill-current text-current" />
                                         </RadioGroupIndicator>
                                     </RadioGroupItem>
-                                    <p class="text-sm font-medium leading-none">Celebrations</p>
+                                    <p class="text-sm font-medium leading-none">Hotels</p>
+                                    <p class="text-sm text-muted-foreground">For a formal event.</p>
+                                </Label>
+                                <Label
+                                    for="conventioncenter"
+                                    class="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary"
+                                >
+                                    <RadioGroupItem
+                                        id="conventioncenter"
+                                        value="conventioncenter"
+                                        class="peer sr-only aspect-square h-4 w-4 rounded-full border border-primary text-primary ring-offset-background focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                                    >
+                                        <RadioGroupIndicator
+                                            class="flex items-center justify-center"
+                                        >
+                                            <Circle class="h-2.5 w-2.5 fill-current text-current" />
+                                        </RadioGroupIndicator>
+                                    </RadioGroupItem>
+                                    <p class="text-sm font-medium leading-none">
+                                        Convention Centers
+                                    </p>
                                     <p class="text-sm text-muted-foreground">
-                                        Custom celebrations such as birthday parties.
+                                        Serious and large events.
                                     </p>
                                 </Label>
                             </div>
@@ -385,354 +405,33 @@ async function submitForm() {
                                     class="data-[state=open]:animate-contentShow fixed top-[50%] left-[50%] max-h-[85vh] w-[90vw] max-w-[450px] translate-x-[-50%] translate-y-[-50%] rounded-[6px] bg-white p-[25px] shadow-[hsl(206_22%_7%_/_35%)_0px_10px_38px_-10px,_hsl(206_22%_7%_/_20%)_0px_10px_20px_-15px] focus:outline-none z-[100]"
                                 >
                                     <DialogTitle class="text-mauve12 m-0 text-[17px] font-semibold">
-                                        Thank you!
+                                        <div v-if="error">Error</div>
+                                        <div v-else>Thank you!</div>
                                     </DialogTitle>
                                     <DialogDescription
                                         class="text-mauve11 mt-[10px] mb-5 text-[15px] leading-normal"
                                     >
-                                        Your event invite has been created and sent to the invitees.
+                                        <div v-if="error">{{ error }}</div>
+                                        <div v-else>
+                                            Your event invite has been created and sent to the
+                                            invitees.
+                                        </div>
                                     </DialogDescription>
 
                                     <div class="mt-[25px] flex justify-end">
                                         <DialogClose as-child>
-                                            <button
-                                                class="bg-green4 text-green11 hover:bg-green5 focus:shadow-green7 inline-flex h-[35px] items-center justify-center rounded-[4px] px-[15px] font-semibold leading-none focus:shadow-[0_0_0_2px] focus:outline-none"
-                                            >
-                                                View Event
-                                            </button>
+                                            <Button variant="outline" v-if="error"
+                                                >Try Again
+                                            </Button>
+                                            <Button variant="outline" v-else>View Event </Button>
                                         </DialogClose>
                                     </div>
-                                    <DialogClose
-                                        class="text-grass11 hover:bg-green4 focus:shadow-green7 absolute top-[10px] right-[10px] inline-flex h-[25px] w-[25px] appearance-none items-center justify-center rounded-full focus:shadow-[0_0_0_2px] focus:outline-none"
-                                        aria-label="Close"
-                                    >
-                                        <Icon icon="lucide:x" />
-                                    </DialogClose>
                                 </DialogContent>
                             </DialogPortal>
                         </DialogRoot>
                     </div>
                 </div>
-                <!-- Step 3 End-->
-                <!-- Step 4 start -->
-
-                <!-- Step 4 end -->
             </form>
         </div>
     </div>
 </template>
-
-<style scoped>
-nav {
-    border-radius: 15px;
-}
-
-.navbar-nav .nav-link:hover {
-    box-shadow: 0 0 5px rgba(0, 0, 0, 0.5); /* Add shadow effect on hover */
-    border-radius: 15px;
-}
-
-.navbar-nav .nav-link.active,
-.navbar-nav .nav-link:active {
-    box-shadow: 0 0 5px rgba(0, 0, 0, 0.5); /* Add shadow effect when clicked */
-    border-radius: 15px;
-}
-
-.navbar-nav .nav-item {
-    margin-right: 20px; /* Adjust margin as needed */
-}
-
-:root {
-    --Marine-blue: hsl(213, 96%, 18%);
-    --Purplish-blue: hsl(243, 100%, 62%);
-    --Pastel-blue: hsl(228, 100%, 84%);
-    --Light-blue: hsl(206, 94%, 87%);
-    --Strawberry-red: hsl(354, 84%, 57%);
-
-    --Cool-gray: hsl(231, 11%, 63%);
-    --Light-gray: hsl(229, 24%, 87%);
-    --Magnolia: hsl(217, 100%, 97%);
-    --Alabaster: hsl(231, 100%, 99%);
-    --White: hsl(0, 0%, 100%);
-}
-* {
-    font-family: 'Poppins', sans-serif;
-}
-.hidden {
-    display: none;
-}
-img {
-    max-width: 100%;
-}
-
-.form-container {
-    display: flex;
-    padding: 1rem;
-    justify-content: center;
-    width: 900px;
-    background-color: hsl(0, 0%, 100%);
-    border-radius: 1rem;
-    box-shadow: 0px 0px 1px black;
-    height: 600px;
-}
-.form-sidebar {
-    padding: 2rem 1rem;
-    display: flex;
-    flex-direction: column;
-    gap: 2rem;
-    background-color: lightpink;
-    border-top-left-radius: 1rem;
-    border-bottom-left-radius: 1rem;
-    width: 250px;
-}
-.circle {
-    width: 40px;
-    height: 40px;
-    border: 2px solid hsl(0, 0%, 100%);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: hsl(0, 0%, 100%);
-    font-weight: 700;
-}
-.active .circle {
-    background-color: hsl(206, 94%, 87%) !important;
-    color: hsl(213, 96%, 18%) !important;
-}
-.err {
-    border: 2px solid hsl(354, 84%, 57%) !important;
-}
-.step {
-    display: flex;
-    align-items: center;
-    gap: 0.8rem;
-}
-.step-content {
-    display: flex;
-    flex-direction: column;
-    gap: 0.2rem;
-}
-.step-content span {
-    text-transform: uppercase;
-    color: hsl(229, 24%, 87%);
-    font-size: 13px;
-}
-.step-content b {
-    text-transform: uppercase;
-    color: hsl(0, 0%, 100%);
-}
-.stp {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-}
-.stp .header {
-    margin-bottom: auto;
-    padding-top: 2rem;
-    line-height: 2.5rem;
-}
-.header .title {
-    color: hsl(213, 96%, 18%);
-}
-.header .exp {
-    color: hsl(231, 11%, 63%);
-}
-.next-stp {
-    margin-top: 1rem;
-    margin-bottom: 2rem;
-    margin-left: auto;
-    border: none;
-    padding: 1rem 2rem;
-    border-radius: 7px;
-    background-color: hsl(213, 96%, 18%);
-    color: white;
-    cursor: pointer;
-}
-
-.prev-stp {
-    margin-top: 1rem;
-    margin-bottom: 2rem;
-    border: none;
-    font-weight: 700;
-    background-color: transparent;
-    padding: 1rem 2rem;
-    border-radius: 7px;
-    color: hsl(231, 11%, 63%);
-    cursor: pointer;
-}
-
-/* STEP 1 */
-.step-1 {
-    display: flex;
-    width: 80%;
-    margin-left: 1rem;
-    margin-right: 1rem;
-}
-.step-1 form {
-    display: flex;
-    flex-direction: column;
-    flex: 1;
-    justify-content: center;
-    gap: 1rem;
-}
-.label {
-    color: hsl(213, 96%, 18%);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-}
-.step-1 form input {
-    padding: 1rem;
-    border: 1px solid hsl(231, 11%, 63%);
-    border-radius: 7px;
-    font-weight: 500;
-    font-size: 1rem;
-}
-.step-1 form input:focus {
-    outline-color: hsl(243, 100%, 62%);
-}
-form input::placeholder {
-    font-weight: 500;
-    font-size: 1rem;
-    font-family: inherit;
-}
-form .error {
-    display: none;
-    margin: 0px;
-    color: hsl(354, 84%, 57%);
-    font-size: 0.9rem;
-    font-weight: 700;
-}
-
-form .error.show {
-    display: flex;
-    justify-content: end;
-}
-/* STEP 2 */
-.step-2 {
-    width: 80%;
-    margin-left: 1rem;
-    margin-right: 1rem;
-}
-.step-2 form {
-    display: flex;
-    flex-direction: column;
-    flex: 1;
-    justify-content: center;
-    gap: 1.5rem;
-}
-.box {
-    border: 1px solid hsl(231, 11%, 63%);
-    border-radius: 10px;
-    padding: 1rem;
-    display: flex;
-    align-items: center;
-    cursor: pointer;
-}
-.description {
-    display: flex;
-    flex-direction: column;
-    gap: 0.3rem;
-    margin-left: 12px;
-}
-
-.ad-selected {
-    border: 1px solid hsl(243, 100%, 62%);
-    background-color: var(--Magnolia);
-}
-.step-2 form input {
-    accent-color: hsl(243, 100%, 62%);
-    transform: scale(1.3);
-    user-select: none;
-}
-.description label {
-    color: hsl(213, 96%, 18%);
-    font-weight: 700;
-    user-select: none;
-}
-.description small {
-    color: hsl(231, 11%, 63%);
-    font-weight: 700;
-}
-.price {
-    color: hsl(243, 100%, 62%);
-}
-
-/* STEP 3 */
-.step-3 {
-    width: 80%;
-    margin-left: 1rem;
-    margin-right: 1rem;
-}
-
-/* STEP 4 */
-.step-4 {
-    align-items: center;
-    width: 80%;
-    text-align: center;
-    justify-content: center;
-    margin: auto;
-}
-.step-4 button {
-    display: none;
-}
-/* SWITCH classes */
-.switcher {
-    background-color: var(--Magnolia);
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.5rem;
-    margin-bottom: 5rem;
-    justify-content: center;
-}
-.switch {
-    position: relative;
-    display: inline-block;
-    width: 50px;
-    height: 24px;
-}
-
-/* Hide default HTML checkbox */
-.switch input {
-    opacity: 0;
-    width: 0;
-    height: 0;
-}
-
-@media (max-width: 600px) {
-    /* Stack sidebar above the form content on small screens */
-    .form-container {
-        flex-direction: column;
-        align-items: center;
-        height: 750px; /* Allow height to adjust to content */
-        padding: 0; /* Remove padding if needed */
-    }
-
-    /* Adjust the sidebar to display horizontally */
-    .form-sidebar {
-        flex-direction: row;
-        justify-content: center;
-        padding: 10; /* Remove padding if needed */
-        width: 100%; /* Full width */
-        margin-bottom: 1rem; /* Add some space between the steps and the form */
-        border-top-right-radius: 1rem; /* Add this line to round the top-right corner */
-        border-bottom-right-radius: 1rem; /* Add this line to round the bottom-right corner when stacked */
-    }
-
-    /* Hide all step content, only show the circle/number */
-    .form-sidebar .step .step-content {
-        display: none;
-    }
-
-    /* Align the circles horizontally */
-    .form-sidebar .step {
-        margin-right: 0.5rem; /* Space out the circles */
-    }
-
-    .stp {
-        flex: 1;
-    }
-}
-</style>
