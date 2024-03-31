@@ -22,7 +22,7 @@ def create_user_schedules(db: Session, schedule_list: schemas.UserScheduleList):
 
 
 
-def delete_user_schedule(db: Session, schedule_id: int, event_id: int, user_id: int):
+def delete_user_schedule(db: Session, schedule_id: int, event_id: int, user_id: int):  ####remove
     db_schedule = db.query(models.UserSchedule).filter(
         models.UserSchedule.schedule_id == schedule_id,
         models.UserSchedule.event_id == event_id,

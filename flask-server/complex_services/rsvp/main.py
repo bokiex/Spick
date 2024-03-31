@@ -16,8 +16,7 @@ import json
 # URLs for the User Schedule, Optimize Schedule services, and Event Status Update
 
 optimize_ms = "http://127.0.0.1:8008/"
-invitee_ms = "http://127.0.0.1:8000/"
-event_ms = "http://127.0.0.1:8001/"
+event_ms = "http://127.0.0.1:8000/"
 user_schedule_ms = "http://127.0.0.1:8007/"
 user_ms = "http://127.0.0.1:8001/"
 
@@ -111,7 +110,7 @@ def accept_invitation(request: AcceptInvitationSchema):
         "status": "Y"
     } 
 
-    status_response = requests.put(invitee_ms + "invitee", json=update_payload)
+    status_response = requests.put(event_ms + "invitee", json=update_payload)
     if status_response.status_code > 300:
         raise HTTPException(status_code=status_response.status_code, detail=status_response)
     
@@ -119,7 +118,7 @@ def accept_invitation(request: AcceptInvitationSchema):
     if schedule_response.status_code > 300:
         raise HTTPException(status_code=schedule_response.status_code, detail=schedule_response)
     
-    retrieve_response = requests.get(f"{invitee_ms}invitee/{request.event_id}")
+    retrieve_response = requests.get(f"{event_ms}invitee/{request.event_id}")
     if retrieve_response.status_code > 300:
         raise HTTPException(status_code=retrieve_response.status_code, detail=retrieve_response)
     opt_data = retrieve_response.json()  # Process opt_data as needed
@@ -128,7 +127,8 @@ def accept_invitation(request: AcceptInvitationSchema):
     # e.g., check_and_trigger_optimization(opt_data)
     x = check_and_trigger_optimization(jsonable_encoder(opt_data))
     x = jsonable_encoder(x)
-    return x
+    res = "Accepted Successfully"
+    return res
     
 
 
@@ -161,10 +161,10 @@ def decline_invitation(request: DeclineInvitationSchema):
         "status": "N"  # Setting status to "N" for decline
     }
     
-    status_response = requests.put(invitee_ms + "invitee", json=update_payload)
+    status_response = requests.put(event_ms + "invitee", json=update_payload)
     if status_response.status_code >300:
         raise HTTPException(status_code=status_response.status_code, detail=status_response)
-    retrieve_response = requests.get(f"{invitee_ms}invitee/{request.event_id}")
+    retrieve_response = requests.get(f"{event_ms}invitee/{request.event_id}")
     if retrieve_response.status_code >300:
         raise HTTPException(status_code=retrieve_response.status_code, detail=retrieve_response)
     opt_data = retrieve_response.json()
@@ -172,8 +172,8 @@ def decline_invitation(request: DeclineInvitationSchema):
     # Assuming check_and_trigger_optimization exists and works as expected
     x = check_and_trigger_optimization((opt_data))  # Ensure this function is defined or adjusted for FastAPI
     x = jsonable_encoder(x)
-
-    return x
+    res = "Declined Successfully"
+    return res
     
     
 def check_and_trigger_optimization(data):
