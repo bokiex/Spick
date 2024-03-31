@@ -1,6 +1,6 @@
 volumes:
     rabbitmq_data:
-    user_schedule_data:
+    user_schedule-mysql-data:
     event_mysql_data:
     reservation_mysql_data:
     user-mysql-data:
@@ -56,7 +56,7 @@ services:
         timeout: 5s
         retries: 10
         volumes:
-            - user_schedule_data:/var/lib/mysql
+            - user_schedule-mysql-data:/var/lib/mysql
   
    
 
