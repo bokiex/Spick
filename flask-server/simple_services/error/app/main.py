@@ -2,12 +2,7 @@ import amqp_connection
 import json
 import pika
 from os import environ
-from fastapi import FastAPI, Depends
-from datetime import datetime
 from os import environ
-from contextlib import asynccontextmanager
-from sqlalchemy.orm import Session
-from fastapi.encoders import jsonable_encoder
 from dotenv import load_dotenv 
 
 load_dotenv()

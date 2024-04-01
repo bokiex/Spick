@@ -192,6 +192,8 @@ services:
             dockerfile: Dockerfile
         env_file:
             - .env
+        environment:
+            PYTHONUNBUFFERED: 1
         networks:
             - spick
         restart: always

@@ -4,7 +4,8 @@ import sys
 import amqp_connection
 import pika
 import json
-import apscheduler
+import logging
+import sys
 from fastapi import FastAPI,  File, UploadFile, Form
 from fastapi.responses import JSONResponse 
 from os import environ
@@ -16,6 +17,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from typing import Optional
 import httpx
 
+event_db = environ.get('EVENT_MYSQL_DATABASE') or "localhost"
 user_ms = environ.get('USER_MS_URL') or "http://localhost:3000/"
 event_ms = environ.get('EVENT_MS_URL') or "http://localhost:3600/"
 recommendation_ms = environ.get('RECOMMENDATION_MS_URL') or "http://localhost:3500/"
@@ -24,25 +26,32 @@ connection = None
 channel = None
 exchangename = environ.get("EXCHANGE_NAME") #"generic_topic"
 exchangetype = environ.get("EXCHANGE_TYPE") #"topic"
+
 scheduler = BackgroundScheduler()
+
+
+# Configure logging
+logging.basicConfig(level=logging.INFO,
+                    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+                    handlers=[logging.StreamHandler(sys.stdout)])
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     global connection, channel
     connection = amqp_connection.create_connection()
+    print("Connection established")
     channel = connection.channel()
-
+    
     if not amqp_connection.check_exchange(channel, exchangename, exchangetype):
         print("\nCreate the 'Exchange' before running this microservice. \nExiting the program.")
         sys.exit(0)
     
-    scheduler.add_jobstore('sqlalchemy', url='mysql+mysqlconnector://is213@localhost:3306/scheduler')
+    scheduler.add_jobstore('sqlalchemy', url=f'mysql+mysqlconnector://root:root@{event_db}:3306/scheduler')
     scheduler.start()
 
     yield
     connection.close()
     scheduler.shutdown()
-
 # Initialize FastAPI app
 app = FastAPI(lifespan=lifespan)
 
@@ -64,14 +73,14 @@ app.add_middleware(
 def get_events():
     event_result = requests.get(event_ms + "event")
     if event_result.status_code not in range(200,300):
-        channel.basic_publish(exchange=exchangename, routing_key="get_event.error",body=event_result, properties=pika.BasicProperties(delivery_mode=2))
-        return event_result
+        channel.basic_publish(exchange=exchangename, routing_key="get_event.error",body=json.dumps(event_result.json()), properties=pika.BasicProperties(delivery_mode=2))
+        return event_result.json()
     event_result = event_result.json()
 
     user_result = requests.get(user_ms + "users")
     if user_result.status_code not in range(200,300):
-        channel.basic_publish(exchange=exchangename, routing_key="get_event.error",body=json.dumps(user_result), properties=pika.BasicProperties(delivery_mode=2))
-        return user_result
+        channel.basic_publish(exchange=exchangename, routing_key="get_event.error",body=json.dumps(user_result.json()), properties=pika.BasicProperties(delivery_mode=2))
+        return user_result.json()
     user_result = user_result.json()
 
     for event in event_result:
@@ -98,13 +107,13 @@ def get_event_by_id(event_id: str):
     event_result = requests.get(event_ms + "event/" + event_id)
 
     if event_result.status_code not in range(200,300):
-        channel.basic_publish(exchange=exchangename, routing_key="get_event.error",body=event_result.json(), properties=pika.BasicProperties(delivery_mode=2))
+        channel.basic_publish(exchange=exchangename, routing_key="get_event.error",body=json.dumps(event_result.json()), properties=pika.BasicProperties(delivery_mode=2))
         return event_result
     event_result = event_result.json()
 
     user_result = requests.get(user_ms + "users")
     if user_result.status_code not in range(200,300):
-        channel.basic_publish(exchange=exchangename, routing_key="get_event.error",body=user_result.json(), properties=pika.BasicProperties(delivery_mode=2))
+        channel.basic_publish(exchange=exchangename, routing_key="get_event.error",body=json.dumps(user_result.json()), properties=pika.BasicProperties(delivery_mode=2))
         return user_result
     user_result = user_result.json()
 

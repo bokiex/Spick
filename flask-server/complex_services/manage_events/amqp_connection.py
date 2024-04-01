@@ -4,6 +4,7 @@ from os import environ
 
 hostname = environ.get('RABBIT_MQ_HOST') # or "localhost" 
 port = environ.get('RABBIT_MQ_PORT') # or 5672
+print(hostname, port)
 # function to create a connection to the broker
 def create_connection(max_retries=12, retry_interval=5):
     print('amqp_connection: Create_connection')
@@ -38,7 +39,3 @@ def check_exchange(channel, exchangename, exchangetype):
         print('Exception:', e)
         return False
     return True
-
-
-if __name__ == "__main__":
-    create_connection()
