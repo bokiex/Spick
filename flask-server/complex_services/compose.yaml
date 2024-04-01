@@ -1,55 +1,83 @@
 volumes:
-  rabbitmq_data: 
-  
+    rabbitmq_data:
+
 networks:
     spick:
         driver: bridge
         name: spick
 
 services:
+  #######################################
+  # RSVP Complex
+  #######################################
+    rsvp:
+        container_name: rsvp
+        build:
+            context: ./
+            dockerfile: Dockerfile
+        restart: always
+        environment:
+            optimizer: "http://optimizer:8106/"
+            event: "http://event:8100/"
+            user: "http://user:8101/"
+            user_schedule: "http://user_schedule:8105/"
+            notification: "http://notification:8107/"
+            error: "http://error:8108/"
+            PYTHONUNBUFFERED: 1
+        ports:
+            - "5201:5201"
+        depends_on:
+            - event
+            - user
+            - user_schedule
+            - optimizer
+            - notification
+            - error
+        networks:
+            - spick
+
     #######################################
     # Rabbit MQ
     #######################################
     rabbitmq:
-       image: rabbitmq:3-management
-       hostname: esd-rabbit
-       restart: always
-       ports:
+        image: rabbitmq:3-management
+        hostname: esd-rabbit
+        restart: always
+        ports:
             - "5672:5672"
             - "15672:15672"
-       volumes:
+        volumes: 
             - ./rabbitmq.config:/etc/rabbitmq/rabbitmq.config
             - ./rabbitmq_definitions.json:/etc/rabbitmq/rabbitmq_definitions.json
             - rabbitmq_data:/var/lib/rabbitmq
-       networks:
+        networks:
             - spick
 
-    # User Schedule Microservice
+  # User Schedule Microservice
     user_schedule-mysql:
         networks:
             - spick
         container_name: user_schedule-mysql
-        build: ./simple_services/user_schedule/mysql
+        build: ../simple_services/user_schedule/mysql
         env_file:
             - .env
         healthcheck:
             test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p root"]
             interval: 1s
             retries: 50
-        volumes:
-            - 
+
 
     user_schedule:
         container_name: user_schedule
         build:
-            context: ./simple_services/user_schedule/
+            context: ../simple_services/user_schedule/
             dockerfile: Dockerfile
         networks:
             - spick
         env_file:
             - .env
         ports:
-            - "8107:8107"
+            - "8105:8105"
         restart: always
         depends_on:
             user_schedule-mysql:
@@ -60,7 +88,7 @@ services:
         networks:
             - spick
         container_name: event-mysql
-        build: ./simple_services/event/mysql
+        build: ../simple_services/event/mysql
         env_file:
             - .env
         healthcheck:
@@ -70,7 +98,7 @@ services:
     event:
         container_name: event
         build:
-            context: ./simple_services/event/
+            context: ../simple_services/event/
             dockerfile: Dockerfile
         networks:
             - spick
@@ -88,7 +116,7 @@ services:
         networks:
             - spick
         container_name: user-mysql
-        build: ./simple_services/user/mysql
+        build: ../simple_services/user/mysql
         env_file:
             - .env
         healthcheck:
@@ -98,7 +126,7 @@ services:
     user:
         container_name: user
         build:
-            context: ./simple_services/user/
+            context: ../simple_services/user/
             dockerfile: Dockerfile
         networks:
             - spick
@@ -113,8 +141,9 @@ services:
 
     #Optimizer Microservice
     optimizer:
+        container_name: optimizer
         build:
-            context: ./simple_services/optimizer/
+            context: ../simple_services/optimizer/
             dockerfile: Dockerfile
         networks:
             - spick
@@ -124,3 +153,32 @@ services:
         depends_on:
             - user_schedule
 
+    #Notification Microservice
+    notification:
+        container_name: notification
+        build:
+            context: ../simple_services/notification/
+            dockerfile: Dockerfile
+        networks: 
+            - spick
+        restart: always
+        depends_on:
+            - rabbitmq
+        ports:
+            - "8107:8107"
+        
+
+    #Error Microservice
+    error:
+        container_name: error
+        build:
+            context: ../simple_services/error/
+            dockerfile: Dockerfile
+        networks: 
+            - spick
+        restart: always
+        depends_on:
+            - rabbitmq
+        ports:
+            - "8108:8108"
+       

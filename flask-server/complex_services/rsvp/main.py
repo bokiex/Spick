@@ -15,10 +15,10 @@ import json
 
 # URLs for the User Schedule, Optimize Schedule services, and Event Status Update
 
-optimize_ms = "http://optimizer:8008/"
-event_ms = "http://127.0.0.1:8000/"
-user_schedule_ms = "http://user_schedule:8007/"
-user_ms = "http://127.0.0.1:8001/"
+optimize_ms = "http://optimizer:8106/"
+event_ms = "http://event:8100/"
+user_schedule_ms = "http://user_schedule:8105/"
+user_ms = "http://user:8101/"
 
 
 connection = None
@@ -71,6 +71,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
+
 #Input
 # {   
 #   "event_id": "123123",
@@ -103,6 +105,7 @@ app.add_middleware(
 """
 @app.post("/rsvp/accept")
 def accept_invitation(request: AcceptInvitationSchema):
+
     # Directly setting status to "Y" since this is an acceptance
     update_payload = {
         "event_id": request.event_id,
