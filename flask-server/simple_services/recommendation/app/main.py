@@ -4,7 +4,10 @@ import schemas
 from fastapi.responses import JSONResponse
 import json
 import requests as rq
+from os import environ
+from dotenv import load_dotenv
 
+load_dotenv()
 
 # Initialize FastAPI app
 app = FastAPI()
@@ -19,7 +22,7 @@ async def exception_handler(request, exc):
     )
 
 
-api_key = "AIzaSyBzngjKb-03Hh8vC0r9rd0ultuCezKLUaQ"
+api_key = environ.get("PLACES_API_KEY")
 
 """
 format of input
