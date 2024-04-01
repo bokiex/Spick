@@ -21,6 +21,8 @@ import { useRouter, useRoute } from 'vue-router'
 const router = useRouter()
 const route = useRoute()
 
+const eventurl = 'http://127.0.0.1:8000/event/'
+const rsvpurl = 'http://127.0.0.1:8101/rsvp/'
 
 // eventID placeholder
 const userID = localStorage.getItem('userID')
@@ -35,7 +37,7 @@ var maxDate = ref(null)
 var valid = ref(null)
 
 onMounted(() => {
-    axios.get(`http://127.0.0.1:8000/event/${event_id}`)
+    axios.get(eventurl.concat(event_id))
         .then((response) => {
             event = response.data
             if (event.detail !== undefined) {
@@ -70,7 +72,7 @@ function previousFirstDayOfWeek() {
     return new Date(new Date().setDate(new Date().getDate() - ((new Date().getDay() + 6) % 7)))
 }
 function sendDecline() {
-    var url = 'http://127.0.0.1:8101/rsvp/decline'
+    var url = rsvpurl.concat('decline')
     var data = {
         user_id: userID,
         event_id: event_id
@@ -84,7 +86,7 @@ function exit(){
     router.push({path : '/'})
 }
 function sendAccept() {
-    var url = 'http://127.0.0.1:8101/rsvp/accept'
+    var url = rsvpurl.concat('accept')
     var events = getEvents()
     var data = {
         user_id: userID,
