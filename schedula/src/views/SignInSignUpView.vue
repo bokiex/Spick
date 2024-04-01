@@ -15,7 +15,7 @@ export default {
     methods: {
         async signUp() {
             try {
-                const response = await axios.post('http://localhost:8005/signup', {
+                const response = await axios.post('http://127.0.0.1:3001/signup', {
                     username: this.username,
                     email: this.email,
                     telegram_tag: this.telegramHandle,
@@ -25,7 +25,7 @@ export default {
                 // this.signInClick(); //redirect to login page after successful registration
                 this.showModal = true
             } catch (error) {
-                console.log(error.response.data)
+                console.log(error)
             }
         },
         closeAndRedirect() {
@@ -34,16 +34,16 @@ export default {
         },
         async signIn() {
             try {
-                const response = await axios.post('http://localhost:8005/login', {
+                const response = await axios.post('http://127.0.0.1:3001/login', {
                     username: this.username,
-                    password: this.password,
-                });
-                console.log(response.data.user);
-                localStorage.setItem('userID', response.data.user.user_id);
+                    password: this.password
+                })
+                console.log(response)
+                localStorage.setItem('userID', response.data.user.user_id)
                 console.log(localStorage)
-                router.push('/');
-            }catch(error){
-                console.log(error.response.data);
+                router.push('/')
+            } catch (error) {
+                console.log(error)
             }
         },
 

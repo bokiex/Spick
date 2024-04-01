@@ -1,20 +1,17 @@
-import sqlalchemy as db
 import requests
 import amqp_connection
 import json
 import threading
-import asyncio
-from telebot import TeleBot
 from os import environ
+from telebot import TeleBot
 from flask import jsonify
-from fastapi import FastAPI, Depends, HTTPException
-from fastapi.encoders import jsonable_encoder
-from contextlib import asynccontextmanager
 from fastapi.responses import JSONResponse
+from dotenv import load_dotenv
 
-bot_token = environ.get('BOT_TOKEN') or "6996801409:AAGDWkgPaCtRAqH08y9lwYJQif6ESOnQ984"
-user_ms = environ.get("USER_URL") or "http://127.0.0.1:8001/users/"  #change back to your own localhost @john
-notification_ms = environ.get("NOTIFICATION_URL") or "http://localhost:8002/notification/"  #^^
+load_dotenv()
+
+bot_token = environ.get('BOT_TOKEN')
+user_ms = environ.get("USER_URL") or "http://user:8101/users/"  #change back to your own localhost @john
 bot = TeleBot(bot_token)
 
 def receiver():
@@ -70,7 +67,7 @@ def echo_all(message):
     user = user.json()
     user["telegram_id"] = str(telegram_id)
     print(user)
-    update = requests.put(user_ms + f"{user['user_id']}", json=jsonable_encoder(user))
+    update = requests.put(user_ms + f"{user['user_id']}", json=jsonify(user))
     
     if update.status_code in range(300, 599):
         msg = "An error occurred updating the user."

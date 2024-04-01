@@ -26,8 +26,8 @@ import * as z from 'zod'
 import { CircleX } from 'lucide-vue-next'
 import Label from '@/components/Label.vue'
 
-const event_ms = 'http://localhost:3600/create_event'
-const user_ms = 'http://0.0.0.0:3000/users'
+const event_ms = 'http://localhost:8000/create_event'
+const user_ms = 'http://localhost:3000/users'
 
 const user_id = localStorage.getItem('userID')
 const friends = ref([])
@@ -152,7 +152,7 @@ async function submitForm() {
             if (!res.ok) {
                 const data = await res.json()
 
-                throw new Error(data.error)
+                throw new Error(data)
             }
         } catch (err) {
             error.value = err.message

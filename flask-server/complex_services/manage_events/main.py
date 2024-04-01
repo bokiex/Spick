@@ -18,7 +18,6 @@ import httpx
 
 user_ms = environ.get('USER_URL') or "http://localhost:3000/users/"
 event_ms = environ.get('EVENT_URL') or "http://localhost:3600/event/"
-notification_ms = environ.get("NOTIFICATION_URL") or "http://localhost:5005/notification/"
 recommendation_ms = environ.get('RECOMMENDATION_URL') or "http://localhost:3500/recommendation/"
 rsvp_ms = environ.get('RSVP_URL') or "http://localhost:4000/rsvp/optimize/"
 connection = None
@@ -184,8 +183,9 @@ Sample event JSON output:
 async def create_event(event: str = Form(...), file: Optional[UploadFile] = File(default=None)):
     
     event_data = json.loads(event)
+    print(event_data)
     event = schemas.Recommend(**event_data)
-    
+    print(event)
     # Get recommendation from recommendation microservice
     print("\n----- Getting recommendation list -----")
     #recommendation_result = requests.post(recommendation_ms, json=jsonable_encoder({"type": event_dict["type"], "township": event_dict["township"]}))

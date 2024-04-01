@@ -109,23 +109,6 @@ services:
   #######################################
   # User Microservice
   #######################################
-<<<<<<< HEAD
-  # user:
-  #   build: 
-  #     context: .\simple_services\user
-  #     dockerfile: dockerfile
-  #   restart: always
-  #   ports:
-  #     - "8001:8001"
-  #   environment:
-  #     dbURL: mysql+mysqlconnector://is213@host.docker.internal:3306/user
-  #     PYTHONUNBUFFERED: 1
-  #   networks:
-  #     - schedula
-  #   depends_on:
-  #     user-mysql:
-  #       condition: service_healthy
-=======
   user:
     build: 
       context: ./simple_services/user
@@ -141,7 +124,6 @@ services:
     depends_on:
       user-mysql:
         condition: service_healthy
->>>>>>> 88c5598dc4f0ae726d7cd967d9c3ba37b075bc5b
         
 
   #######################################

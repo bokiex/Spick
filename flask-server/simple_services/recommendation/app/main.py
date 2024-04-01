@@ -1,11 +1,13 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.encoders import jsonable_encoder
-import  schemas
-from sqlalchemy.orm import Session
+import schemas
 from fastapi.responses import JSONResponse
 import json
 import requests as rq
+from os import environ
+from dotenv import load_dotenv
 
+load_dotenv()
 
 # Initialize FastAPI app
 app = FastAPI()
@@ -20,7 +22,7 @@ async def exception_handler(request, exc):
     )
 
 
-api_key = ""
+api_key = environ.get("PLACES_API_KEY")
 
 """
 format of input
