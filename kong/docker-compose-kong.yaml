@@ -4,9 +4,10 @@ volumes:
   grafanadata:
  
 networks:
-  kong-net:
+  spick:
     driver: bridge
-    name: kong-net
+    name: spick
+    external: true
 
 services:
 
@@ -17,7 +18,7 @@ services:
     image: postgres:latest # Choose a specific version as needed
     restart: always
     networks:
-      - kong-net
+      - spick
     environment:
       POSTGRES_DB: kong
       POSTGRES_USER: kong
@@ -35,19 +36,19 @@ services:
   #######################################
   # Kong database migration
   #######################################
-  kong-migration:
-    image: kong/kong-gateway:3.2.2.5 # tested 20231101
-    command: "kong migrations bootstrap"
-    restart: on-failure
-    networks:
-      - kong-net
-    environment:
-      KONG_DATABASE: postgres
-      KONG_PG_HOST: kong-database
-      KONG_PG_USER: kong
-      KONG_PG_PASSWORD: password
-    depends_on:
-      - kong-database
+  # kong-migration:
+  #   image: kong/kong-gateway:3.2.2.5 # tested 20231101
+  #   command: "kong migrations bootstrap"
+  #   restart: on-failure
+  #   networks:
+  #     - spick
+  #   environment:
+  #     KONG_DATABASE: postgres
+  #     KONG_PG_HOST: kong-database
+  #     KONG_PG_USER: kong
+  #     KONG_PG_PASSWORD: password
+  #   depends_on:
+  #     - kong-database
 
   #######################################
   # Kong: The API Gateway
@@ -56,9 +57,10 @@ services:
     image: kong/kong-gateway:3.2.2.5 # tested 20231101
     restart: always
     networks:
-      - kong-net
+      - spick
     environment:
       KONG_DATABASE: postgres
+      KONG_DECLARATIVE_CONFIG: /etc/kong/kong_config.yaml
       KONG_PG_HOST: kong-database
       KONG_PG_USER: kong
       KONG_PG_PASSWORD: password
@@ -68,9 +70,8 @@ services:
       KONG_ADMIN_ERROR_LOG: /dev/stderr
       KONG_ADMIN_LISTEN: 0.0.0.0:8001
       KONG_ADMIN_GUI_URL: http://localhost:8002
-      KONG_DECLARATIVE_CONFIG: /etc/kong/kong_config.yaml
-    depends_on:
-      - kong-migration
+    # depends_on:
+    #   - kong-migration
     volumes:
       - ./kong_config.yaml:/etc/kong/kong_config.yaml
     ports: # https://docs.konghq.com/gateway/latest/production/networking/default-ports/
@@ -88,25 +89,25 @@ services:
   #######################################
   # Prometheus
   #######################################
-  prometheus:
-    image: prom/prometheus:v2.49.1
-    restart: always
-    networks:
-      - kong-net
-    ports:
-      - "9090:9090"
-    volumes:
-      - prometheusdata:/etc/prometheus
+  # prometheus:
+  #   image: prom/prometheus:v2.49.1
+  #   restart: always
+  #   networks:
+  #     - spick
+  #   ports:
+  #     - "9090:9090"
+  #   volumes:
+  #     - prometheusdata:/etc/prometheus
 
   #######################################
   # Grafana Open Source
   #######################################
-  grafana:
-    image: grafana/grafana-oss:10.2.3
-    restart: always
-    networks:
-      - kong-net
-    ports:
-      - "13000:3000"
-    volumes:
-      - grafanadata:/var/lib/grafana
+  # grafana:
+  #   image: grafana/grafana-oss:10.2.3
+  #   restart: always
+  #   networks:
+  #     - spick
+  #   ports:
+  #     - "13000:3000"
+  #   volumes:
+  #     - grafanadata:/var/lib/grafana
