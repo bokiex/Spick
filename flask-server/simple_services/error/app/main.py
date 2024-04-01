@@ -8,9 +8,10 @@ from os import environ
 from contextlib import asynccontextmanager
 from sqlalchemy.orm import Session
 from fastapi.encoders import jsonable_encoder
+from dotenv import load_dotenv 
 
-e_queue_name = environ.get('Error') or "Error" #Error
-
+load_dotenv()
+e_queue_name = environ.get('ERROR_QUEUE_NAME') or "Error" #Error
 
 def receiveError(channel):
     try:
