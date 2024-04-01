@@ -5,6 +5,7 @@ networks:
     spick:
         driver: bridge
         name: spick
+        # external: true
 
 services:
     #######################################

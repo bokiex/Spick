@@ -1,29 +1,37 @@
-_format_version: "2.1"
+_format_version: "1.1"
+
 services:
   - name: authentication-service
-    url: http://127.0.0.1:8005
+    url: http://authentication:8103
     routes:
       - name: signup-route
         paths:
-          - /signup
+          - /api/v1/signup
         methods:
           - POST
       - name: login-route
         paths:
-          - /login
+          - /api/v1/login
         methods:
           - POST
           
-  - name: event-service
-    url: http://127.0.0.1:8000
-    routes:
-      - name:
-        paths:
-          -
-        methods:
-          - 
-      - name:
-        paths:
-          -
-        methods:
-          - 
+  # - name: event-service
+  #   url: http://localhost:8100
+  #   routes:
+  #     - name:
+  #       paths:
+  #         -
+  #       methods:
+  #         - 
+  #     - name:
+  #       paths:
+  #         -
+  #       methods:
+  #         - 
+
+# CORS plugin
+plugins:
+  - name: cors
+    config:
+      origins:
+        - '*'
