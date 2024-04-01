@@ -11,7 +11,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 bot_token = environ.get('BOT_TOKEN')
-user_ms = environ.get("USER_URL") or "http://127.0.0.1:3000/users/"  #change back to your own localhost @john
+user_ms = environ.get("USER_URL") or "http://user:8101/users/"  #change back to your own localhost @john
 bot = TeleBot(bot_token)
 
 def receiver():

@@ -27,7 +27,7 @@ services:
             rabbit_port: 5672
             PYTHONUNBUFFERED: 1
         ports:
-            - "5201:5201"
+            - "8201:8201"
         depends_on:
             - event
             - user
@@ -35,6 +35,7 @@ services:
             - optimizer
             - notification
             - error
+            - rabbitmq
         networks:
             - spick
         
@@ -62,6 +63,7 @@ services:
             - spick
         container_name: user_schedule-mysql
         build: ../simple_services/user_schedule/mysql
+        restart: always
         env_file:
             - .env
         healthcheck:
@@ -94,6 +96,7 @@ services:
         build: ../simple_services/event/mysql
         env_file:
             - .env
+        restart: always
         healthcheck:
             test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p root"]
             interval: 1s
@@ -120,6 +123,7 @@ services:
             - spick
         container_name: user-mysql
         build: ../simple_services/user/mysql
+        restart: always
         env_file:
             - .env
         healthcheck:

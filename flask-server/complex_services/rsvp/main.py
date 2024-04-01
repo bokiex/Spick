@@ -4,7 +4,6 @@ from schemas import AcceptInvitationSchema, ScheduleItem, DeclineInvitationSchem
 from typing import List
 import requests
 from fastapi.encoders import jsonable_encoder
-from flask import jsonify
 import sys
 import amqp_connection
 import pika
