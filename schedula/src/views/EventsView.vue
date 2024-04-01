@@ -1,7 +1,7 @@
 <script setup>
 import Card from '@/components/Card.vue'
 import Button from '@/components/Button.vue'
-import { useRouter} from 'vue-router'
+import { useRouter } from 'vue-router'
 import { ref, onMounted } from 'vue'
 
 const router = useRouter()
@@ -12,8 +12,7 @@ const events = ref(null)
 onMounted(async () => {
     try {
         // Example API call - replace with your actual API call
-        const data = await fetch('http://localhost:8000/event').then((res) => res.json())
-
+        const data = await fetch('http://localhost:8100/event').then((res) => res.json())
         events.value = data
         console.log(data)
     } catch (error) {
@@ -22,7 +21,9 @@ onMounted(async () => {
         loading.value = false
     }
 })
+
 const navigate = (id) => {
+    console.log(id)
     router.push({ path: `/events/${id}` })
 }
 
@@ -32,7 +33,7 @@ function getImageUrl(event) {
         return `https://spickbucket.s3.ap-southeast-1.amazonaws.com/${event.image}`
     }
     // Return a default image URL or an empty string if event or event.image is not available
-    return 'path/to/default/image.jpg'
+    return '../../public/default.png'
 }
 </script>
 
@@ -53,9 +54,11 @@ function getImageUrl(event) {
             @click="navigate(event?.event_id)"
         >
             <div class="space-y-2">
-                <img :src="getImageUrl(event)" alt="" />
+                <img :src="getImageUrl(event)" alt="" class="w-[200px] h-[150px]" />
                 <div class="flex flex-col gap-y-1.5">
                     <h1>{{ event?.event_name }}</h1>
+                    <div v-if="event.time_out" class="rounded-lg text-bold w-1/2 bg-green-500">RSVP open</div>
+                    <div v-else class="rounded-lg bg-red-600">RSVP closed</div>
                 </div>
                 <div class="text-sm text-muted-foreground">
                     <p>{{ event?.datetime_start }}</p>
