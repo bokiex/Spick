@@ -187,5 +187,5 @@ services:
         depends_on:
             - rabbitmq
         ports:
-            - "8108:8108"
+            - "8108:8108
        
