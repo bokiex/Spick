@@ -23,6 +23,8 @@ services:
             user_schedule: "http://user_schedule:8105/"
             notification: "http://notification:8107/"
             error: "http://error:8108/"
+            rabbit_host: rabbitmq
+            rabbit_port: 5672
             PYTHONUNBUFFERED: 1
         ports:
             - "5201:5201"
@@ -35,6 +37,7 @@ services:
             - error
         networks:
             - spick
+        
 
     #######################################
     # Rabbit MQ

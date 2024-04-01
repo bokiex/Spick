@@ -114,16 +114,17 @@ def accept_invitation(request: AcceptInvitationSchema):
     } 
 
     status_response = requests.put(event_ms + "invitee", json=update_payload)
-    if status_response.status_code > 300:
-        raise HTTPException(status_code=status_response.status_code, detail=status_response)
+    if status_response.status_code not in range(200,300):
+        channel.basic_publish(exchange=exchangename, routing_key="update_status.error",body=json.dumps(status_response.json()), properties=pika.BasicProperties(delivery_mode=2))
     
     schedule_response = requests.post(user_schedule_ms + "user_schedule", json= jsonable_encoder({"sched_list": request.sched_list}))
     if schedule_response.status_code > 300:
-        raise HTTPException(status_code=schedule_response.status_code, detail=schedule_response)
+        channel.basic_publish(exchange=exchangename, routing_key="post_schedule.error",body=json.dumps(schedule_response.json()), properties=pika.BasicProperties(delivery_mode=2))
     
     retrieve_response = requests.get(f"{event_ms}invitee/{request.event_id}")
     if retrieve_response.status_code > 300:
-        raise HTTPException(status_code=retrieve_response.status_code, detail=retrieve_response)
+        channel.basic_publish(exchange=exchangename, routing_key="retrieve_invitee.error",body=json.dumps(retrieve_response.json()), properties=pika.BasicProperties(delivery_mode=2))
+    
     opt_data = retrieve_response.json()  # Process opt_data as needed
     opt_data["event_id"] = request.event_id
     # Now you can process opt_data as needed
@@ -166,10 +167,10 @@ def decline_invitation(request: DeclineInvitationSchema):
     
     status_response = requests.put(event_ms + "invitee", json=update_payload)
     if status_response.status_code >300:
-        raise HTTPException(status_code=status_response.status_code, detail=status_response)
+        channel.basic_publish(exchange=exchangename, routing_key="update_status.error",body=json.dumps(status_response.json()), properties=pika.BasicProperties(delivery_mode=2))
     retrieve_response = requests.get(f"{event_ms}invitee/{request.event_id}")
     if retrieve_response.status_code >300:
-        raise HTTPException(status_code=retrieve_response.status_code, detail=retrieve_response)
+        channel.basic_publish(exchange=exchangename, routing_key="retrieve_invitee.error",body=json.dumps(retrieve_response.json()), properties=pika.BasicProperties(delivery_mode=2))
     opt_data = retrieve_response.json()
     opt_data["event_id"] = request.event_id
     # Assuming check_and_trigger_optimization exists and works as expected
@@ -258,17 +259,18 @@ def check_and_trigger_optimization(data):
 @app.post("/rsvp/optimize")
 def optimize_schedule(request: TimeoutOptimizeScheduleRequest):
     if not request.event_id:
-        raise HTTPException(status_code=400, detail="event_id is required.")
+        res = "invalid event_id"
+        return res
     response = requests.get(f"{user_schedule_ms}user_schedule/{request.event_id}")
     if response.status_code > 300:
-        raise HTTPException(status_code=response.status_code, detail=response)
+        channel.basic_publish(exchange=exchangename, routing_key="get_schedule.error",body=json.dumps(response.json()), properties=pika.BasicProperties(delivery_mode=2))
     schedule_data = response.json()
     opt_response = requests.post(optimize_ms + "optimize_schedule", json=schedule_data)
     if opt_response.status_code >300 :
-        raise HTTPException(status_code=opt_response.status_code, detail=opt_response)
+        channel.basic_publish(exchange=exchangename, routing_key="optimize.error",body=json.dumps(opt_response.json()), properties=pika.BasicProperties(delivery_mode=2))
     opt_update = requests.post(event_ms + "update_optimize", json = opt_response.json())
     if opt_update.status_code >300:
-        raise HTTPException(status_code=opt_update.status_code, detail="failed to update event db")
+        channel.basic_publish(exchange=exchangename, routing_key="update_optmize.error",body=json.dumps(opt_update.json()), properties=pika.BasicProperties(delivery_mode=2))
     
     event_details = requests.get(f"{event_ms}event/{request.event_id}")
     if event_details.status_code not in range(200,300):
