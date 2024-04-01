@@ -9,13 +9,14 @@ export default {
             email: '',
             telegramHandle: '',
             password: '',
-            showModal: false // For controlling the visibility of the custom alert
+            showModal: false, // For controlling the visibility of the custom alert
+            user_ms: 'http://127.0.0.1:8103/'
         }
     },
     methods: {
         async signUp() {
             try {
-                const response = await axios.post('http://127.0.0.1:3001/signup', {
+                const response = await axios.post(this.user_ms + 'signup', {
                     username: this.username,
                     email: this.email,
                     telegram_tag: this.telegramHandle,
@@ -34,7 +35,7 @@ export default {
         },
         async signIn() {
             try {
-                const response = await axios.post('http://127.0.0.1:3001/login', {
+                const response = await axios.post(this.user_ms + 'login', {
                     username: this.username,
                     password: this.password
                 })

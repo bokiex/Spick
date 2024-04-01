@@ -35,7 +35,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-user_ms = environ.get("USER_URL") or "http://localhost:8101/users/"
+user_ms = environ.get("USER_MS_URL") or "http://localhost:8101/"
 """
 {
   "username": "string",
@@ -53,7 +53,7 @@ def online():
 @app.post("/signup")
 def signup(user: schemas.User):
     user.password_hash = generate_password_hash(user.password, method='pbkdf2:sha256')
-    user_result = requests.post(user_ms, json=jsonable_encoder(user))
+    user_result = requests.post(user_ms + "users", json=jsonable_encoder(user))
 
     if int(user_result.status_code) > 300:
         raise HTTPException(status_code=user_result.status_code, detail=user_result.json()["detail"])
@@ -68,7 +68,7 @@ def signup(user: schemas.User):
 """
 @app.post("/login")
 def login(user: schemas.LoginUser):
-    user_result = requests.get(user_ms + user.username)
+    user_result = requests.get(user_ms + "users/" + user.username)
     if int(user_result.status_code) > 300:
         raise HTTPException(status_code=user_result.status_code, detail=user_result.json()["detail"])
         #channel.basic_publish(exchange=exchangename, routing_key="login.error", body=json.dumps(user))

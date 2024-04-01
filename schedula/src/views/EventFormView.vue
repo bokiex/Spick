@@ -26,8 +26,8 @@ import * as z from 'zod'
 import { CircleX } from 'lucide-vue-next'
 import Label from '@/components/Label.vue'
 
-const event_ms = 'http://localhost:8000/create_event'
-const user_ms = 'http://localhost:3000/users'
+const event_ms = 'http://localhost:8200/create_event'
+const user_ms = 'http://localhost:8101/users'
 
 const user_id = localStorage.getItem('userID')
 const friends = ref([])
@@ -38,10 +38,16 @@ onMounted(async () => {
     try {
         // Example API call - replace with your actual API call
         const data = await fetch(user_ms).then((res) => res.json())
-
+        console.log(user_id)
+        // for loop to remove the user from the list of friends
+        for (let i = 0; i < data.length; i++) {
+            if (data[i].user_id == user_id) {
+                data.splice(i, 1)
+            }
+        }
         friends.value = data
+        console.log(friends.value)
         selected_friend.value = friends.value[0]
-        console.log(selected_friend.value)
     } catch (error) {
         console.error('Failed to fetch event data:', error)
     } finally {
@@ -232,7 +238,7 @@ async function submitForm() {
 
                         <div class="flex gap-5">
                             <div v-for="(invitee, index) in invitees" :key="index" class="relative">
-                                <Avatar />
+                                <Avatar :src="invitee.image" :name="invitee.username" />
 
                                 <CircleX
                                     class="absolute -top-2 -right-2 cursor-pointer hover:text-destructive transition-colors duration-150"

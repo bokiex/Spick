@@ -6,10 +6,11 @@ import { ref, onMounted } from 'vue'
 
 const events = ref([])
 const loading = ref(true)
+const event_ms = 'http://localhost:8100/event'
 onMounted(async () => {
     try {
         // Example API call - replace with your actual API call
-        const data = await fetch('http://localhost:3800/event').then((res) => res.json())
+        const data = await fetch(event_ms).then((res) => res.json())
         console.log(data)
         events.value = data.map((event) => ({
             start: event.range_start,
