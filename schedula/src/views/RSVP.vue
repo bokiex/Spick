@@ -35,10 +35,13 @@ var event = null
 var minDate = ref(null)
 var maxDate = ref(null)
 var valid = ref(null)
+var online = ref(null)
 
 onMounted(() => {
+    try {
     axios.get(eventurl.concat(event_id))
         .then((response) => {
+            online = true
             event = response.data
             if (event.detail !== undefined) {
                 valid = false
@@ -64,7 +67,10 @@ onMounted(() => {
                     }
                 }
             }
-        })
+        })}
+        catch{
+            online = false
+        }
 })
 
 // Get the Monday of the real time current week.
@@ -139,7 +145,24 @@ function getEvents() {
 <template>
     <div class="m-auto relative w-full h-screen space-y-6 sm:w-[450px]">
         <div class="my-10 relative h-[700px] space-y-6">
-            <div class="container p-4" v-if="valid === false">
+            <div class="container p-4" v-if="online === false">
+                <div class="row justify-content-center">
+                    <!-- Form Start -->
+                    <div class="form-container" style="position: relative">
+                        <div class="center" style="text-align: center">
+                            <div style="text-align: center">
+                                <h1 class="header form-input" style="font-size: x-large">
+                                    Unable to access event information
+                                </h1>
+                                <router-link class="btn exit" type="button" :to="`/`">
+                                    Home
+                                </router-link>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="container p-4" v-else-if="valid === false">
                 <div class="row justify-content-center">
                     <!-- Form Start -->
                     <div class="form-container" style="position: relative">

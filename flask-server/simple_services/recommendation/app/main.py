@@ -326,10 +326,7 @@ def processSearch(search):
 
 def processImage(resource_name):
     url = "https://places.googleapis.com/v1/" + resource_name + "/media?maxHeightPx=400&maxWidthPx=400?key=" + api_key
-    print(url)
-    print('\n-----calling places photos-----')
-    res = rq.get(url)
-    print("\nReceived photos result:", res.json())
+    return url
    
 
 @app.get("/online")
@@ -355,10 +352,16 @@ def get_recommendation( search: schemas.Search):
         for i in result['places']:
             recommendation_name = i['displayName']['text']
             recommendation_address = i['formattedAddress']
+            recommendation_photos = processImage(i['photos'][0]['name'])
+            recommendation_rating = i["rating"]
+            price_level = i["priceLevel"]
          
             recommendation = {
                 "recommendation_name": recommendation_name,
-                "recommendation_address": recommendation_address
+                "recommendation_address": recommendation_address,
+                "recommendation_photos" : recommendation_photos,
+                "recommendation_rating" : recommendation_rating,
+                "price_level" : price_level
             }
             recommendation = schemas.Recommendation(**recommendation)
             res.append(recommendation)
