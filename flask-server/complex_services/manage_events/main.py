@@ -16,14 +16,14 @@ from fastapi.middleware.cors import CORSMiddleware
 from typing import Optional
 import httpx
 
-user_ms = environ.get('USER_URL') or "http://localhost:3000/users/"
-event_ms = environ.get('EVENT_URL') or "http://localhost:3600/event/"
-recommendation_ms = environ.get('RECOMMENDATION_URL') or "http://localhost:3500/recommendation/"
-rsvp_ms = environ.get('RSVP_URL') or "http://localhost:4000/rsvp/optimize/"
+user_ms = environ.get('USER_MS_URL') or "http://localhost:3000/"
+event_ms = environ.get('EVENT_MS_URL') or "http://localhost:3600/"
+recommendation_ms = environ.get('RECOMMENDATION_MS_URL') or "http://localhost:3500/"
+rsvp_ms = environ.get('RSVP_MS_URL') or "http://localhost:4000/"
 connection = None
 channel = None
-exchangename = "generic_topic"
-exchangetype = "topic"
+exchangename = environ.get("EXCHANGE_NAME") #"generic_topic"
+exchangetype = environ.get("EXCHANGE_TYPE") #"topic"
 scheduler = BackgroundScheduler()
 
 @asynccontextmanager
@@ -62,13 +62,13 @@ app.add_middleware(
 )
 @app.get("/event")
 def get_events():
-    event_result = requests.get(event_ms)
+    event_result = requests.get(event_ms + "event")
     if event_result.status_code not in range(200,300):
         channel.basic_publish(exchange=exchangename, routing_key="get_event.error",body=event_result, properties=pika.BasicProperties(delivery_mode=2))
         return event_result
     event_result = event_result.json()
 
-    user_result = requests.get(user_ms)
+    user_result = requests.get(user_ms + "users")
     if user_result.status_code not in range(200,300):
         channel.basic_publish(exchange=exchangename, routing_key="get_event.error",body=json.dumps(user_result), properties=pika.BasicProperties(delivery_mode=2))
         return user_result
@@ -95,14 +95,14 @@ def get_events():
 
 @app.get("/event/{event_id}")
 def get_event_by_id(event_id: str):
-    event_result = requests.get(event_ms + event_id)
+    event_result = requests.get(event_ms + "event/" + event_id)
 
     if event_result.status_code not in range(200,300):
         channel.basic_publish(exchange=exchangename, routing_key="get_event.error",body=event_result.json(), properties=pika.BasicProperties(delivery_mode=2))
         return event_result
     event_result = event_result.json()
 
-    user_result = requests.get(user_ms)
+    user_result = requests.get(user_ms + "users")
     if user_result.status_code not in range(200,300):
         channel.basic_publish(exchange=exchangename, routing_key="get_event.error",body=user_result.json(), properties=pika.BasicProperties(delivery_mode=2))
         return user_result
@@ -189,7 +189,7 @@ async def create_event(event: str = Form(...), file: Optional[UploadFile] = File
     # Get recommendation from recommendation microservice
     print("\n----- Getting recommendation list -----")
     #recommendation_result = requests.post(recommendation_ms, json=jsonable_encoder({"type": event_dict["type"], "township": event_dict["township"]}))
-    recommendation_result = requests.post(recommendation_ms, json=jsonable_encoder({"type": event.type, "township": event.township}))
+    recommendation_result = requests.post(recommendation_ms + "recommendation", json=jsonable_encoder({"type": event.type, "township": event.township}))
     
 
     # If search is invalid and recommendation returns no results
@@ -220,7 +220,7 @@ async def create_event(event: str = Form(...), file: Optional[UploadFile] = File
         files = {
             "files": (file.filename, file.file, file.content_type),
         }
-        event_result = await client.post(event_ms, data={"event": json.dumps(event_dict)}, files=files)
+        event_result = await client.post(event_ms + "event", data={"event": json.dumps(event_dict)}, files=files)
      
     # If event service is not available
     if event_result.status_code not in range(200,300):
@@ -251,7 +251,7 @@ def delete_event(event_id: int):
 
 def on_timeout(event_id: str):
 
-    optimize_results = requests.post(rsvp_ms, json = jsonable_encoder({"event_id": event_id}))
+    optimize_results = requests.post(rsvp_ms + "rsvp/optimize", json = jsonable_encoder({"event_id": event_id}))
 
     if optimize_results.status_code not in range(200,300):
         channel.basic_publish(exchange=exchangename, routing_key="timeout.error",body=json.dumps(optimize_results.json()), properties=pika.BasicProperties(delivery_mode=2))

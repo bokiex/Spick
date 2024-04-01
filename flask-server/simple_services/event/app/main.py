@@ -158,7 +158,7 @@ def create_event(event: str = Form(...),  files: Optional[UploadFile] = File(def
 def get_invitee_responded(event_id: str, db: Session = Depends(get_db)):
     res = crud.get_invitee_responded(db, event_id)
     if res == []:
-        return jsonable_encoder({"message": "No invitees found."})
+        return []
     return jsonable_encoder({"data": res, "message": "Invitees found."})
 
 """
@@ -203,8 +203,6 @@ def get_invitees(event_id:str, db: Session = Depends(get_db)):
         return jsonable_encoder({"message": "No invitees found."})
     
     respondents = crud.get_invitee_responded(db, event_id)
-    if respondents == []:
-        return jsonable_encoder({"message": "No invitees found."})
     
     invitees_left = len(all_invitees) - len(respondents)
     return jsonable_encoder({"all_invitees": all_invitees, "respondents": respondents, "invitees_left": invitees_left, "message": "Invitees found."})

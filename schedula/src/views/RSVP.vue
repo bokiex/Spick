@@ -20,6 +20,8 @@ import { useRouter, useRoute } from 'vue-router'
 const router = useRouter()
 const route = useRoute()
 
+const eventurl = 'http://127.0.0.1:8000/event/'
+const rsvpurl = 'http://127.0.0.1:8101/rsvp/'
 
 // eventID placeholder
 const userID = localStorage.getItem('userID')
@@ -32,10 +34,13 @@ var event = null
 var minDate = ref(null)
 var maxDate = ref(null)
 var valid = ref(null)
+var online = ref(null)
 
 onMounted(() => {
-    axios.get(`http://127.0.0.1:8100/event/${event_id}`)
+    try {
+    axios.get(eventurl.concat(event_id))
         .then((response) => {
+            online = true
             event = response.data
             console.log(event)
             if (event.detail !== undefined) {
@@ -65,7 +70,10 @@ onMounted(() => {
                     }
                 }
             }
-        })
+        })}
+        catch{
+            online = false
+        }
 })
 
 // Get the Monday of the real time current week.
@@ -73,7 +81,7 @@ function previousFirstDayOfWeek() {
     return new Date(new Date().setDate(new Date().getDate() - ((new Date().getDay() + 6) % 7)))
 }
 function sendDecline() {
-    var url = 'http://127.0.0.1:8101/rsvp/decline'
+    var url = rsvpurl.concat('decline')
     var data = {
         user_id: userID,
         event_id: event_id
@@ -87,7 +95,7 @@ function exit(){
     router.push({path : '/'})
 }
 function sendAccept() {
-    var url = 'http://127.0.0.1:8101/rsvp/accept'
+    var url = rsvpurl.concat('accept')
     var events = getEvents()
     var data = {
         user_id: userID,
@@ -140,7 +148,24 @@ function getEvents() {
 <template>
     <div class="m-auto relative w-full h-screen space-y-6 sm:w-[450px]">
         <div class="my-10 relative h-[700px] space-y-6">
-            <div class="container p-4" v-if="valid === false">
+            <div class="container p-4" v-if="online === false">
+                <div class="row justify-content-center">
+                    <!-- Form Start -->
+                    <div class="form-container" style="position: relative">
+                        <div class="center" style="text-align: center">
+                            <div style="text-align: center">
+                                <h1 class="header form-input" style="font-size: x-large">
+                                    Unable to access event information
+                                </h1>
+                                <router-link class="btn exit" type="button" :to="`/`">
+                                    Home
+                                </router-link>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="container p-4" v-else-if="valid === false">
                 <div class="row justify-content-center">
                     <!-- Form Start -->
                     <div class="form-container" style="position: relative">
