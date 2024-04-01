@@ -18,7 +18,6 @@ CREATE TABLE IF NOT EXISTS `user` (
 
 INSERT INTO `user` (`user_id`, `username`, `email`, `password_hash`, `telegram_tag`, `image`, `telegram_id`) VALUES
 (1, 'string', 'string', 'string', 'string', 'https://images.unsplash.com/photo-1492633423870-43d1cd2775eb?&w=128&h=128&dpr=2&q=80', NULL),
-(3, 'sdf', 'sdfds', 'string', 'string', NULL, NULL),
 (4, 'ssidfng', 'stdfring', 'string', 'string', NULL, NULL),
-(5, 'strisdfng', 'strsdfing', 'string', 'string', NULL, NULL),
+(5, 'strisdfng', 'strsdfing', 'string', '@bokyannn', NULL, NULL),
 (6, 'asdf', 'asdf@gmail.com', 'pbkdf2:sha256:600000$wuJc5iUSEK6zno34$7dc148975d26ef794afc7c90cae1e1969ceca8aa58c911842cd63fb64a9316f0', '@asdf', 'https://images.unsplash.com/photo-1492633423870-43d1cd2775eb?&w=128&h=128&dpr=2&q=80', NULL);

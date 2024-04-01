@@ -5,7 +5,6 @@ import threading
 from os import environ
 from telebot import TeleBot
 from flask import jsonify
-from fastapi.responses import JSONResponse
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -35,7 +34,7 @@ def receiver():
         users = requests.get(user_ms)
 
         if users.status_code in range(300, 599):
-            return JSONResponse(status_code=users.status_code, content={"message":users.json()["detail"]})
+            return users.json()
         users = users.json()
     
         for user in users:
@@ -45,9 +44,11 @@ def receiver():
             #sendurl = "https://api.telegram.org/bot" + token + "/sendMessage" + "?chat_id=" + user["telegram_id"] + "&text=" + chatmsg
             bot.send_message(user["telegram_id"], message)
             countnotif += 1
+        if countnotif == 0:
+            print("No users found to send notifications to.")
         else:
             successmsg = f"Notification successfully sent. {str(countnotif)} notifications were sent."
-            JSONResponse(status_code=200, content={"message":successmsg})
+            print(successmsg)
             
     channel.basic_consume(queue="Notification", on_message_callback=callback, auto_ack=True)
     channel.start_consuming()
@@ -67,11 +68,12 @@ def echo_all(message):
     user = user.json()
     user["telegram_id"] = str(telegram_id)
     print(user)
-    update = requests.put(user_ms + f"{user['user_id']}", json=jsonify(user))
+    update = requests.put(user_ms + f"telegram/{user['user_id']}", json=user)
     
     if update.status_code in range(300, 599):
         msg = "An error occurred updating the user."
-    msg = "Your account is now tied to your telegram tag."
+    else:
+        msg = "Your account is now tied to your telegram tag."
     return bot.send_message(telegram_id, msg)
 
 if __name__ == "__main__":

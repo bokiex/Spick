@@ -38,10 +38,16 @@ onMounted(async () => {
     try {
         // Example API call - replace with your actual API call
         const data = await fetch(user_ms).then((res) => res.json())
-
+        console.log(user_id)
+        // for loop to remove the user from the list of friends
+        for (let i = 0; i < data.length; i++) {
+            if (data[i].user_id == user_id) {
+                data.splice(i, 1)
+            }
+        }
         friends.value = data
+        console.log(friends.value)
         selected_friend.value = friends.value[0]
-        console.log(selected_friend.value)
     } catch (error) {
         console.error('Failed to fetch event data:', error)
     } finally {
@@ -232,7 +238,7 @@ async function submitForm() {
 
                         <div class="flex gap-5">
                             <div v-for="(invitee, index) in invitees" :key="index" class="relative">
-                                <Avatar />
+                                <Avatar :src="invitee.image" :name="invitee.username" />
 
                                 <CircleX
                                     class="absolute -top-2 -right-2 cursor-pointer hover:text-destructive transition-colors duration-150"

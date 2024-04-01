@@ -5,6 +5,7 @@ import { computed, defineProps } from 'vue'
 const props = defineProps<{
     src: string
     alt: string
+    name: string
     onload: () => void
 }>()
 
@@ -12,6 +13,10 @@ const imageSrc = computed(() => {
     return (
         props.src || 'https://source.unsplash.com/black-dog-wearing-blue-denim-collar-K4mSJ7kc0As'
     )
+})
+
+const name = computed(() => {
+    return props.name || 'CT'
 })
 </script>
 
@@ -29,7 +34,7 @@ const imageSrc = computed(() => {
             class="text-grass11 leading-1 flex h-full w-full items-center justify-center bg-white text-[15px] font-medium"
             :delay-ms="600"
         >
-            CT
+            {{ name }}
         </AvatarFallback>
     </AvatarRoot>
 </template>

@@ -131,6 +131,15 @@ async def update_user_password(user_id: int, user: schemas.User, db: Session = D
         raise HTTPException(status_code=404, detail="User not found.")
     return result
 
+# Update user telegram_id
+@app.put("/users/telegram/{user_id}")
+async def update_user_password(user_id: int, user: schemas.User, db: Session = Depends(get_db)):
+    
+    result = crud.update_user(db, user, user_id)
+    if result is None:
+        raise HTTPException(status_code=404, detail="User not found.")
+    return result
+
 
 # Get user by user_id
 @app.get("/users/user_id/{user_id}", response_model=schemas.UserResponse)

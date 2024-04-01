@@ -105,6 +105,8 @@ services:
             - .env
         ports:
             - "8102:8102"
+        networks:
+            - spick
         restart: always
 
     # Authentication Microservice
@@ -218,6 +220,22 @@ services:
             rabbitmq:
                 condition: service_started
 
+    notification:
+        container_name: notification
+        build:
+            context: ./simple_services/notification/
+            dockerfile: Dockerfile
+        env_file:
+            - .env
+        environment:
+            PYTHONUNBUFFERED: 1
+        networks:
+            - spick
+        restart: always
+        depends_on:
+            rabbitmq:
+                condition: service_started
+
     # Complex Microservices
     # Manage Events
     manage_events:
@@ -241,3 +259,30 @@ services:
                 condition: service_started
             rabbitmq:
                 condition: service_started
+
+    #######################################
+    # RSVP Complex
+    #######################################
+    rsvp:
+        container_name: rsvp
+        build:
+            context: ./complex_services/rsvp
+            dockerfile: Dockerfile
+        restart: always
+        env_file:
+            - .env
+        ports:
+            - "8201:8201"
+        depends_on:
+            user:
+                condition: service_started
+            event:
+                condition: service_started
+            user_schedule:
+                condition: service_started
+            optimizer:
+                condition: service_started
+            rabbitmq:
+                condition: service_started
+        networks:
+            - spick

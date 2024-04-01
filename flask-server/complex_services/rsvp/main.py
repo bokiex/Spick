@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Depends, HTTPException, status
+from fastapi import FastAPI
 from sqlalchemy.orm import Session
 from schemas import AcceptInvitationSchema, ScheduleItem, DeclineInvitationSchema, TimeoutOptimizeScheduleRequest
 from typing import List
@@ -10,20 +10,21 @@ import pika
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 import json
-
+from dotenv import load_dotenv
+from os import environ
 
 # URLs for the User Schedule, Optimize Schedule services, and Event Status Update
+load_dotenv()
 
-optimize_ms = "http://optimizer:8106/"
-event_ms = "http://event:8100/"
-user_schedule_ms = "http://user_schedule:8105/"
-user_ms = "http://user:8101/"
-
+optimize_ms = f"http://{environ.get("OPTIMIZER_MS")}:{environ.get("OPTIMIZER_MS_PORT")}/"
+event_ms = f"http://{environ.get("EVENT_MS")}:{environ.get("EVENT_MS_PORT")}/"
+user_schedule_ms = f"http://{environ.get("USER_SCHEDULE_MS")}:{environ.get("USER_SCHEDULE_MS_PORT")}/"
+user_ms = f"http://{environ.get("USER_MS")}:{environ.get("USER_MS_PORT")}/"
 
 connection = None
 channel = None
-exchangename = "generic_topic"
-exchangetype = "topic"
+exchangename = environ.get("EXCHANGE_NAME") #"generic_topic"
+exchangetype = environ.get("EXCHANGE_TYPE") #"topic"
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -40,20 +41,6 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(lifespan=lifespan)
 
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    global connection, channel
-    connection = amqp_connection.create_connection()
-    channel = connection.channel()
-
-    if not amqp_connection.check_exchange(channel, exchangename, exchangetype):
-        print("\nCreate the 'Exchange' before running this microservice. \nExiting the program.")
-        sys.exit(0)
-
-    yield
-    connection.close()
-   
-app = FastAPI(lifespan=lifespan)
 
 origins = [
     "http://localhost:5173",
@@ -104,7 +91,9 @@ app.add_middleware(
 """
 @app.post("/rsvp/accept")
 def accept_invitation(request: AcceptInvitationSchema):
-
+    print(event_ms)
+    print(user_ms)
+    print(user_schedule_ms)
     # Directly setting status to "Y" since this is an acceptance
     update_payload = {
         "event_id": request.event_id,
