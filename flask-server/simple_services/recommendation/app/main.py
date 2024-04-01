@@ -352,14 +352,14 @@ def get_recommendation( search: schemas.Search):
         for i in result['places']:
             recommendation_name = i['displayName']['text']
             recommendation_address = i['formattedAddress']
-            recommendation_photos = processImage(i['photos'][0]['name'])
-            recommendation_rating = i["rating"]
+            recommendation_photo = processImage(i['photos'][0]['name'])
+            recommendation_rating = str(i["rating"])
             price_level = i["priceLevel"]
          
             recommendation = {
                 "recommendation_name": recommendation_name,
                 "recommendation_address": recommendation_address,
-                "recommendation_photos" : recommendation_photos,
+                "recommendation_photo" : recommendation_photo,
                 "recommendation_rating" : recommendation_rating,
                 "price_level" : price_level
             }
