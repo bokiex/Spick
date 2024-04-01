@@ -5,53 +5,53 @@ networks:
     spick:
         driver: bridge
         name: spick
-        external: true
+        # external: true
 
 services:
     #######################################
     # Rabbit MQ
     #######################################
-    # rabbitmq:
-    #     image: rabbitmq:3-management
-    #     hostname: esd-rabbit
-    #     restart: always
-    #     ports:
-    #         - "5672:5672"
-    #         - "15672:15672"
-    #     volumes:
-    #         - ./rabbitmq.config:/etc/rabbitmq/rabbitmq.config
-    #         - ./rabbitmq_definitions.json:/etc/rabbitmq/rabbitmq_definitions.json
-    #         - rabbitmq_data:/var/lib/rabbitmq
-    #     networks:
-    #         - spick
+    rabbitmq:
+        image: rabbitmq:3-management
+        hostname: esd-rabbit
+        restart: always
+        ports:
+            - "5672:5672"
+            - "15672:15672"
+        volumes:
+            - ./rabbitmq.config:/etc/rabbitmq/rabbitmq.config
+            - ./rabbitmq_definitions.json:/etc/rabbitmq/rabbitmq_definitions.json
+            - rabbitmq_data:/var/lib/rabbitmq
+        networks:
+            - spick
 
     # Event Microservice
-    # event-mysql:
-    #     networks:
-    #         - spick
-    #     container_name: event-mysql
-    #     build: ./simple_services/event/mysql
-    #     env_file:
-    #         - .env
-    #     healthcheck:
-    #         test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p root"]
-    #         interval: 1s
-    #         retries: 50
-    # event:
-    #     container_name: event
-    #     build:
-    #         context: ./simple_services/event/
-    #         dockerfile: Dockerfile
-    #     networks:
-    #         - spick
-    #     env_file:
-    #         - .env
-    #     ports:
-    #         - "8100:8100"
-    #     restart: always
-    #     depends_on:
-    #         event-mysql:
-    #             condition: service_healthy
+    event-mysql:
+        networks:
+            - spick
+        container_name: event-mysql
+        build: ./simple_services/event/mysql
+        env_file:
+            - .env
+        healthcheck:
+            test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p root"]
+            interval: 1s
+            retries: 50
+    event:
+        container_name: event
+        build:
+            context: ./simple_services/event/
+            dockerfile: Dockerfile
+        networks:
+            - spick
+        env_file:
+            - .env
+        ports:
+            - "8100:8100"
+        restart: always
+        depends_on:
+            event-mysql:
+                condition: service_healthy
 
     # User Microservice
     user-mysql:
@@ -87,16 +87,16 @@ services:
             retries: 5
 
     # Recommendation Microservice
-    # recommendation:
-    #     container_name: recommendation
-    #     build:
-    #         context: ./simple_services/recommendation
-    #         dockerfile: Dockerfile
-    #     env_file:
-    #         - .env
-    #     ports:
-    #         - "8102:8102"
-    #     restart: always
+    recommendation:
+        container_name: recommendation
+        build:
+            context: ./simple_services/recommendation
+            dockerfile: Dockerfile
+        env_file:
+            - .env
+        ports:
+            - "8102:8102"
+        restart: always
 
     # Authentication Microservice
     authentication:
@@ -111,100 +111,100 @@ services:
         ports:
             - "8103:8103"
         restart: always
-        # depends_on:
-        #     user:
-        #         condition: service_healthy
+        depends_on:
+            user:
+                condition: service_healthy
 
     # User Schedule Microservice
-    # reservation-mysql:
-    #     networks:
-    #         - spick
-    #     container_name: reservation-mysql
-    #     build: ./simple_services/reservation/mysql
-    #     env_file:
-    #         - .env
-    #     healthcheck:
-    #         test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p root"]
-    #         interval: 1s
-    #         retries: 50
-    #     volumes:
-    #         -
+    reservation-mysql:
+        networks:
+            - spick
+        container_name: reservation-mysql
+        build: ./simple_services/reservation/mysql
+        env_file:
+            - .env
+        healthcheck:
+            test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p root"]
+            interval: 1s
+            retries: 50
+        volumes:
+            -
 
-    # reservation:
-    #     container_name: reservation
-    #     build:
-    #         context: ./simple_services/reservation/
-    #         dockerfile: Dockerfile
-    #     networks:
-    #         - spick
-    #     env_file:
-    #         - .env
-    #     ports:
-    #         - "8104:8104"
-    #     restart: always
-    #     depends_on:
-    #         reservation-mysql:
-    #             condition: service_healthy
+    reservation:
+        container_name: reservation
+        build:
+            context: ./simple_services/reservation/
+            dockerfile: Dockerfile
+        networks:
+            - spick
+        env_file:
+            - .env
+        ports:
+            - "8104:8104"
+        restart: always
+        depends_on:
+            reservation-mysql:
+                condition: service_healthy
 
     # User Schedule Microservice
-    # user_schedule-mysql:
-    #     networks:
-    #         - spick
-    #     container_name: user_schedule-mysql
-    #     build: ./simple_services/user_schedule/mysql
-    #     env_file:
-    #         - .env
-    #     healthcheck:
-    #         test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p root"]
-    #         interval: 1s
-    #         retries: 50
-    #     volumes:
-    #         -
+    user_schedule-mysql:
+        networks:
+            - spick
+        container_name: user_schedule-mysql
+        build: ./simple_services/user_schedule/mysql
+        env_file:
+            - .env
+        healthcheck:
+            test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p root"]
+            interval: 1s
+            retries: 50
+        volumes:
+            -
 
-    # user_schedule:
-    #     container_name: user_schedule
-    #     build:
-    #         context: ./simple_services/user_schedule/
-    #         dockerfile: Dockerfile
-    #     networks:
-    #         - spick
-    #     env_file:
-    #         - .env
-    #     ports:
-    #         - "8105:8105"
-    #     restart: always
-    #     depends_on:
-    #         user_schedule-mysql:
-    #             condition: service_healthy
+    user_schedule:
+        container_name: user_schedule
+        build:
+            context: ./simple_services/user_schedule/
+            dockerfile: Dockerfile
+        networks:
+            - spick
+        env_file:
+            - .env
+        ports:
+            - "8105:8105"
+        restart: always
+        depends_on:
+            user_schedule-mysql:
+                condition: service_healthy
 
     #Optimizer Microservice
-    # optimizer:
-    #     container_name: optimizer
-    #     build:
-    #         context: ./simple_services/optimizer/
-    #         dockerfile: Dockerfile
-    #     networks:
-    #         - spick
-    #     ports:
-    #         - "8106:8106"
-    #     restart: always
-    #     depends_on:
-    #         - user_schedule
+    optimizer:
+        container_name: optimizer
+        build:
+            context: ./simple_services/optimizer/
+            dockerfile: Dockerfile
+        networks:
+            - spick
+        ports:
+            - "8106:8106"
+        restart: always
+        depends_on:
+            - user_schedule
 
-    # notification:
-    #     container_name: notification
-    #     build:
-    #         context: ./simple_services/notification/
-    #         dockerfile: Dockerfile
-    #     networks:
-    #         - spick
-    #     restart: always
+    notification:
+        container_name: notification
+        build:
+            context: ./simple_services/notification/
+            dockerfile: Dockerfile
+        networks:
+            - spick
+        restart: always
 
-    # error:
-    #     container_name: error
-    #     build:
-    #         context: ./simple_services/error/
-    #         dockerfile: Dockerfile
-    #     networks:
-    #         - spick
-    #     restart: always
+    error:
+        container_name: error
+        build:
+            context: ./simple_services/error/
+            dockerfile: Dockerfile
+        networks:
+            - spick
+        restart: always
