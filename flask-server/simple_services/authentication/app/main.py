@@ -24,6 +24,7 @@ origins = [
     "https://localhost.tiangolo.com",
     "http://localhost",
     "http://localhost:8080",
+    "http://localhost:8000",
 ]
 
 app.add_middleware(
@@ -34,7 +35,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-user_ms = environ.get("USER_URL") or "http://localhost:3000/users/"
+user_ms = environ.get("USER_URL") or "http://localhost:8101/users/"
 """
 {
   "username": "string",

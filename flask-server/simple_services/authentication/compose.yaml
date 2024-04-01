@@ -13,4 +13,4 @@ services:
     networks:
       - spick-net
     ports:
-      - "8005:8005"
+      - "8103:8103"
