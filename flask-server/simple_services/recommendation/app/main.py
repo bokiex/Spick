@@ -325,7 +325,7 @@ def processSearch(search):
     return response
 
 def processImage(resource_name):
-    url = "https://places.googleapis.com/v1/" + resource_name + "/media?maxHeightPx=400&maxWidthPx=400?key=" + api_key
+    url = "https://places.googleapis.com/v1/" + resource_name + "/media?maxHeightPx=400&maxWidthPx=400&key=" + api_key
     return url
    
 
