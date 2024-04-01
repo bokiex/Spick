@@ -34,7 +34,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-user_ms = environ.get("USER_URL") or "http://localhost:8001/users/"
+user_ms = environ.get("USER_URL") or "http://user:8001/users/"
 """
 {
   "username": "string",

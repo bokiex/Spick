@@ -8,10 +8,10 @@ import os
 
 
 # SQLALCHEMY_DATABASE_URL = os.getenv("dbURL")
-SQLALCHEMY_DATABASE_URL='mysql+mysqlconnector://is213@host.docker.internal:3306/user_schedule'
+# SQLALCHEMY_DATABASE_URL='mysql+mysqlconnector://is213@host.docker.internal:3306/user_schedule'
 # SQLALCHEMY_DATABASE_URL = 'mysql+mysqlconnector://is213@localhost:3306/event'
 
-SQLALCHEMY_DATABASE_URL = os.getenv("SQLALCHEMY_DATABASE_URL")
+SQLALCHEMY_DATABASE_URL = os.getenv("DATABASE_URL") or 'mysql+mysqlconnector://is213@host.docker.internal:3306/user_schedule'
 
 
 engine = create_engine(SQLALCHEMY_DATABASE_URL, echo=True)
