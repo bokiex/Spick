@@ -1,53 +1,44 @@
-<script>
+<script setup>
 import { RadioGroupItem, RadioGroupRoot, Label } from 'radix-vue'
-export default {
-    userID: localStorage.getItem('userID'),
-    components: {
-        RadioGroupItem,
-        RadioGroupRoot,
-        Label
+import { ref } from 'vue'
+
+const userID = localStorage.getItem('userID')
+const selectedTimeslot = ref(null)
+const selectedVenu = ''
+const timeslots = [
+    {
+        date: '2024-03-14',
+        start_time: '2024-03-14T21:00:00',
+        end_time: '2024-03-14T13:00:00'
     },
-    data() {
-        return {
-            selectedTimeslot: '',
-            selectedVenu: '',
-            timeslots: [
-                {
-                    date: '2024-03-14',
-                    start_time: '2024-03-14T21:00:00',
-                    end_time: '2024-03-14T13:00:00'
-                },
-                {
-                    date: '2024-03-15',
-                    start_time: '2024-03-14T21:00:00',
-                    end_time: '2024-03-14T13:00:00'
-                },
-                {
-                    date: '2024-03-16',
-                    start_time: '2024-03-14T21:00:00',
-                    end_time: '2024-03-14T13:00:00'
-                }
-            ],
-            venues: [
-                {
-                    name: 'SMU',
-                    address: 'Victoria Road',
-                    imageUrl: 'https://via.placeholder.com/150'
-                },
-                {
-                    name: 'SMU',
-                    address: 'Victoria Road',
-                    imageUrl: 'https://via.placeholder.com/150'
-                },
-                {
-                    name: 'SMU',
-                    address: 'Victoria Road',
-                    imageUrl: 'https://via.placeholder.com/150'
-                }
-            ]
-        }
+    {
+        date: '2024-03-15',
+        start_time: '2024-03-14T21:00:00',
+        end_time: '2024-03-14T13:00:00'
+    },
+    {
+        date: '2024-03-16',
+        start_time: '2024-03-14T21:00:00',
+        end_time: '2024-03-14T13:00:00'
     }
-}
+]
+const venues = [
+    {
+        name: 'SMU',
+        address: 'Victoria Road',
+        imageUrl: 'https://via.placeholder.com/150'
+    },
+    {
+        name: 'SMU',
+        address: 'Victoria Road',
+        imageUrl: 'https://via.placeholder.com/150'
+    },
+    {
+        name: 'SMU',
+        address: 'Victoria Road',
+        imageUrl: 'https://via.placeholder.com/150'
+    }
+]
 </script>
 
 <template>

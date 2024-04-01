@@ -15,7 +15,6 @@ import {
     Separator
 } from 'radix-vue'
 import Button from '@/components/Button.vue'
-import router from '@/router'
 import { useRouter, useRoute } from 'vue-router'
 
 const router = useRouter()
@@ -26,7 +25,7 @@ const route = useRoute()
 const userID = localStorage.getItem('userID')
 
 const vuecal = ref()
-const event_id = route.params.eventToken
+const event_id = route.params.id
 var timeout = ref(null)
 var invited = false
 var event = null
@@ -35,9 +34,10 @@ var maxDate = ref(null)
 var valid = ref(null)
 
 onMounted(() => {
-    axios.get(`http://127.0.0.1:8000/event/${event_id}`)
+    axios.get(`http://127.0.0.1:8100/event/${event_id}`)
         .then((response) => {
             event = response.data
+            console.log(event)
             if (event.detail !== undefined) {
                 valid = false
             }
@@ -49,8 +49,11 @@ onMounted(() => {
                 maxDate = enddate.getFullYear()+'-'+(enddate.getMonth()+1)+'-'+enddate.getDate()
                 timeout.value = event.time_out
                 for (var user of event.invitees) {
-                    if (user.user_id === userID) {
+                    
+                    if (user.user_id == userID) {
+                     
                         if(user.status === null){
+                            console.log('invited')
                             invited = true
                         }
                         else if (user.status === 'Y'){

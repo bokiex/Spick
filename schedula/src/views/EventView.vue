@@ -17,7 +17,7 @@ const loading = ref(true)
 onMounted(async () => {
     try {
         // Example API call - replace with your actual API call
-        const data = await fetch('http://localhost:3800/event' + `/${event_id}`).then((res) =>
+        const data = await fetch('http://localhost:8100/event' + `/${event_id}`).then((res) =>
             res.json()
         )
         event.value = data
