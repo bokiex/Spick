@@ -1,6 +1,9 @@
 import time
 import pika
 from os import environ
+from dotenv import load_dotenv
+
+load_dotenv()
 
 hostname = environ.get('RABBIT_MQ_HOST') or "localhost" #localhost
 port = environ.get('RABBIT_MQ_PORT') or 5672 #5672 
