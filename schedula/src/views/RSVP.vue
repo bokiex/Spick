@@ -15,12 +15,15 @@ import {
     Separator
 } from 'radix-vue'
 import Button from '@/components/Button.vue'
-import { useRoute } from 'vue-router'
+import router from '@/router'
+import { useRouter, useRoute } from 'vue-router'
+
+const router = useRouter()
+const route = useRoute()
+
 
 // eventID placeholder
 const userID = localStorage.getItem('userID')
-
-const route = useRoute()
 
 const vuecal = ref()
 const event_id = route.params.eventToken
@@ -46,8 +49,16 @@ onMounted(() => {
                 maxDate = enddate.getFullYear()+'-'+(enddate.getMonth()+1)+'-'+enddate.getDate()
                 timeout.value = event.time_out
                 for (var user of event.invitees) {
-                    if (user.status === null && user.user_id === userID) {
-                        invited = true
+                    if (user.user_id === userID) {
+                        if(user.status === null){
+                            invited = true
+                        }
+                        else if (user.status === 'Y'){
+                            invited = 'Y'
+                        }
+                        else if (user.status === 'N'){
+                            invited = 'N'
+                        }
                     }
                 }
             }
@@ -66,8 +77,11 @@ function sendDecline() {
     }
     console.log(data)
     axios.post(url, data).then(function (response) {
-        this.route.push({ path: '/calendarview' })
+        router.push({path : '/'})
     })
+}
+function exit(){
+    router.push({path : '/'})
 }
 function sendAccept() {
     var url = 'http://127.0.0.1:8101/rsvp/accept'
@@ -80,7 +94,7 @@ function sendAccept() {
     console.log(data)
     axios.post(url, data).then(function (response) {
         console.log("success")
-        this.route.push({ path: '/calendarview' })
+        router.push({path : '/'})
     })
 }
 function getEvents() {
@@ -174,6 +188,23 @@ function getEvents() {
                     </div>
                 </div>
             </div>
+            <div class="container p-4" v-else-if="invited === 'Y' || invited === 'N'">
+                <div class="row justify-content-center">
+                    <!-- Form Start -->
+                    <div class="form-container" style="position: relative">
+                        <div class="center" style="text-align: center">
+                            <div style="text-align: center">
+                                <h1 class="header form-input" style="font-size: x-large">
+                                    You have already responded
+                                </h1>
+                                <router-link class="btn exit" type="button" :to="`/`">
+                                    Home
+                                </router-link>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
             <form class="form" v-else>
                 <div class="h-full">
                     <!-- Content omitted for brevity -->
@@ -237,7 +268,7 @@ function getEvents() {
 
                                     <div class="mt-[25px] flex justify-end">
                                         <DialogClose as-child>
-                                            <button variant="outline"
+                                            <button variant="outline" @click = "exit()"
                                                 class="inline-flex h-[35px] items-center justify-center rounded-[4px] px-[15px] font-semibold leading-none focus:shadow-[0_0_0_2px] focus:outline-none">
                                                 Exit
                                             </button>

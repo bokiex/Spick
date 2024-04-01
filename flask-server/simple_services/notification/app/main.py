@@ -10,14 +10,14 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-bot_token = environ.get('BOT_TOKEN')
-user_ms = environ.get("USER_URL") or "http://user:8101/users/"  #change back to your own localhost @john
+bot_token = environ.get('TELEGRAM_BOT_API_KEY')
+user_ms = f"http://{environ.get("USER_MS")}:{environ.get("USER_MS_PORT")}/users/"
 bot = TeleBot(bot_token)
-
+n_queue_name = environ.get('NOTIFICATION_QUEUE_NAME') or "Notification"
 def receiver():
     connection = amqp_connection.create_connection()
     channel = connection.channel()
-    channel.queue_declare(queue="Notification", durable=True)
+    channel.queue_declare(queue=n_queue_name, durable=True)
 
     def callback(channel, method, properties, body):
         print("\nNotification microservice: Received a notification by " + __file__)
