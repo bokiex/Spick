@@ -44,7 +44,7 @@ def get_db():
 
 @app.get("/online")
 def online():
-    return {"message": "User is online."}
+    return {"status": "OK"}
 
 # Get all users
 @app.get("/users", response_model=list[schemas.UserResponse])
