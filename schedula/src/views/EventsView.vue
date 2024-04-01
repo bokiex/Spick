@@ -28,7 +28,7 @@ const navigate = (id) => {
 }
 
 function getImageUrl(event) {
-    if (event && event.image) {
+    if (event && event.image && event.image !== 'None') { // Need to check if event.image !== None is necessary
         console.log(event.image)
         return `https://spickbucket.s3.ap-southeast-1.amazonaws.com/${event.image}`
     }
@@ -53,12 +53,35 @@ function getImageUrl(event) {
             v-for="event in events"
             @click="navigate(event?.event_id)"
         >
+            {{ console.log(event.user_id, userID) }}
             <div class="space-y-2">
                 <img :src="getImageUrl(event)" alt="" class="w-[200px] h-[150px]" />
                 <div class="flex flex-col gap-y-1.5">
                     <h1>{{ event?.event_name }}</h1>
-                    <div v-if="event.time_out" class="rounded-lg text-bold w-1/2 bg-green-500">RSVP open</div>
-                    <div v-else class="rounded-lg bg-red-600">RSVP closed</div>
+                    <div
+                        v-if="event.time_out"
+                        class="rounded-lg font-bold w-1/2 bg-green-300 text-center"
+                    >
+                        RSVP open
+                    </div>
+                    <div
+                        v-else-if="!event.time_out"
+                        class="rounded-lg font-bold w-1/2 bg-destructive0 text-center"
+                    >
+                        RSVP closed
+                    </div>
+                    <div
+                        v-if="event.user_id == userID"
+                        class="rounded-lg font-bold w-1/2 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-center"
+                    >
+                        Host
+                    </div>
+                    <div
+                        v-else-if="event.user_id != userID"
+                        class="rounded-lg font-bold w-1/2 bg-border text-center"
+                    >
+                        Invitee
+                    </div>
                 </div>
                 <div class="text-sm text-muted-foreground">
                     <p>{{ event?.datetime_start }}</p>

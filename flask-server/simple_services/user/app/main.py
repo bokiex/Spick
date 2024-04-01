@@ -139,3 +139,11 @@ async def get_user_by_user_id(user_id: int, db: Session = Depends(get_db)):
     if result is None:
         raise HTTPException(status_code=404, detail="User not found.")
     return jsonable_encoder(result)
+
+# Get multiple users by user_id
+@app.post("/users/user_id", response_model=list[schemas.UserResponse])
+async def get_multiple_users_by_user_id(user_ids: list[int], db: Session = Depends(get_db)):
+    result = crud.get_multiple_users_by_user_id(db, user_ids)
+    if result == []:
+        raise HTTPException(status_code=404, detail="No users found.")
+    return jsonable_encoder(result)

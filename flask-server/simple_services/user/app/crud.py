@@ -65,3 +65,9 @@ def get_user_by_user_id(db: Session, user_id: int):
     if db_user is None:
         return None
     return db_user
+
+def get_multiple_users_by_user_id(db: Session, user_ids: list):
+    db_users = db.query(models.User).filter(models.User.user_id.in_(user_ids)).all()
+    if db_users is None:
+        return None
+    return db_users

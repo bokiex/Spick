@@ -4,24 +4,39 @@ import Avatar from '@/components/Avatar.vue'
 import { Calendar, Clock, MapPin, Pin } from 'lucide-vue-next'
 import Button from '@/components/Button.vue'
 import { useRouter, useRoute } from 'vue-router'
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import Skeleton from '@/components/Skeleton.vue'
 
 const router = useRouter()
 const route = useRoute()
-
+const userID = localStorage.getItem('userID')
 const event_id = route.params.id
 const event = ref(null)
 const loading = ref(true)
+const isRSVPClosed = computed(() => !event.value?.time_out)
+const isHost = computed(() => event.value?.user_id == userID)
+const side_title = computed(() => (isHost.value ? 'Waiting for response' : 'RSVP now'))
+const side_description = computed(() =>
+    isRSVPClosed.value ? 'RSVP is closed' : 'Timeout: ' + event.value?.time_out
+)
 
 onMounted(async () => {
     try {
         // Example API call - replace with your actual API call
-        const data = await fetch('http://localhost:8100/event' + `/${event_id}`).then((res) =>
+        const event_data = await fetch('http://localhost:8100/event' + `/${event_id}`).then((res) =>
             res.json()
         )
-        event.value = data
-        console.log(data)
+        event.value = event_data
+        const invitees_user_ids = event_data.invitees.map((invitee) => invitee.user_id)
+
+        const invitee_data = await fetch('http://localhost:8101/users/user_id', {
+            method: 'POST',
+            
+            body: JSON.stringify({user_ids: invitees_user_ids})
+        }).then((res) => res.json())
+
+        console.log(invitee_data)
+        console.log(event.value)
     } catch (error) {
         console.error('Failed to fetch event data:', error)
     } finally {
@@ -138,9 +153,20 @@ function getImageUrl(event) {
                     <div class="space-y-4 w-full">
                         <Card>
                             <div class="flex flex-col gap-y-1.5 p-4 space-y-1">
-                                <h3 class="text-lg font-semibold">RSVP now</h3>
-                                <p class="text-muted-foreground">Click to RSVP</p>
-                                <Button @click="reservation()">Join</Button>
+                                <h3 class="text-lg font-semibold">{{ side_title }}</h3>
+                                <p class="text-muted-foreground">{{ side_description }}</p>
+
+                                <div v-if="isHost && !isRSVPClosed">
+                                    <p class="text-muted-foreground">Responded</p>
+                                    <div v-for="invitee in event?.invitees">
+                                        <Avatar :src="invitee.image" v-if="invitee.status" />
+                                    </div>
+                                    <p class="text-muted-foreground">Not Responded</p>
+                                    <div v-for="invitee in event?.invitee">
+                                        <Avatar :src="invitee.image" v-if="!invitee.status" />
+                                    </div>
+                                </div>
+                                <Button v-else @click="reservation()">{{ button_text }}</Button>
                             </div>
                         </Card>
                         <Card>
@@ -156,7 +182,7 @@ function getImageUrl(event) {
                                 <h3 class="text-lg font-semibold">Attendees</h3>
                                 <div class="flex overflow-hidden gap-x-3">
                                     <div
-                                        class=" flex flex-col items-center justify-center"
+                                        class="flex flex-col items-center justify-center"
                                         v-for="invitee in event?.invitees"
                                         :key="invitee.user_id"
                                     >
@@ -165,7 +191,7 @@ function getImageUrl(event) {
                                             class="w-12 h-12 rounded-full"
                                         >
                                         </Avatar>
-                                        <span class=" p-2 text-center font-light text-xs">
+                                        <span class="p-2 text-center font-light text-xs">
                                             Light
                                         </span>
                                     </div>
