@@ -12,6 +12,7 @@ services:
     # Rabbit MQ
     #######################################
     rabbitmq:
+        container_name: rabbitmq
         image: rabbitmq:3-management
         hostname: esd-rabbit
         restart: always
@@ -80,11 +81,6 @@ services:
         depends_on:
             user-mysql:
                 condition: service_healthy
-        healthcheck:
-            test: ["CMD", "curl", "--include", "-request", "GET", "http://localhost:8101/online", "||", "exit 1"]
-            interval: 5s
-            timeout: 5s
-            retries: 5
 
     # Recommendation Microservice
     recommendation:
@@ -113,9 +109,9 @@ services:
         restart: always
         depends_on:
             user:
-                condition: service_healthy
+                condition: service_started
 
-    # User Schedule Microservice
+    # Reservation Microservice
     reservation-mysql:
         networks:
             - spick
@@ -127,8 +123,6 @@ services:
             test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p root"]
             interval: 1s
             retries: 50
-        volumes:
-            -
 
     reservation:
         container_name: reservation
@@ -158,8 +152,6 @@ services:
             test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p root"]
             interval: 1s
             retries: 50
-        volumes:
-            -
 
     user_schedule:
         container_name: user_schedule
@@ -183,6 +175,8 @@ services:
         build:
             context: ./simple_services/optimizer/
             dockerfile: Dockerfile
+        env_file:
+            - .env
         networks:
             - spick
         ports:
@@ -191,20 +185,40 @@ services:
         depends_on:
             - user_schedule
 
-    notification:
-        container_name: notification
-        build:
-            context: ./simple_services/notification/
-            dockerfile: Dockerfile
-        networks:
-            - spick
-        restart: always
-
     error:
         container_name: error
         build:
             context: ./simple_services/error/
             dockerfile: Dockerfile
+        env_file:
+            - .env
         networks:
             - spick
         restart: always
+        depends_on:
+            rabbitmq:
+                condition: service_started
+
+    # Complex Microservices
+    # Manage Events
+    manage_events:
+        container_name: manage_events
+        build:
+            context: ./complex_services/manage_events/
+            dockerfile: Dockerfile
+        ports:
+            - "8200:8200"
+        env_file:
+            - .env
+        networks:
+            - spick
+        restart: always
+        depends_on:
+            user:
+                condition: service_started
+            event:
+                condition: service_started
+            recommendation:
+                condition: service_started
+            rabbitmq:
+                condition: service_started

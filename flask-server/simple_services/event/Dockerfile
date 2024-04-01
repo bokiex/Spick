@@ -2,8 +2,6 @@ FROM python:3-slim
 
 WORKDIR /usr/src/app
 
-ENV DATABASE_URL=mysql+mysqlconnector://root:root@localhost:8889/event
-
 COPY ./requirements.txt ./
 
 RUN pip install -r ./requirements.txt

@@ -36,7 +36,7 @@
     ],
     "exchanges": [
         {
-            "name": "exchange_topic",
+            "name": "generic_topic",
             "type": "topic",
             "vhost": "/",
             "durable": true,
@@ -47,14 +47,14 @@
     ],
     "queues": [
         {
-            "name": "error_queue",
+            "name": "Error",
             "vhost": "/",
             "durable": true,
             "auto_delete": false,
             "arguments": {}
         },
         {
-            "name": "notification_queue",
+            "name": "Notification",
             "vhost": "/",
             "durable": true,
             "auto_delete": false,
@@ -63,17 +63,17 @@
     ],
     "bindings": [
         {
-            "source": "exchange_topic",
+            "source": "generic_topic",
             "vhost": "/",
-            "destination": "notification_queue",
+            "destination": "Notification",
             "destination_type": "queue",
             "routing_key": "*notification",
             "arguments": {}
         },
         {
-            "source": "exchange_topic",
+            "source": "generic_topic",
             "vhost": "/",
-            "destination": "error_queue",
+            "destination": "Error",
             "destination_type": "queue",
             "routing_key": "*.error",
             "arguments": {}
