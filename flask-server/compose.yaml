@@ -29,7 +29,9 @@ services:
         networks:
             - spick
 
+    #######################################
     # Event Microservice
+    #######################################
     event-mysql:
         networks:
             - spick
@@ -61,7 +63,9 @@ services:
             event-mysql:
                 condition: service_healthy
 
+    #######################################
     # User Microservice
+    #######################################
     user-mysql:
         networks:
             - spick
@@ -92,10 +96,13 @@ services:
             user-mysql:
                 condition: service_healthy
 
+    #######################################
     # Recommendation Microservice
+    #######################################
     recommendation:
         networks:
             - spick
+        restart: always
         container_name: recommendation
         build:
             context: ./simple_services/recommendation
@@ -104,9 +111,10 @@ services:
             - .env
         ports:
             - "8102:8102"
-        restart: always
 
+    #######################################
     # Authentication Microservice
+    #######################################
     authentication:
         container_name: authentication
         build:
@@ -123,7 +131,9 @@ services:
             user:
                 condition: service_started
 
+    #######################################
     # Reservation Microservice
+    #######################################
     reservation-mysql:
         networks:
             - spick
@@ -154,7 +164,9 @@ services:
             reservation-mysql:
                 condition: service_healthy
 
+    #######################################
     # User Schedule Microservice
+    #######################################
     user_schedule-mysql:
         networks:
             - spick
@@ -184,8 +196,10 @@ services:
         depends_on:
             user_schedule-mysql:
                 condition: service_healthy
-
+                
+    #######################################
     #Optimizer Microservice
+    #######################################
     optimizer:
         container_name: optimizer
         build:
@@ -201,6 +215,9 @@ services:
         depends_on:
             - user_schedule
 
+    #######################################
+    # Error Microservice
+    #######################################
     error:
         container_name: error
         build:
@@ -217,6 +234,9 @@ services:
             rabbitmq:
                 condition: service_started
 
+    #######################################
+    # Notification Microservice
+    #######################################
     notification:
         container_name: notification
         build:
@@ -233,8 +253,9 @@ services:
             rabbitmq:
                 condition: service_started
 
-    # Complex Microservices
-    # Manage Events
+    #######################################
+    # Manage Events Complex
+    #######################################
     manage_events:
         container_name: manage_events
         build:
@@ -263,7 +284,7 @@ services:
     rsvp:
         container_name: rsvp
         build:
-            context: ./complex_services/rsvp
+            context: ./complex_services/rsvp/
             dockerfile: Dockerfile
         restart: always
         env_file:
@@ -283,3 +304,81 @@ services:
                 condition: service_started
         networks:
             - spick
+
+    #######################################
+    # PostgreSQL: The database used by Kong
+    #######################################
+    # kong-database:
+    #     image: postgres:12
+    #     restart: always
+    #     networks:
+    #     - spick
+    #     environment:
+    #         POSTGRES_DB: kong
+    #         POSTGRES_USER: kong
+    #         POSTGRES_PASSWORD: password
+    #     ports:
+    #     - "5432:5432"
+    #     healthcheck:
+    #         test: ["CMD", "pg_isready", "-U", "kong"]
+    #         interval: 10s
+    #         timeout: 5s
+    #         retries: 5
+    #     volumes:
+    #     - dbdata:/var/lib/postgresql/data
+
+    #######################################
+    # Kong database migration
+    #######################################
+    kong-migration:
+        image: kong/kong-gateway:3.2.2.5
+        command: "kong migrations bootstrap"
+        restart: on-failure
+        networks:
+        - spick
+        environment:
+            KONG_DATABASE: "off"
+            # KONG_PG_HOST: kong-database
+            # KONG_PG_USER: kong
+            # KONG_PG_PASSWORD: password
+        # depends_on:
+        # - kong-database
+        
+    #######################################
+    # Kong: The API Gateway
+    #######################################
+    kong:
+        # image: kong:3.6.0-ubuntu
+        restart: always
+        networks:
+        - spick
+        build:
+            context: ./kong/
+            dockerfile: Dockerfile
+        environment:
+            KONG_DATABASE: "off"
+            KONG_DECLARATIVE_CONFIG: /etc/kong/kong.yaml
+            KONG_PG_HOST: kong-database
+            KONG_PG_USER: kong
+            KONG_PG_PASSWORD: password
+            KONG_PROXY_ACCESS_LOG: /dev/stdout
+            KONG_ADMIN_ACCESS_LOG: /dev/stdout
+            KONG_PROXY_ERROR_LOG: /dev/stderr
+            KONG_ADMIN_ERROR_LOG: /dev/stderr
+            KONG_ADMIN_LISTEN: 0.0.0.0:8001
+            KONG_ADMIN_GUI_URL: http://localhost:8002
+        depends_on:
+          - kong-migration
+        volumes:
+        - ./kong/kong.yaml:/etc/kong/kong.yaml
+        ports: # https://docs.konghq.com/gateway/latest/production/networking/default-ports/
+        - "8000:8000" # Takes incoming HTTP traffic from Consumers, and forwards it to upstream Services.
+        - "8443:8443" # Takes incoming HTTPS traffic from Consumers, and forwards it to upstream Services.
+        - "8001:8001" # Admin API. Listens for calls from the command line over HTTP.
+        - "8444:8444" # Admin API. Listens for calls from the command line over HTTPS.
+        - "8002:8002" # Kong Manager (GUI). Listens for HTTP traffic.
+        - "8445:8445" # Kong Manager (GUI). Listens for HTTPS traffic.
+        - "8003:8003" # Dev Portal. Listens for HTTP traffic, assuming Dev Portal is enabled.
+        - "8446:8446" # Dev Portal. Listens for HTTP traffic, assuming Dev Portal is enabled.
+        - "8004:8004" # Dev Portal /files traffic over HTTPS, assuming the Dev Portal is enabled.
+        - "8447:8447" # Dev Portal /files traffic over HTTPS, assuming the Dev Portal is enabled.

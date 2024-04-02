@@ -12,6 +12,7 @@ from contextlib import asynccontextmanager
 import json
 from dotenv import load_dotenv
 from os import environ
+import logging
 
 # URLs for the User Schedule, Optimize Schedule services, and Event Status Update
 load_dotenv()
@@ -25,6 +26,12 @@ connection = None
 channel = None
 exchangename = environ.get("EXCHANGE_NAME") #"generic_topic"
 exchangetype = environ.get("EXCHANGE_TYPE") #"topic"
+
+# Configure logging
+logging.basicConfig(level=logging.INFO,
+                    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+                    handlers=[logging.StreamHandler(sys.stdout)])
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):

@@ -67,7 +67,7 @@
             "vhost": "/",
             "destination": "Notification",
             "destination_type": "queue",
-            "routing_key": "*notification",
+            "routing_key": "*.notification",
             "arguments": {}
         },
         {
