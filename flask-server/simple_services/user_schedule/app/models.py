@@ -3,7 +3,7 @@ from sqlalchemy import Column, Integer, DateTime, String
 from sqlalchemy.ext.declarative import DeclarativeMeta, declarative_base
 from pydantic import BaseModel
 
-Base: DeclarativeMeta = declarative_base()
+Base = declarative_base()
 
 class UserSchedule(Base):
     __tablename__ = 'user_schedule'
@@ -12,9 +12,3 @@ class UserSchedule(Base):
     user_id = Column(Integer, index=True)
     start_time = Column(String)
     end_time = Column(String)
-
-
-class ScheduleDelete(BaseModel): #dont need
-    schedule_id: int
-    event_id: int
-    user_id: int

@@ -63,7 +63,6 @@ Output
 def online():
     return {"message": "Schedule is online."}
 
-# main.py adjustment for create_schedules endpoint
 @app.post("/user_schedule", response_model=schemas.UserScheduleList)
 def create_schedules(schedule_list: schemas.UserScheduleList, db: Session = Depends(get_db)):
     print(schedule_list)
@@ -102,14 +101,4 @@ def read_user_schedules(event_id: str, db: Session = Depends(get_db)):
     "message": "Schedule deleted successfully."
 }
 """
-@app.delete("/user_schedule/", response_model=schemas.ScheduleDeleteResponse)
-def delete_schedule(delete_request: models.ScheduleDelete, db: Session = Depends(get_db)):
-    result = crud.delete_user_schedule(
-        db,
-        schedule_id=delete_request.schedule_id,
-        event_id=delete_request.event_id,
-        user_id=delete_request.user_id
-    )
-    if result is None:
-        raise HTTPException(status_code=404, detail="Schedule not found or access denied")
-    return result
+

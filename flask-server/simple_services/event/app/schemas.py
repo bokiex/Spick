@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from datetime import datetime
 from typing import List, Optional
 from fastapi import File, UploadFile
@@ -45,10 +45,10 @@ class EventResponse(Event):
 class OptimizedScheduleDay(BaseModel):
     event_id: str
     date: str
-    start: str
-    end: str
-    attending_users: List[int]
-    non_attending_users: List[int]
+    start: datetime
+    end: datetime
+    attending_users: List[int] = Field(default_factory=list) 
+    non_attending_users: List[int] = Field(default_factory=list) 
 
 class OptimizedSchedules(BaseModel):
     schedules: List[OptimizedScheduleDay]
