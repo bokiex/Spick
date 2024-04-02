@@ -1,0 +1,25 @@
+_format_version: "1.1"
+
+services:
+  - name: authentication-service
+    url: http://authentication:8103
+    routes:
+      - name: signup-route
+        methods: [POST]
+        # paths: ["/signup"]
+      - name: login-route
+        methods: [POST]
+        # paths: ["/login"]
+
+  - name: user-service
+    url: http://user:8101
+    routes:
+      - name: getAllUsers-route
+        methods: [GET]
+        # paths: ["/users"]
+      - name: createUser-route
+        methods: [POST]
+        # paths: ["/users"]
+      - name: getUserByUsername-route
+        methods: [GET]
+        # paths: ["/users/{username}"]
