@@ -4,7 +4,6 @@ from typing import List, Optional
 from fastapi import File, UploadFile
 
 class Invitee(BaseModel):
-    event_id: str
     user_id: int 
     status: str | None = None
 
