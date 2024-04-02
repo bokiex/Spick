@@ -30,6 +30,7 @@ def create_event(db: Session, event: schemas.Event):
     if hasattr(event, 'invitees') and event.invitees:
             for inv in event.invitees:
                 db_inv = models.Invitee(**inv.model_dump(), event=db_event)
+                db_inv.event_id = db_event.event_id
                 db_event.invitees.append(db_inv)
 
     db.add(db_event)

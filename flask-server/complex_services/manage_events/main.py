@@ -232,8 +232,9 @@ async def create_event(event: str = Form(...), file: Optional[UploadFile] = File
         event_result = await client.post(event_ms + "event", data={"event": json.dumps(event_dict)}, files=files)
      
     # If event service is not available
+    
     if event_result.status_code not in range(200,300):
-        channel.basic_publish(exchange=exchangename, routing_key="create_event.error",body=json.dumps(event_result.json()), properties=pika.BasicProperties(delivery_mode=2))
+        channel.basic_publish(exchange=exchangename, routing_key="create_event.error",body=json.dumps(event_result), properties=pika.BasicProperties(delivery_mode=2))
         return event_result
     
     print("\n------ Event created ------")
@@ -241,11 +242,7 @@ async def create_event(event: str = Form(...), file: Optional[UploadFile] = File
     print(event_result)
     notification = {
         "notification_list": [i["telegram_tag"] for i in event_dict["invitees"]],
-<<<<<<< HEAD
-        "message": f"You've been invited to an event! Check it out on Spick with {event_result['data']['event_id']}"
-=======
         "message": f"You've been invited to an event! Check it out on Spick. Key in the event code {event_result["data"]['event_id']} to view your invite!"
->>>>>>> 5174e6c7cb23b296f43a9161ff8a609622a495a1
     }
     # Send notification to users
     channel.basic_publish(exchange=exchangename, routing_key="create_event.notification",body=json.dumps(notification), properties=pika.BasicProperties(delivery_mode=2))
