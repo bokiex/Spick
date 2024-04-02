@@ -7,6 +7,7 @@ import { ref, onMounted } from 'vue'
 const events = ref([])
 const loading = ref(true)
 const event_ms = 'http://localhost:8100/event'
+const userID = localStorage.getItem('userID')
 onMounted(async () => {
     try {
         // Example API call - replace with your actual API call
@@ -28,7 +29,6 @@ onMounted(async () => {
     }
 })
 
-const user_id = localStorage.getItem('userID')
 </script>
 <template>
     <div class="">

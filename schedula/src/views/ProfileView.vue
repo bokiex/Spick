@@ -6,7 +6,7 @@ import Button from '../components/Button.vue'
 import Avatar from '../components/Avatar.vue'
 import { ref, onMounted } from 'vue'
 
-const userID = ref(1)
+const userID = localStorage.getItem('userID')
 const user = ref({
     name: '',
     password: '',
@@ -18,10 +18,8 @@ const user = ref({
     confirmPwd: ''
 })
 onMounted(async () => {
-    // userID.value = localStorage.getItem('user_id')
-
     await axios
-        .get(`http://localhost:8101/users/user_id/${userID.value}`)
+        .get(`http://localhost:8101/users/user_id/${userID}`)
         .then((response) => {
             user.value.name = response.data.username
             user.value.tele = response.data.telegram_tag
@@ -55,7 +53,7 @@ async function saveSettings() {
     formData.append('files', user.value.image)
 
     try {
-        const res = await fetch(`http://localhost:8001/users/user_id/${userID.value}`, {
+        const res = await fetch(`http://localhost:8001/users/user_id/${userID}`, {
             method: 'PUT',
             body: formData
         })
@@ -92,7 +90,7 @@ async function updatePassword() {
             email: user.value.email,
             password: user.value.confirmPwd
         })
-        const res = await fetch(`http://localhost:8001/users/user_id/${userID.value}/password`, {
+        const res = await fetch(`http://localhost:8001/users/user_id/${userID}/password`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json', // Specify that we're sending JSON data
@@ -115,7 +113,8 @@ async function updatePassword() {
     }
 }
 function logout() {
-    localStorage.removeItem('user_id')
+    localStorage.removeItem('userID')
+    localStorage.removeItem('userId')
     router.push({ name: 'SignInSignUp' })
 }
 </script>
