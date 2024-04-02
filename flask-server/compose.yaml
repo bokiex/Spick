@@ -285,7 +285,7 @@ services:
     rsvp:
         container_name: rsvp
         build:
-            context: ./complex_services/rsvp
+            context: ./complex_services/rsvp/
             dockerfile: Dockerfile
         restart: always
         env_file:
