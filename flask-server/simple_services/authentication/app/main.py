@@ -53,6 +53,7 @@ def online():
 @app.post("/signup")
 def signup(user: schemas.User):
     user.password_hash = generate_password_hash(user.password, method='pbkdf2:sha256')
+    print(user)
     user_result = requests.post(user_ms + "users", json=jsonable_encoder(user))
 
     if int(user_result.status_code) > 300:

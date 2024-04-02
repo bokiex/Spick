@@ -15,6 +15,7 @@ def get_events(db: Session):
 def create_event(db: Session, event: schemas.Event):
 
     event_data = event.model_dump(exclude={"recommendations", "invitees"})
+    print(event_data)
 
  
     db_event = models.Event(**event_data)

@@ -25,7 +25,10 @@ const side_description = computed(() =>
           ' ' +
           format_time(event.value?.time_out)
 )
-const invitees_responded = computed(() => event.value?.invitees.filter((invitee) => invitee.status))
+const invitees_responded = computed(() => event.value?.invitees.filter((invitee) => {
+    console.log(invitee.status)
+    return invitee.status
+}))
 const invitees_not_responded = computed(() =>
     event.value?.invitees.filter((invitee) => !invitee.status)
 )
@@ -44,10 +47,10 @@ onMounted(async () => {
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ user_ids: invitees_user_ids })
+            body: JSON.stringify(invitees_user_ids )
         }).then((res) => res.json())
 
-        host.value = await fetch('http://localhost:8101/users/user_id/' + userID).then((res) =>
+        host.value = await fetch('http://localhost:8101/users/user_id/' + event_data.user_id).then((res) =>
             res.json()
         )
         event.value = event_data
@@ -207,7 +210,7 @@ function getImageUrl(event) {
                                         </div>
                                     </div>
                                 </div>
-                                <Button v-else @click="reservation()">{{ button_text }}</Button>
+                                <Button v-else-if="isHost && isRSVPClosed" @click="reservation()">Reserve</Button>
                             </div>
                         </Card>
                         <Card>
@@ -242,7 +245,7 @@ function getImageUrl(event) {
                                         >
                                         </Avatar>
                                         <span class="p-2 text-center font-light text-xs">
-                                            Light
+                                            {{invitee.username}}
                                         </span>
                                     </div>
                                 </div>

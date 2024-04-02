@@ -71,7 +71,8 @@ services:
             - spick
         container_name: user-mysql
         build: ./simple_services/user/mysql
-  
+        ports:
+            - "9001:3306"
         env_file:
             - .env
         volumes:
