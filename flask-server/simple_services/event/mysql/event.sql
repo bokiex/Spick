@@ -56,7 +56,7 @@ CREATE TABLE IF NOT EXISTS `optimized` (
 --
 
 INSERT INTO `event` (`event_id`, `event_name`, `event_desc`, `datetime_start`, `datetime_end`, `time_out`, `event_location`, `user_id`, `reservation_name`, `reservation_address`, `image`) VALUES
-('GHKBDH', 'next test', 'fuck la', '2024-03-26 10:44:00', '2024-03-27 10:44:00', '2024-03-28 10:44:00', NULL, 5, NULL, NULL, 'image_2024-03-14_19-37-35.png'),
+('GHKBDH', 'next test', 'fuck la', '2024-04-26 10:44:00', '2024-05-27 10:44:00', '2024-04-28 10:44:00', NULL, 2, NULL, NULL, 'image_2024-03-14_19-37-35.png'),
 ('ICAPVA', 'hahhaa', 'sdsss', '2024-03-27 10:33:00', '2024-03-28 10:33:00', '2024-03-27 10:33:00', NULL, 1, NULL, NULL, 'event.jpg'),
 ('KKPTMA', 'just another test', 'dont mind me im just testing', '2024-03-26 14:06:00', '2024-03-27 14:06:00', '2024-03-26 14:09:00', NULL, 1, NULL, NULL, 'image_2024-02-18_16-42-40.png'),
 ('OEOODQ', 'hahhaa', 'sdsss', '2024-03-27 10:33:00', '2024-03-28 10:33:00', '2024-03-27 10:33:00', NULL, 1, NULL, NULL, 'event.jpg'),
@@ -70,7 +70,7 @@ INSERT INTO `event` (`event_id`, `event_name`, `event_desc`, `datetime_start`, `
 
 -- --------------------------------------------------------
 INSERT INTO `invitee` (`event_id`, `user_id`, `status`) VALUES
-('GHKBDH', 3, NULL),
+('GHKBDH', 2, NULL),
 ('GHKBDH', 5, NULL),
 ('ICAPVA', 3, NULL),
 ('KKPTMA', 3, NULL),
