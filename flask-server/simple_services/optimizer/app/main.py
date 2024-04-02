@@ -28,66 +28,47 @@ def online():
 
 @app.post('/optimize_schedule', response_model=OptimizedSchedules)
 def optimize_schedule(schedule_list: List[ScheduleItem]):
-    schedules_by_day: Dict[datetime, List] = defaultdict(list)
+    optimized_schedules = []
+    schedules_by_day = defaultdict(lambda: defaultdict(list))
+
+    # Organize schedules by event and then by day
     for schedule in schedule_list:
-        schedules_by_day[schedule.start_time.date()].append((schedule.start_time, schedule.end_time, schedule.user_id))
-        id = schedule.event_id
+        day_key = schedule.start_time.date()
+        schedules_by_day[schedule.event_id][day_key].append(schedule)
 
-    optimized_schedule_days = []
+    for event_id, schedules_per_day in schedules_by_day.items():
+        for day, day_schedules in schedules_per_day.items():
+            time_blocks = [(s.start_time, 1, s.user_id) for s in day_schedules] + [(s.end_time, -1, s.user_id) for s in day_schedules]
+            time_blocks.sort()
+            current_users = set()
+            max_overlap_users = set()
+            max_attendees = 0
+            start_overlap = None
 
-    for day, day_schedules in schedules_by_day.items():
-        day_schedules.sort(key=lambda x: (x[0], x[1]))
-        time_blocks = []
-        for start, end, user_id in day_schedules:
-            time_blocks.append((start, 'start', user_id))
-            time_blocks.append((end, 'end', user_id))
-        time_blocks.sort()
-
-        max_attendees = 0
-        current_attendees = set()
-        potential_slots = []
-        slot_start = None
-
-        for time, event, user_id in time_blocks:
-            if event == 'start':
-                if not current_attendees:  # if starting a new slot
-                    slot_start = time
-                current_attendees.add(user_id)
-            else:
-                current_attendees.remove(user_id)
-                if not current_attendees and slot_start:  # if ending a slot
-                    potential_slots.append((slot_start, time, len(current_attendees)))
-                    slot_start = None
-
-        # Filtering slots that have the max number of attendees
-        slots_with_max_attendees = [slot for slot in potential_slots if slot[2] == max(max_attendees, len(current_attendees))]
-
-        for slot_start, slot_end, _ in slots_with_max_attendees:
-            attending_users = set()
-            non_attending_users = set()
-            for start, end, user_id in day_schedules:
-                if start <= slot_start and end >= slot_end:
-                    attending_users.add(user_id)
+            for time, action, user_id in time_blocks:
+                if action == 1:  # start
+                    current_users.add(user_id)
+                    if len(current_users) > max_attendees:
+                        max_attendees = len(current_users)
+                        max_overlap_users = current_users.copy()
+                        start_overlap = time
                 else:
-                    non_attending_users.add(user_id)
+                    current_users.remove(user_id)
 
-            optimized_schedule_days.append(
-                OptimizedScheduleDay(
-                    event_id = id,
+            if max_overlap_users:
+                end_overlap = min(s.end_time for s in day_schedules if s.user_id in max_overlap_users and s.start_time <= start_overlap)
+                non_attendees = [s.user_id for s in day_schedules if s.user_id not in max_overlap_users]
+
+                optimized_schedules.append(OptimizedScheduleDay(
+                    event_id=event_id,
                     date=str(day),
-                    start=slot_start,
-                    end=slot_end,
-                    attending_users=list(attending_users),
-                    non_attending_users=list(non_attending_users),
-                )
-            )
-    max_attendees_count = max(len(day.attending_users) for day in optimized_schedule_days)
-    filtered_schedule_days = [day for day in optimized_schedule_days if len(day.attending_users) == max_attendees_count]
+                    start=start_overlap,
+                    end=end_overlap,
+                    attending_users=list(max_overlap_users),
+                    non_attending_users=non_attendees
+                ))
 
-
-
-    return OptimizedSchedules(schedules=filtered_schedule_days)
-
+    return OptimizedSchedules(schedules=optimized_schedules)
 
 # Input
 """

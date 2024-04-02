@@ -65,37 +65,6 @@ app.add_middleware(
 )
 
 
-
-#Input
-# {   
-#   "event_id": "123123",
-#   "user_id": 101,
-#   "sched_list": [
-#     {
-#       "schedule_id": 1,
-#       "event_id": "123123",
-#       "user_id": 101,
-#       "start_time": "2024-04-01T00:00:00",
-#       "end_time": "2024-04-01T10:00:00"
-#     }
-#   ]
-# }     
-"""
-{
-    "schedules": [
-        {
-            "event_id: "123123",
-            "date": "2024-04-01",
-            "start": "2024-04-01T00:00:00",
-            "end": "2024-04-01T10:00:00",
-            "attending_users": [
-                101
-            ],
-            "non_attending_users": []
-        }
-    ]
-}
-"""
 @app.post("/rsvp/accept")
 def accept_invitation(request: AcceptInvitationSchema):
     print(event_ms)
@@ -130,28 +99,6 @@ def accept_invitation(request: AcceptInvitationSchema):
     return res
     
 
-
-#Input
-# {   
-#   "event_id": "123123",
-#   "user_id": 102
-# }
-"""
-{
-    "schedules": [
-        {   
-            "event_id: "123123",
-            "date": "2024-04-01",
-            "start": "2024-04-01T00:00:00",
-            "end": "2024-04-01T10:00:00",
-            "attending_users": [
-                101
-            ],
-            "non_attending_users": []
-        }
-    ]
-}
-"""
 @app.put("/rsvp/decline")
 def decline_invitation(request: DeclineInvitationSchema):
     update_payload = {
@@ -231,26 +178,7 @@ def check_and_trigger_optimization(data):
         # Condition where total_invitees != current_responses
         return jsonable_encoder({"message": "Optimization not triggered, condition not met."})
 
-#Input
-# {
-#     "event_id": "123123"
-# }
-"""
-{
-    "schedules": [
-        {   
-            "event_id: "123123",
-            "date": "2024-04-01",
-            "start": "2024-04-01T00:00:00",
-            "end": "2024-04-01T10:00:00",
-            "attending_users": [
-                101
-            ],
-            "non_attending_users": []
-        }
-    ]
-}
-"""
+
 @app.post("/rsvp/optimize")
 def optimize_schedule(request: TimeoutOptimizeScheduleRequest):
     if not request.event_id:
