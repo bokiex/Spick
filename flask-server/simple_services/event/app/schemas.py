@@ -4,6 +4,7 @@ from typing import List, Optional
 from fastapi import File, UploadFile
 
 class Invitee(BaseModel):
+    event_id: str
     user_id: int 
     status: str | None = None
 
@@ -19,7 +20,7 @@ class Event(BaseModel):
     datetime_end: datetime
     image: str | None = None
     invitees: List[Invitee] = []
-    time_out: datetime
+    time_out: datetime | None = None
     user_id: int
     recommendations: List[Recommendation] = []
     reservation_name: Optional[str] = None

@@ -68,7 +68,7 @@ function getImageUrl(event) {
                         </div>
                         <div
                             v-else-if="!event.time_out"
-                            class="rounded-lg font-bold w-1/2 bg-destructive0 text-center"
+                            class="rounded-lg font-bold w-1/2 bg-destructive text-center"
                         >
                             RSVP closed
                         </div>
