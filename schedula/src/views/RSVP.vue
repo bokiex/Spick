@@ -20,11 +20,11 @@ import { useRouter, useRoute } from 'vue-router'
 const router = useRouter()
 const route = useRoute()
 
-const eventurl = 'http://locahost:8100/event/'
+const eventurl = 'http://localhost:8100/event/'
 const rsvpurl = 'http://localhost:8201/rsvp/'
 
 // eventID placeholder
-const userID = localStorage.getItem('user_id')
+const userID = localStorage.getItem('userID')
 
 const vuecal = ref()
 const event_id = route.params.id

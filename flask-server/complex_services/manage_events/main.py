@@ -239,8 +239,12 @@ async def create_event(event: str = Form(...), file: Optional[UploadFile] = File
     print("\n------ Event created ------")
     event_result = event_result.json()
 
+    notification = {
+        "notification_list": [i["telegram_tag"] for i in event_result["data"]["invitees"]],
+        "message": f"You've been invited to an event! Check it out on Spick with {event_result["data"]['event_id']}"
+    }
     # Send notification to users
-    channel.basic_publish(exchange=exchangename, routing_key="create_event.notification",body=json.dumps(event_result), properties=pika.BasicProperties(delivery_mode=2))
+    channel.basic_publish(exchange=exchangename, routing_key="create_event.notification",body=json.dumps(notification), properties=pika.BasicProperties(delivery_mode=2))
     
     print(event_result["data"]["event_id"])
     # Start scheduler for event time out

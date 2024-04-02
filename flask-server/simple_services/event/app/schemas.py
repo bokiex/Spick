@@ -11,7 +11,7 @@ class Invitee(BaseModel):
 class Recommendation(BaseModel):
     recommendation_name: str
     recommendation_address: str
-    recommendation_photo: str
+    recommendation_photo: str | None = None
 
 class Event(BaseModel):
     event_name: str
