@@ -238,9 +238,9 @@ async def create_event(event: str = Form(...), file: Optional[UploadFile] = File
     
     print("\n------ Event created ------")
     event_result = event_result.json()
-
+    print(event_result)
     notification = {
-        "notification_list": [i["telegram_tag"] for i in event_result["data"]["invitees"]],
+        "notification_list": [i["telegram_tag"] for i in event_dict["invitees"]],
         "message": f"You've been invited to an event! Check it out on Spick with {event_result['data']['event_id']}"
     }
     # Send notification to users

@@ -135,6 +135,7 @@ def create_event(event: str = Form(...),  files: Optional[UploadFile] = File(def
 
     if res is None:
         return jsonable_encoder({"message": "An event with the same name already exists."})
+    
     return jsonable_encoder({"data": res, "message": "Event has been created."})
 
 """
