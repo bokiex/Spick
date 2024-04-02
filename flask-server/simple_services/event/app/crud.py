@@ -14,7 +14,8 @@ def get_events(db: Session):
 
 def create_event(db: Session, event: schemas.Event):
 
-    event_data = event.dict(exclude={"recommendations", "invitees"})
+    print(event)
+    event_data = event.model_dump(exclude={"recommendations", "invitees"})
 
  
     db_event = models.Event(**event_data)
@@ -22,13 +23,13 @@ def create_event(db: Session, event: schemas.Event):
     # Convert recommendation to db model
     if hasattr(event, 'recommendations') and event.recommendations:
             for rec in event.recommendations:
-                db_rec = models.Recommendation(**rec.dict(), event=db_event) 
+                db_rec = models.Recommendation(**rec.model_dump(), event=db_event) 
                 db_event.recommendations.append(db_rec)
     
     # Convert invitees to db model
     if hasattr(event, 'invitees') and event.invitees:
             for inv in event.invitees:
-                db_inv = models.Invitee(**inv.dict(), event=db_event)
+                db_inv = models.Invitee(**inv.model_dump(), event=db_event)
                 db_event.invitees.append(db_inv)
 
     db.add(db_event)

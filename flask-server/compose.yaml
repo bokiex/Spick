@@ -36,7 +36,7 @@ services:
         container_name: event-mysql
         build: ./simple_services/event/mysql
         ports:
-            - "8889:3306"
+            - "9000:3306"
         env_file:
             - .env
         volumes:
@@ -67,8 +67,7 @@ services:
             - spick
         container_name: user-mysql
         build: ./simple_services/user/mysql
-        ports:
-            - "9000:3306"
+  
         env_file:
             - .env
         volumes:
@@ -105,8 +104,6 @@ services:
             - .env
         ports:
             - "8102:8102"
-        networks:
-            - spick
         restart: always
 
     # Authentication Microservice

@@ -19,13 +19,13 @@ import httpx
 
 event_db = environ.get('EVENT_MYSQL_DATABASE') or "localhost"
 user_ms = environ.get('USER_MS_URL') or "http://localhost:3000/"
-event_ms = environ.get('EVENT_MS_URL') or "http://localhost:3600/"
-recommendation_ms = environ.get('RECOMMENDATION_MS_URL') or "http://localhost:3500/"
+event_ms = environ.get('EVENT_MS_URL') or "http://localhost:8100/"
+recommendation_ms = environ.get('RECOMMENDATION_MS_URL') or "http://localhost:8102/"
 rsvp_ms = environ.get('RSVP_MS_URL') or "http://localhost:4000/"
 connection = None
 channel = None
-exchangename = environ.get("EXCHANGE_NAME") #"generic_topic"
-exchangetype = environ.get("EXCHANGE_TYPE") #"topic"
+exchangename = environ.get("EXCHANGE_NAME") or "generic_topic"
+exchangetype = environ.get("EXCHANGE_TYPE") or "topic"
 
 scheduler = BackgroundScheduler()
 
@@ -199,7 +199,7 @@ async def create_event(event: str = Form(...), file: Optional[UploadFile] = File
     print("\n----- Getting recommendation list -----")
     #recommendation_result = requests.post(recommendation_ms, json=jsonable_encoder({"type": event_dict["type"], "township": event_dict["township"]}))
     recommendation_result = requests.post(recommendation_ms + "recommendation", json=jsonable_encoder({"type": event.type, "township": event.township}))
-    
+    print(recommendation_result.json())
 
     # If search is invalid and recommendation returns no results
     if recommendation_result.status_code == 404:

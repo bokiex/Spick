@@ -21,3 +21,6 @@ class UserResponse(BaseModel):
     telegram_id : str | None = None
     telegram_tag: str | None = None
     image: str | None = None
+
+class UserIDs(BaseModel):
+    user_ids: List[int]

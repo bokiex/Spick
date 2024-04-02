@@ -2,8 +2,8 @@ import time
 import pika
 from os import environ
 
-hostname = environ.get('RABBIT_MQ_HOST') # or "localhost" 
-port = environ.get('RABBIT_MQ_PORT') # or 5672
+hostname = environ.get('RABBIT_MQ_HOST') or "localhost" 
+port = environ.get('RABBIT_MQ_PORT') or 5672
 print(hostname, port)
 # function to create a connection to the broker
 def create_connection(max_retries=12, retry_interval=5):

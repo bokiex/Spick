@@ -21,7 +21,7 @@ onMounted(async () => {
     // userID.value = localStorage.getItem('user_id')
 
     await axios
-        .get(`http://localhost:8001/users/user_id/${userID.value}`)
+        .get(`http://localhost:8101/users/user_id/${userID.value}`)
         .then((response) => {
             user.value.name = response.data.username
             user.value.tele = response.data.telegram_tag

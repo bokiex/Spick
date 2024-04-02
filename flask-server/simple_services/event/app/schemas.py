@@ -4,13 +4,14 @@ from typing import List, Optional
 from fastapi import File, UploadFile
 
 class Invitee(BaseModel):
-    event_id: str 
+
     user_id: int 
     status: str | None = None
 
 class Recommendation(BaseModel):
     recommendation_name: str
     recommendation_address: str
+    recommendation_photo: str
 
 class Event(BaseModel):
     event_name: str

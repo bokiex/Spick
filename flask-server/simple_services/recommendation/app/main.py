@@ -341,35 +341,34 @@ def get_recommendation( search: schemas.Search):
     print("\nReceived search terms in JSON:", search)
 
     # 1. Send search info
-    try: 
-        result = processSearch(search)
-        print("\nReceived search results in JSON:", result)
-        # 2. Save the result to the database
-        result = jsonable_encoder(result)
-        
-        res = []
-     
-        for i in result['places']:
-            recommendation_name = i['displayName']['text']
-            recommendation_address = i['formattedAddress']
-            recommendation_photo = processImage(i['photos'][0]['name'])
-            recommendation_rating = str(i["rating"])
-            price_level = i["priceLevel"]
-         
-            recommendation = {
-                "recommendation_name": recommendation_name,
-                "recommendation_address": recommendation_address,
-                "recommendation_photo" : recommendation_photo,
-                "recommendation_rating" : recommendation_rating,
-                "price_level" : price_level
-            }
 
-            recommendation = schemas.Recommendation(**recommendation)
-            res.append(recommendation)
-        return res
-    except:
+    result = processSearch(search)
+    print("\nReceived search results in JSON:", result)
+    # 2. Save the result to the database
+    result = jsonable_encoder(result)
+    
+    res = []
+
+    for i in result['places']:
+        print("\nPlace:", i)
+        recommendation_name = i['displayName']['text']
+        recommendation_address = i['formattedAddress']
+        recommendation_photo = processImage(i['photos'][0]['name'])
+  
         
-        raise HTTPException(status_code=404, detail="No recommendation found.")
+        recommendation = {
+            "recommendation_name": recommendation_name,
+            "recommendation_address": recommendation_address,
+            "recommendation_photo" : recommendation_photo,
+        
+        }
+
+        recommendation = schemas.Recommendation(**recommendation)
+    
+        res.append(recommendation)
+        print("\nRecommendation:", recommendation)
+    return res
+
     
 
     

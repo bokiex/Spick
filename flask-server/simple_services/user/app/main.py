@@ -12,6 +12,7 @@ import boto3
 from fastapi.responses import JSONResponse
 from dotenv import load_dotenv
 import json
+from fastapi import Body
 
 load_dotenv()
 
@@ -151,8 +152,9 @@ async def get_user_by_user_id(user_id: int, db: Session = Depends(get_db)):
 
 # Get multiple users by user_id
 @app.post("/users/user_id", response_model=list[schemas.UserResponse])
-async def get_multiple_users_by_user_id(user_ids: list[int], db: Session = Depends(get_db)):
-    result = crud.get_multiple_users_by_user_id(db, user_ids)
+async def get_multiple_users_by_user_id(user_ids: schemas.UserIDs, db: Session = Depends(get_db)):
+
+    result = crud.get_multiple_users_by_user_id(db, user_ids.user_ids)
     if result == []:
         raise HTTPException(status_code=404, detail="No users found.")
     return jsonable_encoder(result)

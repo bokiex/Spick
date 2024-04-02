@@ -35,6 +35,7 @@ class Recommendation(Base):
     recommendation_id = Column(Integer, primary_key=True, autoincrement=True, index=True)
     recommendation_name = Column(String(64), nullable=False)
     recommendation_address = Column(String(64), nullable=False)
+    recommendation_photo = Column(String(1024), nullable=True)
     event_id = Column(String(6), ForeignKey('event.event_id'), nullable=False)
 
     event = relationship("Event", back_populates="recommendations")
