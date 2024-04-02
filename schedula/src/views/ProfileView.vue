@@ -5,6 +5,7 @@ import { Separator, Label } from 'radix-vue'
 import Button from '../components/Button.vue'
 import Avatar from '../components/Avatar.vue'
 import { ref, onMounted } from 'vue'
+import { getImageUrl } from '@/utils/get_image'
 
 const userID = localStorage.getItem('userID')
 const user = ref({
@@ -25,7 +26,8 @@ onMounted(async () => {
             user.value.tele = response.data.telegram_tag
             user.value.email = response.data.email
             user.value.image = response.data.image
-            user.value.preview_image = response.data.image
+            user.value.preview_image = getImageUrl(response.data.image)
+            console.log(response.data)
         })
         .catch((error) => console.error(error))
 })
@@ -50,10 +52,20 @@ async function saveSettings() {
             image: user.value.image.name
         })
     ) // eventData is your form's data as a JS object
-    formData.append('files', user.value.image)
+    if (user.value.image instanceof File) {
+        formData.append('files', user.value.image)
+    }
+ 
+    console.log(JSON.stringify({
+            username: user.value.name,
+            telegram_tag: user.value.tele,
+            email: user.value.email,
+            image: user.value.image.name,
+        }),
+            user.value.image)
 
     try {
-        const res = await fetch(`http://localhost:8001/users/user_id/${userID}`, {
+        const res = await fetch(`http://localhost:8101/users/user_id/${userID}`, {
             method: 'PUT',
             body: formData
         })
@@ -93,7 +105,7 @@ async function updatePassword() {
         const res = await fetch(`http://localhost:8001/users/user_id/${userID}/password`, {
             method: 'PUT',
             headers: {
-                'Content-Type': 'application/json', // Specify that we're sending JSON data
+                'Content-Type': 'application/json' // Specify that we're sending JSON data
             },
             body: JSON.stringify({
                 username: user.value.name,

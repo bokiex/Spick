@@ -6,6 +6,8 @@ import Button from '@/components/Button.vue'
 import { useRouter, useRoute } from 'vue-router'
 import { computed, onMounted, ref } from 'vue'
 import Skeleton from '@/components/Skeleton.vue'
+import {format_date, format_time} from '@/utils/format_datetime'
+import {getImageUrl} from '@/utils/get_image'
 
 const router = useRouter()
 const route = useRoute()
@@ -26,12 +28,13 @@ const side_description = computed(() =>
           format_time(event.value?.time_out)
 )
 const invitees_responded = computed(() => event.value?.invitees.filter((invitee) => {
-    console.log(invitee.status)
+   
     return invitee.status
 }))
 const invitees_not_responded = computed(() =>
     event.value?.invitees.filter((invitee) => !invitee.status)
 )
+const is_responded = computed(() => invitees_responded.value?.find((invitee) => invitee.user_id == userID))
 
 onMounted(async () => {
     try {
@@ -41,13 +44,13 @@ onMounted(async () => {
         )
 
         const invitees_user_ids = event_data.invitees.map((invitee) => invitee.user_id)
-
+        console.log(invitees_user_ids)
         const invitee_data = await fetch('http://localhost:8101/users/user_id', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify(invitees_user_ids )
+            body: JSON.stringify({user_ids: invitees_user_ids })
         }).then((res) => res.json())
 
         host.value = await fetch('http://localhost:8101/users/user_id/' + event_data.user_id).then((res) =>
@@ -65,28 +68,6 @@ onMounted(async () => {
         loading.value = false
     }
 })
-
-const format_date = (datetime) => {
-    const date = new Date(datetime)
-    const date_options = {
-        weekday: 'long',
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric'
-        
-    }
-
-    return date.toLocaleDateString('en-SG', date_options)
-}
-
-const format_time = (datetime) => {
-    console.log(datetime)
-    const date = new Date("2024-04-03T15:29:00.000Z")
- 
-    const time_options = { hour: 'numeric', minute: 'numeric', hour12: true, timeZone: "Asia/Singapore" }
-
-    return date.toLocaleTimeString('en-SG', time_options)
-}
 
 const RSVP = () => {
     router.push({ path: `/events/${event_id}/RSVP` })
@@ -114,16 +95,7 @@ const reservation = () => {
 //     ]
 // }
 
-function getImageUrl(event) {
-    if (event && event.image) {
-        const url = 'https://spickbucket.s3.ap-southeast-1.amazonaws.com/' + event.image
 
-        return url
-    }
-
-    // Return a default image URL or an empty string if event or event.image is not available
-    return 'path/to/default/image.jpg'
-}
 </script>
 
 <template>
@@ -133,7 +105,7 @@ function getImageUrl(event) {
                 <Skeleton v-if="loading" class="h-64 w-full rounded-xl" />
                 <img
                     v-else
-                    :src="getImageUrl(event)"
+                    :src="getImageUrl(event?.image)"
                     alt="Event banner"
                     class="w-full h-64 object-cover"
                 />
@@ -217,7 +189,8 @@ function getImageUrl(event) {
                                     </div>
                                 </div>
                                 <Button v-else-if="isHost && isRSVPClosed" @click="reservation()">Reserve</Button>
-                                <Button v-else-if="!isHost && !isRSVPClosed" @click="RSVP()">RSVP</Button>
+                                <Button v-else-if="!isHost && !isRSVPClosed && !is_responded" @click="RSVP()">RSVP</Button>
+                                <Button variant="secondary" v-else-if="!isHost && !isRSVPClosed && is_responded">You have responded</Button>
                             </div>
                         </Card>
                         <Card>

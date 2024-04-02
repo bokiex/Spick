@@ -3,6 +3,8 @@ import Card from '@/components/Card.vue'
 import Button from '@/components/Button.vue'
 import { useRouter } from 'vue-router'
 import { ref, onMounted } from 'vue'
+import {format_date, format_time} from '@/utils/format_datetime'
+import {getImageUrl} from '@/utils/get_image'
 
 const router = useRouter()
 const userID = localStorage.getItem('userID')
@@ -27,15 +29,7 @@ const navigate = (id) => {
     router.push({ path: `/events/${id}` })
 }
 
-function getImageUrl(event) {
-    if (event && event.image && event.image !== 'None') {
-        // Need to check if event.image !== None is necessary
-        console.log(event.image)
-        return `https://spickbucket.s3.ap-southeast-1.amazonaws.com/${event.image}`
-    }
-    // Return a default image URL or an empty string if event or event.image is not available
-    return '../../public/default.png'
-}
+
 </script>
 
 <template>
@@ -57,7 +51,7 @@ function getImageUrl(event) {
                 @click="navigate(event?.event_id)"
             >
                 <div class="space-y-2">
-                    <img :src="getImageUrl(event)" alt="" class="w-[200px] h-[150px]" />
+                    <img :src="getImageUrl(event?.image)" alt="" class="w-[200px] h-[150px]" />
                     <div class="flex flex-col gap-y-1.5">
                         <h1>{{ event?.event_name }}</h1>
                         <div
@@ -86,7 +80,8 @@ function getImageUrl(event) {
                         </div>
                     </div>
                     <div class="text-sm text-muted-foreground">
-                        <p>{{ event?.datetime_start }}</p>
+                        <p>{{ format_date(event?.datetime_start) }}</p>
+                        <p>{{ format_time(event?.datetime_start) }}</p>
                         <p>{{ event?.event_desc }}</p>
                     </div>
                 </div>

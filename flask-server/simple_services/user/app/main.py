@@ -108,7 +108,7 @@ def upload_file(files: UploadFile, object_name=None):
         return JSONResponse(status_code=400, content={"message": "File upload failed."})
 # Update user information
 @app.put("/users/user_id/{user_id}")
-async def update_user(user_id: int, user: str = Form(...),  files: Optional[UploadFile] = File(default=None), db: Session = Depends(get_db)):
+async def update_user(user_id: int, user: str = Form(...), files: Optional[UploadFile] = File(default=None), db: Session = Depends(get_db)):
     print(user)
     print(files)
 

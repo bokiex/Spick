@@ -15,7 +15,6 @@ services:
   # Rabbit MQ
   #######################################
   rabbitmq:
-    platform: linux/amd64
     container_name: rabbitmq
     image: rabbitmq:3-management
     hostname: esd-rabbit

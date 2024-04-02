@@ -87,6 +87,7 @@ def accept_invitation(request: AcceptInvitationSchema):
         channel.basic_publish(exchange=exchangename, routing_key="post_schedule.error",body=json.dumps(schedule_response.json()), properties=pika.BasicProperties(delivery_mode=2))
         return schedule_response.json()
     
+    print("\n\n ------ getting invitee from event ms ------ \n\n")
     retrieve_response = requests.get(f"{event_ms}invitee/{request.event_id}")
     if retrieve_response.status_code > 300:
         channel.basic_publish(exchange=exchangename, routing_key="retrieve_invitee.error",body=json.dumps(retrieve_response.json()), properties=pika.BasicProperties(delivery_mode=2))
@@ -127,6 +128,7 @@ def decline_invitation(request: DeclineInvitationSchema):
     
 def check_and_trigger_optimization(data):
     # Assuming the total_invitees and current_responses are fetched from the event status update response or elsewhere
+    print("\n\n-----------Check and trigger has been triggered-----------\n\n")
     invitees_left = data['invitees_left']
     event_id = data['event_id']
     if invitees_left == 0 :
