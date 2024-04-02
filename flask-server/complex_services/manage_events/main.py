@@ -232,8 +232,9 @@ async def create_event(event: str = Form(...), file: Optional[UploadFile] = File
         event_result = await client.post(event_ms + "event", data={"event": json.dumps(event_dict)}, files=files)
      
     # If event service is not available
+    
     if event_result.status_code not in range(200,300):
-        channel.basic_publish(exchange=exchangename, routing_key="create_event.error",body=json.dumps(event_result.json()), properties=pika.BasicProperties(delivery_mode=2))
+        channel.basic_publish(exchange=exchangename, routing_key="create_event.error",body=json.dumps(event_result), properties=pika.BasicProperties(delivery_mode=2))
         return event_result
     
     print("\n------ Event created ------")

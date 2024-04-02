@@ -85,8 +85,11 @@ const format_time = (datetime) => {
     return date.toLocaleTimeString('en-US', time_options)
 }
 
-const reservation = () => {
+const RSVP = () => {
     router.push({ path: `/events/${event_id}/RSVP` })
+}
+const reservation = () => {
+    router.push({ path: `/events/${event_id}/reservation` })
 }
 
 // const event = {
@@ -211,6 +214,7 @@ function getImageUrl(event) {
                                     </div>
                                 </div>
                                 <Button v-else-if="isHost && isRSVPClosed" @click="reservation()">Reserve</Button>
+                                <Button v-else-if="!isHost && !isRSVPClosed" @click="RSVP()">RSVP</Button>
                             </div>
                         </Card>
                         <Card>

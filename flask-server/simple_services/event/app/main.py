@@ -134,9 +134,9 @@ def create_event(event: str = Form(...),  files: Optional[UploadFile] = File(def
     
 
     if res is None:
-        return jsonable_encoder({"message": "An event with the same name already exists."})
+        return JSONResponse(status_code=404, content={"message": "An event with the same name already exists."})
     
-    return jsonable_encoder({"data": res, "message": "Event has been created."})
+    return JSONResponse(status_code=201, content={"data": jsonable_encoder(res), "message": "Event has been created."})
 
 """
 {
@@ -160,7 +160,7 @@ def get_invitee_responded(event_id: str, db: Session = Depends(get_db)):
     res = crud.get_invitee_responded(db, event_id)
     if res == []:
         return []
-    return jsonable_encoder({"data": res, "message": "Invitees found."})
+    return JSONResponse(status_code=200, content={"data": jsonable_encoder(res), "message": "Invitees found."})
 
 """
 {
@@ -201,19 +201,19 @@ def get_invitee_responded(event_id: str, db: Session = Depends(get_db)):
 def get_invitees(event_id:str, db: Session = Depends(get_db)):
     all_invitees = crud.get_invitee(db, event_id)
     if all_invitees == []:
-        return jsonable_encoder({"message": "No invitees found."})
+        return JSONResponse(status_code=404, content={"message": "No invitees found."})
     
     respondents = crud.get_invitee_responded(db, event_id)
     
     invitees_left = len(all_invitees) - len(respondents)
-    return jsonable_encoder({"all_invitees": all_invitees, "respondents": respondents, "invitees_left": invitees_left, "message": "Invitees found."})
+    return JSONResponse(status_code=200, content={"all_invitees": jsonable_encoder(all_invitees), "respondents": respondents, "invitees_left": invitees_left, "message": "Invitees found."})
 
 @app.put("/invitee")
 def update_invitee(invitee: schemas.Invitee, db: Session = Depends(get_db)):
     res = crud.update_invitee(db, invitee)
     if res is None:
-        return jsonable_encoder({"message": "No invitee found."})
-    return jsonable_encoder({"data": res, "message": "Invitee has been updated."})
+        return JSONResponse(status_code=404, content={"message": "No invitee found."})
+    return JSONResponse(status_code=200, content={"data": jsonable_encoder(res), "message": "Invitee has been updated."})
 
 
 """
@@ -227,8 +227,8 @@ def create_invitees(invitee: schemas.Invitee, db: Session = Depends(get_db)):
     
     res = crud.create_invitee(db, invitee)
     if res is None:
-        return jsonable_encoder({"message": "User has already been invited to this event."})
-    return jsonable_encoder({"data": {"user_id": res.user_id}, "message": "Invitee has been added."})
+        return JSONResponse(status_code=404, content={"message": "User has already been invited to this event."})
+    return JSONResponse(status_code=201, content={"data": {"user_id": res.user_id}, "message": "Invitee has been added."})
 
 
 
@@ -236,8 +236,8 @@ def create_invitees(invitee: schemas.Invitee, db: Session = Depends(get_db)):
 def add_opt_schedule(optimized: schemas.OptimizedSchedules, db: Session = Depends(get_db)):
     res = crud.add_opt_schedule(db, optimized)
     if res is None:
-        return jsonable_encoder({"message": "Optimized schedule has already been invited to this event."})
-    return jsonable_encoder({"message": "Optimized schedule has been added."})
+        return JSONResponse(status_code=404, content={"message": "Optimized schedule has already been invited to this event."})
+    return JSONResponse(status_code=201, content={"message": "Optimized schedule has been added."})
 
 
 #!/usr/bin/env python3
