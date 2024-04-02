@@ -17,8 +17,5 @@ CREATE TABLE IF NOT EXISTS `user` (
   ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 INSERT INTO `user` (`user_id`, `username`, `email`, `password_hash`, `telegram_tag`, `image`, `telegram_id`) VALUES
-(1, 'string', 'string', 'string', 'string', 'https://images.unsplash.com/photo-1492633423870-43d1cd2775eb?&w=128&h=128&dpr=2&q=80', NULL),
-(4, 'ssidfng', 'stdfring', 'string', 'string', NULL, NULL),
-(3, 'ssidasd', 'stdfng', 'strsng', 'strsng', NULL, NULL),
-(5, 'test2', 'std128yuyuihojie', 'pbkdf2:sha256:600000$Ant22xex5VCnUclw$b65776c52241f4a3394e58a264f8d01e8cbf960c9a72399c3d4c36047327432d', '@strsng', NULL, NULL),
-(2, 'asdf','asdf@gmail.com', 'pbkdf2:sha256:600000$wuJc5iUSEK6zno34$7dc148975d26ef794afc7c90cae1e1969ceca8aa58c911842cd63fb64a9316f0', '@asdf', 'https://images.unsplash.com/photo-1492633423870-43d1cd2775eb?&w=128&h=128&dpr=2&q=80', NULL);
+(1, 'bokyan', 'bok@bok.com', 'pbkdf2:sha256:600000$Ant22xex5VCnUclw$b65776c52241f4a3394e58a264f8d01e8cbf960c9a72399c3d4c36047327432d', '@bokyannn', NULL, NULL),
+(2, 'kae', 'kae@kae.com', 'pbkdf2:sha256:600000$Ant22xex5VCnUclw$b65776c52241f4a3394e58a264f8d01e8cbf960c9a72399c3d4c36047327432d', '@hotatementai', NULL, NULL)

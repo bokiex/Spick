@@ -69,8 +69,9 @@ def signup(user: schemas.User):
 @app.post("/login")
 def login(user: schemas.LoginUser):
     user_result = requests.get(user_ms + "users/" + user.username)
+    print(user_result.json())
     if int(user_result.status_code) > 300:
-        raise HTTPException(status_code=user_result.status_code, detail=user_result.json()["detail"])
+        raise HTTPException(status_code=user_result.status_code, detail=user_result.json())
         #channel.basic_publish(exchange=exchangename, routing_key="login.error", body=json.dumps(user))
     user_result = user_result.json()
     if not check_password_hash(user_result["password_hash"], user.password):
