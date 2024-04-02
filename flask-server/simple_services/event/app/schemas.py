@@ -16,11 +16,11 @@ class Recommendation(BaseModel):
 class Event(BaseModel):
     event_name: str
     event_desc: str
-    datetime_start: datetime
-    datetime_end: datetime
+    datetime_start: str
+    datetime_end: str
     image: str | None = None
     invitees: List[Invitee] = []
-    time_out: datetime | None = None
+    time_out: str | None = None
     user_id: int
     recommendations: List[Recommendation] = []
     reservation_name: Optional[str] = None
@@ -29,11 +29,11 @@ class Event(BaseModel):
 class EventPut(BaseModel):
     event_name: Optional[str] = None
     event_desc: Optional[str] = None
-    datetime_start: Optional[datetime] = None
-    datetime_end: Optional[datetime] = None
+    datetime_start: Optional[str] = None
+    datetime_end: Optional[str] = None
     image: Optional[str] = None
     invitees: Optional[List[Invitee]] = None
-    time_out: Optional[datetime] = None
+    time_out: Optional[str] = None
     user_id: Optional[int] = None
     recommendations: Optional[List[Recommendation]] = None
     reservation_name: Optional[str] = None      #edited by kae
@@ -45,8 +45,8 @@ class EventResponse(Event):
 class OptimizedScheduleDay(BaseModel):
     event_id: str
     date: str
-    start: datetime
-    end: datetime
+    start: str
+    end: str
     attending_users: List[int]
     non_attending_users: List[int]
 

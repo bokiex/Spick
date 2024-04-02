@@ -1,13 +1,12 @@
 # schemas.py
 from pydantic import BaseModel
-from datetime import datetime
 from typing import List
 
 class UserScheduleCreate(BaseModel):
     event_id: str
     user_id: int
-    start_time: datetime
-    end_time: datetime
+    start_time: str
+    end_time: str
 
 class UserScheduleList(BaseModel):
     sched_list: List[UserScheduleCreate]

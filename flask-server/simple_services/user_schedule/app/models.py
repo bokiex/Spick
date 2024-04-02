@@ -10,8 +10,8 @@ class UserSchedule(Base):
     schedule_id = Column(Integer, index=True, primary_key=True)
     event_id = Column(String, index=True)
     user_id = Column(Integer, index=True)
-    start_time = Column(DateTime)
-    end_time = Column(DateTime)
+    start_time = Column(String)
+    end_time = Column(String)
 
 
 class ScheduleDelete(BaseModel): #dont need

@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, TIMESTAMP, String, ForeignKey, LargeBinary, Boolean
+from sqlalchemy import Column, Integer,  String, ForeignKey, LargeBinary, Boolean
 from sqlalchemy.orm import relationship
 from database import Base
 
@@ -12,9 +12,9 @@ class Event(Base):
     event_id = Column(String(6), primary_key=True, default=generate_random_event_id)
     event_name = Column(String(64), nullable=False)
     event_desc = Column(String(256), nullable=True)
-    datetime_start = Column(TIMESTAMP, nullable=True)
-    datetime_end = Column(TIMESTAMP, nullable=True)
-    time_out = Column(TIMESTAMP, nullable=True)
+    datetime_start = Column(String(33), nullable=True)
+    datetime_end = Column(String(33), nullable=True)
+    time_out = Column(String(33), nullable=True)
     event_location = Column(String(64), nullable=True)
     user_id = Column(Integer, nullable=False)
     reservation_name = Column(String(64), nullable=True)
@@ -44,5 +44,5 @@ class Optimized(Base):
     __tablename__ = 'optimized'
     event_id = Column(String(6), primary_key=True, nullable=False)
     attendee_id = Column(Integer, primary_key=True, nullable=False)
-    start_time = Column(TIMESTAMP, nullable=False)
-    end_time = Column(TIMESTAMP, nullable=False)
+    start_time = Column(String(33), nullable=False)
+    end_time = Column(String(33), nullable=False)

@@ -15,9 +15,9 @@ CREATE TABLE IF NOT EXISTS `event` (
     `event_name` varchar(64) NOT NULL,
     `event_desc` varchar(256),
     `image` varchar(1024),
-    `datetime_start` timestamp,
-    `datetime_end` timestamp,
-    `time_out` timestamp,
+    `datetime_start` varchar(33),
+    `datetime_end` varchar(33),
+    `time_out` varchar(33),
     `reservation_name` varchar(64),
     `reservation_address` varchar(64),
     `event_location` varchar(64),
@@ -46,8 +46,8 @@ CREATE TABLE IF NOT EXISTS `recommendation` (
 CREATE TABLE IF NOT EXISTS `optimized` (
     `event_id` VARCHAR(6) NOT NULL,
     `attendee_id` INT, 
-    `start_time` timestamp,
-    `end_time` timestamp,
+    `start_time` varchar(33),
+    `end_time` varchar(33),
     PRIMARY KEY (`event_id`, `attendee_id`,`start_time`,`end_time`)
 )   ENGINE=InnoDB DEFAULT CHARSET=utf8;
 

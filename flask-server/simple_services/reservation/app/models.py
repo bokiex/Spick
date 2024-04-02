@@ -6,7 +6,7 @@ class Reservation(Base):
     reservation_id = Column(Integer, primary_key=True, autoincrement=True, index=True)
     user_id = Column(Integer, nullable=False)
     reservation_name = Column(String(64), nullable=False)
-    reservation_start_time = Column(TIMESTAMP, nullable=False)
-    reservation_end_time = Column(TIMESTAMP, nullable=False)
+    reservation_start_time = Column(String(33), nullable=False)
+    reservation_end_time = Column(String(33), nullable=False)
     reservation_address = Column(String(64), nullable=False)
  

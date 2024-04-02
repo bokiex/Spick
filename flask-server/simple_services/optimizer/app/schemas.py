@@ -5,19 +5,19 @@ from datetime import datetime
 class ScheduleItem(BaseModel):
     event_id: str
     user_id: int
-    start_time: datetime
-    end_time: datetime
+    start_time: str
+    end_time: str
     schedule_id: int
 
 class CommonSlot(BaseModel): #no longer need this
-    start: datetime
-    end: datetime
+    start: str
+    end: str
 
 class OptimizedScheduleDay(BaseModel):
     event_id: str
     date: str
-    start: datetime
-    end: datetime
+    start: str
+    end: str
     attending_users: List[int]
     non_attending_users: List[int]
 

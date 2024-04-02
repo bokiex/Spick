@@ -73,16 +73,19 @@ const format_date = (datetime) => {
         year: 'numeric',
         month: 'long',
         day: 'numeric'
+        
     }
 
-    return date.toLocaleDateString('en-US', date_options)
+    return date.toLocaleDateString('en-SG', date_options)
 }
 
 const format_time = (datetime) => {
-    const date = new Date(datetime)
-    const time_options = { hour: 'numeric', minute: 'numeric', hour12: true }
+    console.log(datetime)
+    const date = new Date("2024-04-03T15:29:00.000Z")
+ 
+    const time_options = { hour: 'numeric', minute: 'numeric', hour12: true, timeZone: "Asia/Singapore" }
 
-    return date.toLocaleTimeString('en-US', time_options)
+    return date.toLocaleTimeString('en-SG', time_options)
 }
 
 const RSVP = () => {
