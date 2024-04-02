@@ -80,14 +80,17 @@ def accept_invitation(request: AcceptInvitationSchema):
     status_response = requests.put(event_ms + "invitee", json=update_payload)
     if status_response.status_code not in range(200,300):
         channel.basic_publish(exchange=exchangename, routing_key="update_status.error",body=json.dumps(status_response.json()), properties=pika.BasicProperties(delivery_mode=2))
+        return status_response.json()
     
     schedule_response = requests.post(user_schedule_ms + "user_schedule", json= jsonable_encoder({"sched_list": request.sched_list}))
     if schedule_response.status_code > 300:
         channel.basic_publish(exchange=exchangename, routing_key="post_schedule.error",body=json.dumps(schedule_response.json()), properties=pika.BasicProperties(delivery_mode=2))
+        return schedule_response.json()
     
     retrieve_response = requests.get(f"{event_ms}invitee/{request.event_id}")
     if retrieve_response.status_code > 300:
         channel.basic_publish(exchange=exchangename, routing_key="retrieve_invitee.error",body=json.dumps(retrieve_response.json()), properties=pika.BasicProperties(delivery_mode=2))
+        return retrieve_response.json()
     
     opt_data = retrieve_response.json()  # Process opt_data as needed
     opt_data["event_id"] = request.event_id
@@ -165,6 +168,7 @@ def check_and_trigger_optimization(data):
         host_tag = requests.get(f"{user_ms}users/user_id/{host_id}")
         if host_tag.status_code not in range(200,300):
             channel.basic_publish(exchange=exchangename, routing_key="user.error",body=host_tag, properties=pika.BasicProperties(delivery_mode=2))
+            return host_tag.json()
 
         host_tag = host_tag.json()["telegram_tag"]
         
@@ -187,18 +191,23 @@ def optimize_schedule(request: TimeoutOptimizeScheduleRequest):
     response = requests.get(f"{user_schedule_ms}user_schedule/{request.event_id}")
     if response.status_code > 300:
         channel.basic_publish(exchange=exchangename, routing_key="get_schedule.error",body=json.dumps(response.json()), properties=pika.BasicProperties(delivery_mode=2))
+        return response.json()
+    
     schedule_data = response.json()
     opt_response = requests.post(optimize_ms + "optimize_schedule", json=schedule_data)
     if opt_response.status_code >300 :
         channel.basic_publish(exchange=exchangename, routing_key="optimize.error",body=json.dumps(opt_response.json()), properties=pika.BasicProperties(delivery_mode=2))
+        return opt_response.json()
+    
     opt_update = requests.post(event_ms + "update_optimize", json = opt_response.json())
     if opt_update.status_code >300:
         channel.basic_publish(exchange=exchangename, routing_key="update_optmize.error",body=json.dumps(opt_update.json()), properties=pika.BasicProperties(delivery_mode=2))
+        return opt_update.json()
     
     event_details = requests.get(f"{event_ms}event/{request.event_id}")
     if event_details.status_code not in range(200,300):
         channel.basic_publish(exchange=exchangename, routing_key="timeout.error",body=event_details, properties=pika.BasicProperties(delivery_mode=2))
-        return event_details
+        return event_details.json()
         
     # Update event timeout to null
     payload = {'time_out': None}
@@ -213,13 +222,13 @@ def optimize_schedule(request: TimeoutOptimizeScheduleRequest):
     host_tag = requests.get(f"{user_ms}users/user_id/{host_id}")
     if host_tag.status_code not in range(200,300):
         channel.basic_publish(exchange=exchangename, routing_key="user.error",body=host_tag, properties=pika.BasicProperties(delivery_mode=2))
+        return host_tag.json()
 
     host_tag = host_tag.json()["telegram_tag"]
         
     noti_payload = {"notification_list": [host_tag], "message": f"Event {request.event_id} timed-out and optimised." }
                                                    
     channel.basic_publish(exchange=exchangename, routing_key="update_optimization.notification",body=json.dumps(noti_payload), properties=pika.BasicProperties(delivery_mode=2))
-        
     
     return opt_response.json()
 
