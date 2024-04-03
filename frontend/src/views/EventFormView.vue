@@ -390,20 +390,20 @@ function tryAgain() {
                         <Separator class="shrink-0 bg-border h-px w-full" />
 
                         <div class="space-y-2">
-                            <Label for="datetime_start">Start Time</Label>
+                            <Label for="datetime_start">Range Start</Label>
                             <VueDatePicker v-model="datetime_start" time-picker-inline />
                         </div>
                         <div class="space-y-2">
-                            <Label for="datetime_end">End Time</Label>
+                            <Label for="datetime_end">Range End</Label>
                             <VueDatePicker v-model="datetime_end" time-picker-inline />
                         </div>
                         <div class="space-y-2">
-                            <Label for="time_out">Time Out</Label>
+                            <Label for="time_out">Event Invite Expiry</Label>
                             <VueDatePicker v-model="time_out" time-picker-inline />
                         </div>
                         <div class="space-y-2">
                             <div class="label">
-                                <label for="township">Prefered Area</label>
+                                <label for="township">Preferred Area</label>
                             </div>
                             <input
                                 required

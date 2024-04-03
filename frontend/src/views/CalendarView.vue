@@ -3,7 +3,7 @@ import VueCal from 'vue-cal'
 import 'vue-cal/dist/vuecal.css'
 import '@vuepic/vue-datepicker/dist/main.css'
 import { ref, onMounted, computed } from 'vue'
-import {onBeforeMount} from 'vue'
+import { onBeforeMount } from 'vue'
 import axios from 'axios'
 
 var events = ref([])
@@ -16,12 +16,11 @@ var selected_date = ref(null)
 onBeforeMount(async () => {
     //for testing
     events.value.push({
-        "start":"05-04-2024",
-        "end":"06-04-2024",
-        "title":"urmum",
-        "desc":"gay"
-    }
-    )
+        start: '05-04-2024',
+        end: '06-04-2024',
+        title: 'urmum',
+        desc: 'gay'
+    })
     console.log(events.value)
     // for testing end
     selected_date =
@@ -75,7 +74,7 @@ onBeforeMount(async () => {
                     title: event.event_name,
                     content: event.event_desc
                 }
-                events.push(topush)
+                events.value.push(topush)
             }
         })
         // Example API call - replace with your actual API call
@@ -94,12 +93,13 @@ onBeforeMount(async () => {
         console.error('Failed to fetch event data:', error)
     } finally {
         loaded.value = true
+        console.log(loaded.value)
     }
 })
 </script>
 <template>
-    <div class="">
-        <vue-cal v-if = "loaded.value"
+    <div class="" v-if="loaded">
+        <vue-cal
             :selected-date="selected_date"
             :time-from="9 * 60"
             :time-to="24 * 60"
