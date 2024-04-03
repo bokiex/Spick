@@ -124,9 +124,9 @@ def decline_invitation(request: DeclineInvitationSchema):
     opt_data["event_id"] = request.event_id
     # Assuming check_and_trigger_optimization exists and works as expected
     x = check_and_trigger_optimization((opt_data))  # Ensure this function is defined or adjusted for FastAPI
-    x = jsonable_encoder(x)
-    res = "Declined Successfully"
-    return res
+    return JSONResponse(status_code=x.status_code, content=x.json())
+    
+    
     
     
 def check_and_trigger_optimization(data):
@@ -138,7 +138,7 @@ def check_and_trigger_optimization(data):
         response = requests.get(f"{user_schedule_ms}user_schedule/{event_id}")
         if response.status_code >300:
             channel.basic_publish(exchange=exchangename, routing_key="user_schedule.error",body=json.dumps(response.json()), properties=pika.BasicProperties(delivery_mode=2))
-            return response.json()
+            return JSONResponse(status_code=404, content=response.json())
         
         payload = response.json()
 

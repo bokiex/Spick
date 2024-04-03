@@ -93,13 +93,13 @@ onBeforeMount(async () => {
         console.error('Failed to fetch event data:', error)
     } finally {
         loaded.value = true
-        console.log(loaded.value)
     }
 })
 </script>
 <template>
-    <div class="" v-if="loaded">
+    <div class="">
         <vue-cal
+            v-if="loaded"
             :selected-date="selected_date"
             :time-from="9 * 60"
             :time-to="24 * 60"

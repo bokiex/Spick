@@ -17,7 +17,7 @@ class Event(Base):
     time_out = Column(String(33), nullable=True)
     user_id = Column(Integer, nullable=False)
     reservation_name = Column(String(64), nullable=True)
-    reservation_address = Column(String(64), nullable=True)
+    reservation_address = Column(String(1024), nullable=True)
     image = Column(String(1024), nullable=True)
     recommendations = relationship("Recommendation", back_populates="event",   cascade="all, delete, delete-orphan")
     invitees = relationship("Invitee", back_populates="event",   cascade="all, delete, delete-orphan")
