@@ -16,6 +16,7 @@ onMounted(async () => {
     const res = await fetch('http://localhost:8100/event').then(
         // if status code is not 200, then set events to empty array
         (res) => {
+            console.log(res)
             if (res.status != 200) {
                 console.error('Failed to fetch event data:', res)
                 problem.value = 'fetch failed'
@@ -27,33 +28,38 @@ onMounted(async () => {
             }
         }
     )
-    const data = res
+    const data = await res.then((data) => {
+        console.log(res)
+        for (var i in data) {
+            console.log(data[i])
+            const invitees_user_ids = []
+            data[i].datetime_start = new Date(data[i].datetime_start)
+            data[i].datetime_end = new Date(data[i].datetime_end)
+            // check if userID is in invitees
+            for (var j in data[i].invitees) {
+                if (data[i].invitees[j].user_id == userID) {
+                    invitees_user_ids.push(data[i].invitees[j].user_id)
+                }
+            }
 
-    for (var i in data) {
-        const invitees_user_ids = []
-        data[i].datetime_start = new Date(data[i].datetime_start)
-        data[i].datetime_end = new Date(data[i].datetime_end)
-        // check if userID is in invitees
-        for (var j in data[i].invitees) {
-            if (data[i].invitees[j].user_id == userID) {
-                invitees_user_ids.push(data[i].invitees[j].user_id)
+            // if userID doesn't exist in invitee and is not equal to user_id, then remove the event
+            if (!invitees_user_ids.includes(Number(userID)) && data[i].user_id != userID) {
+                console.log(data[i].user_id, userID, 'removed')
+                data.splice(i, 1)
+                i--
+            } else {
+                console.log(data[i].user_id, userID, 'kept')
             }
         }
-        // if userID doesn't exist in invitee and is not equal to user_id, then remove the event
-        if (!invitees_user_ids.includes(Number(userID)) && data[i].user_id != userID) {
-            data.splice(i, 1)
-            i--
-        }
-    }
 
-    if (data == null || data.length == 0) {
-        problem.value = 'no events'
+        if (data == null || data.length == 0) {
+            problem.value = 'no events'
+            loading.value = false
+            events.value = []
+        }
+        events.value = data
         loading.value = false
-        events.value = []
-    }
-    events.value = data
-    console.log(userID)
-    loading.value = false
+    })
 })
 
 const navigate = (id) => {
