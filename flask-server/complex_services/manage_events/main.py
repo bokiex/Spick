@@ -251,23 +251,16 @@ async def create_event(event: str = Form(...), file: Optional[UploadFile] = File
     # Start scheduler for event time out
     scheduler.add_job(on_timeout, 'date', run_date=event_result["data"]["time_out"], args=[event_result["data"]["event_id"]])
     scheduler.print_jobs()
+
+    return JSONResponse(status_code=201, content={"message": "Event created successfully.", "data": jsonable_encoder(event_result)})
   
-
-@app.delete("/delete_event/{event_id}")
-def delete_event(event_id: int):
-    event_result = requests.delete(event_ms + f"/{event_id}").json()
-    if event_result.status_code not in range(200,300):
-        channel.basic_publish(exchange=exchangename, routing_key="delete_event.error",body=json.dumps(event_result.json()), properties=pika.BasicProperties(delivery_mode=2))
-        return event_result
-    
-    channel.basic_publish(exchange=exchangename, routing_key="delete_event.notification",body=event_result, properties=pika.BasicProperties(delivery_mode=2))
-    return event_result
-
 def on_timeout(event_id: str):
 
     optimize_results = requests.post(rsvp_ms + "rsvp/optimize", json = jsonable_encoder({"event_id": event_id}))
 
     if optimize_results.status_code not in range(200,300):
         channel.basic_publish(exchange=exchangename, routing_key="timeout.error",body=json.dumps(optimize_results.json()), properties=pika.BasicProperties(delivery_mode=2))
-        return optimize_results
+        return JSONResponse(status_code=500, content={"error": "RSVP service not available"})
+    
+    return JSONResponse(status_code=200, content=optimize_results.json())
     
