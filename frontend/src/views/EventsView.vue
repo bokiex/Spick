@@ -11,9 +11,11 @@ const userID = Number(localStorage.getItem('userID'))
 var loading = ref(true)
 const events = ref(null)
 var problem = ref(null)
+const event_ms = 'http://localhost:8100/event'
+console.log(event_ms)
 onMounted(async () => {
     // Example API call - replace with your actual API call
-    const res = await fetch('http://localhost:8100/event').then(
+    const res = await fetch(event_ms).then(
         // if status code is not 200, then set events to empty array
         (res) => {
             console.log(res)
@@ -28,37 +30,37 @@ onMounted(async () => {
             }
         }
     )
-    const data = await res.then((data) => {
-        for (var i = data.length - 1; i >= 0; i--) {
-            console.log(i)
-            console.log(data[i])
-            const invitees_user_ids = []
-            data[i].datetime_start = new Date(data[i].datetime_start)
-            data[i].datetime_end = new Date(data[i].datetime_end)
-            // check if userID is in invitees
-            for (var j in data[i].invitees) {
-                if (data[i].invitees[j].user_id == userID) {
-                    invitees_user_ids.push(data[i].invitees[j].user_id)
-                }
-            }
-
-            // if userID doesn't exist in invitee and is not equal to user_id, then remove the event
-            if (!invitees_user_ids.includes(Number(userID)) && data[i].user_id != userID) {
-                console.log(data[i].user_id, userID, 'removed')
-                data.splice(i, 1)
-            } else {
-                console.log(data[i].user_id, userID, 'kept')
+    const data = res
+    console.log(res)
+    for (var i in data) {
+        console.log(data[i])
+        const invitees_user_ids = []
+        data[i].datetime_start = new Date(data[i].datetime_start)
+        data[i].datetime_end = new Date(data[i].datetime_end)
+        // check if userID is in invitees
+        for (var j in data[i].invitees) {
+            if (data[i].invitees[j].user_id == userID) {
+                invitees_user_ids.push(data[i].invitees[j].user_id)
             }
         }
 
-        if (data == null || data.length == 0) {
-            problem.value = 'no events'
-            loading.value = false
-            events.value = []
+        // if userID doesn't exist in invitee and is not equal to user_id, then remove the event
+        if (!invitees_user_ids.includes(Number(userID)) && data[i].user_id != userID) {
+            console.log(data[i].user_id, userID, 'removed')
+            data.splice(i, 1)
+            i--
+        } else {
+            console.log(data[i].user_id, userID, 'kept')
         }
-        events.value = data
+    }
+
+    if (data == null || data.length == 0) {
+        problem.value = 'no events'
         loading.value = false
-    })
+        events.value = []
+    }
+    events.value = data
+    loading.value = false
 })
 
 const navigate = (id) => {

@@ -15,7 +15,6 @@ class Event(Base):
     datetime_start = Column(String(33), nullable=True)
     datetime_end = Column(String(33), nullable=True)
     time_out = Column(String(33), nullable=True)
-    event_location = Column(String(64), nullable=True)
     user_id = Column(Integer, nullable=False)
     reservation_name = Column(String(64), nullable=True)
     reservation_address = Column(String(64), nullable=True)

@@ -20,7 +20,6 @@ CREATE TABLE IF NOT EXISTS `event` (
     `time_out` varchar(33),
     `reservation_name` varchar(64),
     `reservation_address` varchar(64),
-    `event_location` varchar(64),
     `user_id` INT
 )   ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
