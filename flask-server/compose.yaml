@@ -4,6 +4,7 @@ volumes:
     user_mysql_data:
     reservation_mysql_data:
     user_schedule_mysql_data:
+    error_logs:
 networks:
     spick:
         driver: bridge
@@ -243,6 +244,8 @@ services:
         networks:
             - spick
         restart: always
+        volumes:
+
         depends_on:
             rabbitmq:
                 condition: service_started
