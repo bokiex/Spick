@@ -25,7 +25,7 @@ onMounted(async () => {
             }
         }
     )
-    const data = res['data']
+    const data = res
     for (var i in data) {
         data[i].datetime_start = new Date(data[i].datetime_start)
         data[i].datetime_end = new Date(data[i].datetime_end)
@@ -37,6 +37,7 @@ onMounted(async () => {
         }
     }
     events.value = data
+    console.log(events.value)
     loading.value = false
 })
 
