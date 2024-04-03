@@ -55,6 +55,7 @@ app.add_middleware(
 @app.post("/reserve")
 def reserve(reservation: schemas.Reservation):
     # check if reservation name contains fail
+    print(reservation)
     if "fail" in reservation.reservation_name:
         return JSONResponse(status_code=400, content={"message":"Simulated failure of reservation creation"})
     
@@ -66,36 +67,39 @@ def reserve(reservation: schemas.Reservation):
         "reservation_address": reservation.reservation_address
     }
 
-    res = requests.post(reservation_ms, json=reservation_details)
+    res = requests.post(reservation_ms + "reservation", json=reservation_details)
     if res.status_code not in range(200,300):
         channel.basic_publish(exchange=exchangename, routing_key="reservation.error", body=json.dumps(res.json()))
         return JSONResponse(status_code=400, content={"message":res.json()})
 
-    res = res.json()['reservation']
+ 
     
     event_details = {
-        "reservation_name": res["reservation_name"],
-        "reservation_address": res["reservation_address"],
-        "datetime_start": res["reservation_start_time"],
-        "datetime_end": res["reservation_end_time"],
-    }    
+        "reservation_name": reservation.reservation_name,
+        "reservation_start_time": str(reservation.datetime_start),
+        "reservation_end_time": str(reservation.datetime_end),
+        "reservation_address": reservation.reservation_address
+    }   
+
+    print(event_details)
     update_event = requests.put(event_ms + f"event/{reservation.event_id}", json=event_details)
     if update_event.status_code not in range(200,300):
         channel.basic_publish(exchange=exchangename, routing_key="event.error", body=json.dumps(update_event.json()))
         return JSONResponse(status_code=400, content={"message":update_event.json()})
     
-    event = requests.get(manage_event_ms + f"event/{reservation.event_id}")
-    if event.status_code not in range(200,300):
-        channel.basic_publish(exchange=exchangename, routing_key="manage_event.error", body=json.dumps(event.json()))
-        return JSONResponse(status_code=400, content={"message":event.json()})
+    # event = requests.get(manage_event_ms + f"event/{reservation.event_id}")
+    # if event.status_code not in range(200,300):
+    #     channel.basic_publish(exchange=exchangename, routing_key="manage_event.error", body=json.dumps(event.json()))
+    #     return JSONResponse(status_code=400, content={"message":event.json()})
     
-    event = event.json()
-    print(event)
+    # event = event.json()
+    print("\n\n ------- SAFE PLACE ------- \n\n")
+    print(reservation)
 
     # convert datetime into date and time 
-    reservation.datetime_start = reservation.datetime_start.strftime("%m-%d %H:%M:%S")
+    # reservation.datetime_start = reservation.datetime_start.strftime("%m-%d %H:%M:%S")
     notification = {
-        "notification_list": [i["telegram_tag"] for i in event["invitees"]],
+        "notification_list": [i["telegram_tag"] for i in reservation.dict()["attendees"]],
         "message": f"{reservation.reservation_name} at {reservation.reservation_address} has been reserved at {reservation.datetime_start}. See you there!"
     }
     channel.basic_publish(exchange=exchangename, routing_key="reservation.notification", body=json.dumps(notification))
