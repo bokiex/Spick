@@ -3,8 +3,8 @@ import Card from '@/components/Card.vue'
 import Button from '@/components/Button.vue'
 import { useRouter } from 'vue-router'
 import { ref, onMounted } from 'vue'
-import {format_date, format_time} from '@/utils/format_datetime'
-import {getImageUrl} from '@/utils/get_image'
+import { format_date, format_time } from '@/utils/format_datetime'
+import { getImageUrl } from '@/utils/get_image'
 
 const router = useRouter()
 const userID = localStorage.getItem('userID')
@@ -12,33 +12,38 @@ const loading = ref(null)
 const events = ref(null)
 
 onMounted(async () => {
-    try {
-        // Example API call - replace with your actual API call
-        const data = await fetch('http://localhost:8100/event').then((res) => res.json())
-        for (let i = 0; i < data.length; i++) {
-            data[i].datetime_start = new Date(data[i].datetime_start)
-            data[i].datetime_end = new Date(data[i].datetime_end)
-            // if userID doesn't exist in invitee and is not equal to user_id, then remove the event
-            if (!data[i].invitee.includes(userID) && data[i].user_id != userID) {
-                data.splice(i, 1)
-                i--
+    // Example API call - replace with your actual API call
+    const res = await fetch('http://localhost:8100/event').then(
+        // if status code is not 200, then set events to empty array
+        (res) => {
+            if (res.status != 200) {
+                console.error('Failed to fetch event data:', data)
+                events.value = []
+            } else {
+                return res.json()
             }
         }
+    )
+    const data = res['data']
+    for (var i in data) {
+        data[i].datetime_start = new Date(data[i].datetime_start)
+        data[i].datetime_end = new Date(data[i].datetime_end)
+
+        // if userID doesn't exist in invitee and is not equal to user_id, then remove the event
+        if (!data[i].invitees.includes(userID) && data[i].user_id != userID) {
+            data.splice(i, 1)
+            i--
+        }
+
         events.value = data
-        console.log(data)
-    } catch (error) {
-        console.error('Failed to fetch event data:', error)
-    } finally {
-        loading.value = false
     }
+    console.log(events.value)
 })
 
 const navigate = (id) => {
     console.log(id)
     router.push({ path: `/events/${id}` })
 }
-
-
 </script>
 
 <template>

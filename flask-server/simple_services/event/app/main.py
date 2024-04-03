@@ -49,15 +49,15 @@ def online():
     return {"message": "Event is online."}
 
 # Get all events
-@app.get("/event", response_model=list[schemas.EventResponse])
+@app.get("/event")
 def get_events(db: Session = Depends(get_db)):
     res = crud.get_events(db)
     if res == []:
-        return jsonable_encoder({"message": "No events found."})
-    return jsonable_encoder(res)
+        return JSONResponse(status_code=404, content={"message": "No events found."})
+    return JSONResponse(status_code=200, content={"data": jsonable_encoder(res)})
 
 # Get event by ID
-@app.get("/event/{event_id}", response_model=schemas.EventResponse)
+@app.get("/event/{event_id}")
 def get_event_by_id(event_id: str, db: Session = Depends(get_db)):
  
     res = crud.get_event_by_id(event_id, db)
