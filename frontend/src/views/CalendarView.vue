@@ -2,17 +2,28 @@
 import VueCal from 'vue-cal'
 import 'vue-cal/dist/vuecal.css'
 import '@vuepic/vue-datepicker/dist/main.css'
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
+import {onBeforeMount} from 'vue'
 import axios from 'axios'
 
-var events = []
-const loading = ref(true)
+var events = ref([])
+var loaded = ref(false)
 const event_ms = 'http://localhost:8200/event'
 const userID = localStorage.getItem('userID')
 var today = new Date()
 var selected_date = ref(null)
 
-onMounted(async () => {
+onBeforeMount(async () => {
+    //for testing
+    events.value.push({
+        "start":"05-04-2024",
+        "end":"06-04-2024",
+        "title":"urmum",
+        "desc":"gay"
+    }
+    )
+    console.log(events.value)
+    // for testing end
     selected_date =
         today.getFullYear() +
         '-' +
@@ -82,19 +93,19 @@ onMounted(async () => {
     } catch (error) {
         console.error('Failed to fetch event data:', error)
     } finally {
-        loading.value = false
+        loaded.value = true
     }
 })
 </script>
 <template>
     <div class="">
-        <vue-cal
+        <vue-cal v-if = "loaded.value"
             :selected-date="selected_date"
             :time-from="9 * 60"
             :time-to="24 * 60"
             :disable-views="['years']"
             events-count-on-year-view
-            :events="events"
+            :events="events.value"
         ></vue-cal>
         <!-- Modal -->
         <!-- <div
