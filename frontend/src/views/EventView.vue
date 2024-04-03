@@ -237,9 +237,6 @@ const reservation = () => {
                                     </div>
                                 </div>
                                 <Skeleton v-if="loading" class="w-48 h-6" />
-                                <p v-else-if="!loading" class="p-2 font-light text-sm">
-                                    Email: {{ host?.email }}
-                                </p>
                             </div>
                         </Card>
 
