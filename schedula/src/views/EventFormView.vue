@@ -25,6 +25,7 @@ import Avatar from '@/components/Avatar.vue'
 import * as z from 'zod'
 import { CircleX } from 'lucide-vue-next'
 import Label from '@/components/Label.vue'
+import router from '../router'
 
 const event_ms = 'http://localhost:8200/create_event'
 const user_ms = 'http://localhost:8101/users'
@@ -167,6 +168,11 @@ async function submitForm() {
         }
     }
 }
+
+function viewEvents() {
+    router.push({ name: 'events' })
+}
+
 </script>
 <template>
     <div class="m-auto relative w-full h-screen space-y-6 sm:w-[450px]">
@@ -430,7 +436,7 @@ async function submitForm() {
                                             <Button variant="outline" v-if="error"
                                                 >Try Again
                                             </Button>
-                                            <Button variant="outline" v-else>View Event </Button>
+                                            <Button variant="outline" @click="viewEvents" v-else>View Event </Button>
                                         </DialogClose>
                                     </div>
                                 </DialogContent>
