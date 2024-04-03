@@ -17,19 +17,25 @@ Makre sure all of these are running and installed on your local machine before y
 
 ## Installation
 
-`git clone https://github.com/bokiex/Spick.git`
-
 ```
+git clone https://github.com/bokiex/Spick.git
 cd spick
 ```
 
 1. Backend Setup: To set up the backend, navigate to the flask-server directory and use Docker Compose to build and run the project:
 
-`cd flask-server docker-compose up --build`
+```
+cd flask-server
+docker-compose up --build
+```
 
 1. Frontend Setup: Open a new terminal window or tab for the frontend setup. Navigate to the schedula directory, install the necessary packages, and start the development server:
 
-`cd Spick npm install npm run dev`
+```
+cd frontend
+npm install
+npm run dev
+```
 
 This will start the frontend development server. Make sure you have Node.js and npm installed on your machine.
 
