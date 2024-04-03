@@ -192,6 +192,16 @@ def optimize_schedule(request: TimeoutOptimizeScheduleRequest):
     if not request.event_id:
         res = "invalid event_id"
         return res
+    
+    timeout_status = requests.get( event_ms +"event/" + request.event_id)
+    if timeout_status.status_code>300:
+        channel.basic_publish(exchange=exchangename, routing_key="get_event.error",body=json.dumps(timeout_status.json()), properties=pika.BasicProperties(delivery_mode=2))
+        return timeout_status.json()
+    
+    if timeout_status.json().timeout == None:
+        res = "Event was already optimized."
+        return res
+
     response = requests.get(f"{user_schedule_ms}user_schedule/{request.event_id}")
     if response.status_code > 300:
         channel.basic_publish(exchange=exchangename, routing_key="get_schedule.error",body=json.dumps(response.json()), properties=pika.BasicProperties(delivery_mode=2))
