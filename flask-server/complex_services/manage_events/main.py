@@ -75,7 +75,7 @@ def get_events():
     if event_result.status_code not in range(200,300):
         channel.basic_publish(exchange=exchangename, routing_key="get_event.error",body=json.dumps(event_result.json()), properties=pika.BasicProperties(delivery_mode=2))
         return event_result.json()
-    event_result = event_result.json()["data"]
+    event_result = event_result.json()
 
     user_result = requests.get(user_ms + "users")
     if user_result.status_code not in range(200,300):
@@ -110,7 +110,7 @@ def get_event_by_id(event_id: str):
     if event_result.status_code not in range(200,300):
         channel.basic_publish(exchange=exchangename, routing_key="get_event.error",body=json.dumps(event_result.json()), properties=pika.BasicProperties(delivery_mode=2))
         return event_result.json()
-    event_result = event_result.json()["data"]
+    event_result = event_result.json()
 
     user_result = requests.get(user_ms + "users")
     if user_result.status_code not in range(200,300):
