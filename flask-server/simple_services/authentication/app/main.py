@@ -3,6 +3,7 @@ import requests
 #import amqp_connection
 import sys
 import json
+from fastapi.responses import JSONResponse
 from fastapi import FastAPI, Depends, HTTPException
 from fastapi.encoders import jsonable_encoder
 from sqlalchemy.orm import Session
@@ -59,7 +60,7 @@ def signup(user: schemas.User):
     if int(user_result.status_code) > 300:
         raise HTTPException(status_code=user_result.status_code, detail=user_result.json()["detail"])
         #channel.basic_publish(exchange=exchangename, routing_key="signup.error", body=json.dumps(user))
-    return jsonable_encoder({"message": "User created successfully.", "user": user_result.json()})
+    return JSONResponse(status_code=201, content=jsonable_encoder({"message": "User created successfully.", "user": user_result.json()}))
 
 """
 {
@@ -72,9 +73,9 @@ def login(user: schemas.LoginUser):
     user_result = requests.get(user_ms + "users/" + user.username)
     print(user_result.json())
     if int(user_result.status_code) > 300:
-        raise HTTPException(status_code=user_result.status_code, detail=user_result.json())
+        raise JSONResponse(status_code=user_result.status_code, content=user_result.json())
         #channel.basic_publish(exchange=exchangename, routing_key="login.error", body=json.dumps(user))
     user_result = user_result.json()
     if not check_password_hash(user_result["password_hash"], user.password):
-        raise HTTPException(status_code=401, detail="Invalid password.")
-    return jsonable_encoder({"message": "User logged in successfully.", "user": user_result})
+        raise JSONResponse(status_code=401, content={"message": "Invalid password."})
+    return JSONResponse(status_code=404, content=jsonable_encoder({"message": "User logged in successfully.", "user": user_result}))
