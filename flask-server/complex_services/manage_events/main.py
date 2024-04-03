@@ -92,7 +92,8 @@ def get_events():
                     'username': user['username'],
                     'email': user['email'],
                     'telegram_tag': user['telegram_tag'],
-                    'image': user['image']
+                    'image': user['image'],
+                    'status': invitee['status']
                 }
                 if invitee['user_id'] == user['user_id']:
                     new_invitees.append(new_user)
@@ -125,7 +126,8 @@ def get_event_by_id(event_id: str):
                     'username': user['username'],
                     'email': user['email'],
                     'telegram_tag': user['telegram_tag'],
-                    'image': user['image']
+                    'image': user['image'],
+                    'status': invitee['status']
                 }
             if invitee['user_id'] == user['user_id']:
                 new_invitees.append(new_user)

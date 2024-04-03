@@ -54,7 +54,7 @@ def get_events(db: Session = Depends(get_db)):
     res = crud.get_events(db)
     if res == []:
         return JSONResponse(status_code=404, content={"message": "No events found."})
-    return JSONResponse(status_code=200, content={"data": jsonable_encoder(res)})
+    return JSONResponse(status_code=200, content=jsonable_encoder(res))
 
 # Get event by ID
 @app.get("/event/{event_id}")
@@ -62,8 +62,8 @@ def get_event_by_id(event_id: str, db: Session = Depends(get_db)):
  
     res = crud.get_event_by_id(event_id, db)
     if res == []:
-        return jsonable_encoder({"message": "No event found."})
-    return jsonable_encoder(res)
+        return JSONResponse(status_code=404, content={"message": "No event found."})
+    return JSONResponse(status_code=200, content=jsonable_encoder(res))
 
 
 # Update event

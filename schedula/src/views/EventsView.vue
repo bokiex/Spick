@@ -8,7 +8,7 @@ import { getImageUrl } from '@/utils/get_image'
 
 const router = useRouter()
 const userID = localStorage.getItem('userID')
-var loading = true
+var loading = ref(true)
 const events = ref(null)
 var problem = ref(null)
 onMounted(async () => {
@@ -18,6 +18,7 @@ onMounted(async () => {
         (res) => {
             if (res.status != 200) {
                 console.error('Failed to fetch event data:', data)
+                problem.value = 'fetch failed'
                 events.value = []
             } else {
                 return res.json()
@@ -34,10 +35,9 @@ onMounted(async () => {
             data.splice(i, 1)
             i--
         }
-
-        events.value = data
     }
-    console.log(events.value)
+    events.value = data
+    loading.value = false
 })
 
 const navigate = (id) => {
