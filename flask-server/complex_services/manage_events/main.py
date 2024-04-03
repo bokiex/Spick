@@ -81,7 +81,7 @@ def check_get_event():
         return False
     return True
 
-@app.get("/event")
+@app.get("/event", response_model=list[schemas.EventResponse])
 def get_events():
     online = check_get_event()
     if not online:
@@ -118,7 +118,7 @@ def get_events():
         event["invitees"] = new_invitees
     return JSONResponse(status_code=200, content=event_result)
 
-@app.get("/event/{event_id}")
+@app.get("/event/{event_id}", response_model=schemas.EventResponse)
 def get_event_by_id(event_id: str):
     online = check_get_event()
     if not online:
@@ -203,71 +203,20 @@ def get_timeslot_by_event_id(event_id: str):
     
     print(json.dumps(timeslots))
     return JSONResponse(status_code=200, content=json.dumps(timeslots))
-"""
-Sample event JSON input:
-{
-    "event_name": "Picnic",
-    "event_desc": "Picnic at Marina Bay",
-    "range_start": "2021-10-01 15:00:00",
-    "range_end": "2021-10-01 18:00:00",
-    "time_out": "2021-09-30 23:59:59",
-    "category": "Picnic",
-    "township": "Marina Bay",
-    "invitees": ["user2", "user3"],
-    "user_id": "user1"
-}
 
-Sample event JSON output:
-{
-    "code": 201,
-    "data": {
-        "event_id": 1,
-        "event_name": "Picnic",
-        "event_desc": "Picnic at Marina Bay",
-        "start_time": "2021-10-01 15:00:00",
-        "end_time": "2021-10-01 18:00:00",
-        "time_out": "2021-09-30 23:59:59",
-        "category": "Picnic",
-        "township": "Marina Bay",
-        "invitees": [
-            {
-            'userID': 1
-            'username': "user2",
-            'email': "user2@email.com",
-            'telegramtag': "@user2"
-            },
-            {
-                'userID': 2
-                'username': "user3",
-                'email': "user3@email.com",
-                'telegramtag': "@user3"
-            }
-        ],
-        "user_id": "user1",
-        "recommendations": [    
-            {
-                "recommendation_id": 1,
-                "event_id": 1,
-                "recommendation_name": "Pandan Reservoir Park",
-                "recommendation_address": "700 W Coast Rd, Singapore 608785"
-            }
-        ]
-    }
-}
-"""
 
 def check_create_event():
-    event_result = requests.get(event_ms + "online")
-    if event_result.status_code not in range(200,300):
+    event = requests.get(event_ms + "online")
+    if event.status_code not in range(200,300):
         return False
-    user_result = requests.get(user_ms + "online")
-    if user_result.status_code not in range(200,300):
+    user = requests.get(user_ms + "online")
+    if user.status_code not in range(200,300):
         return False
-    recommendation_ms = requests.get(recommendation_ms + "online")
-    if recommendation_ms.status_code not in range(200,300):
+    recommendation = requests.get(recommendation_ms + "online")
+    if recommendation.status_code not in range(200,300):
         return False
-    rsvp_ms = requests.get(rsvp_ms + "online")
-    if rsvp_ms.status_code not in range(200,300):
+    rsvp = requests.get(rsvp_ms + "online")
+    if rsvp.status_code not in range(200,300):
         return False
     return True
 
@@ -335,7 +284,7 @@ def create_event(event: str = Form(...), file: Optional[UploadFile] = File(defau
     scheduler.add_job(on_timeout, 'date', run_date=event_result["data"]["time_out"], args=[event_result["data"]["event_id"]])
     scheduler.print_jobs()
 
-    return JSONResponse(status_code=201, content={"message": "Event created successfully.", "data": jsonable_encoder(event_result)})
+    return JSONResponse(status_code=201, content=event_result)
   
 def on_timeout(event_id: str):
 

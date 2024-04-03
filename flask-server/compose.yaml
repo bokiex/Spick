@@ -29,6 +29,11 @@ services:
             - rabbitmq_data:/var/lib/rabbitmq
         networks:
             - spick
+        healthcheck:
+            test: rabbitmq-diagnostics -q ping
+            interval: 3s
+            timeout: 30s
+            retries: 10    
 
     #######################################
     # Event Microservice
@@ -248,7 +253,7 @@ services:
             - error_logs:/usr/src/app/errorlogs.txt
         depends_on:
             rabbitmq:
-                condition: service_started
+                condition: service_healthy
 
     #######################################
     # Notification Microservice
@@ -268,7 +273,7 @@ services:
         restart: always
         depends_on:
             rabbitmq:
-                condition: service_started
+                condition: service_healthy
 
     #######################################
     # Manage Events Complex
@@ -294,7 +299,7 @@ services:
             recommendation:
                 condition: service_started
             rabbitmq:
-                condition: service_started
+                condition: service_healthy
 
     #######################################
     # RSVP Complex
@@ -320,7 +325,7 @@ services:
             optimizer:
                 condition: service_started
             rabbitmq:
-                condition: service_started
+                condition: service_healthy
         networks:
             - spick
 
@@ -339,7 +344,7 @@ services:
             event:
                 condition: service_started
             rabbitmq:
-                condition: service_started
+                condition: service_healthy
             manage_events:
                 condition: service_started
         networks:
