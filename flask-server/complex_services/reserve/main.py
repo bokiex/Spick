@@ -13,9 +13,9 @@ from contextlib import asynccontextmanager
 import json
 
 
-reservation_ms = environ.get("RESERVATION_URL") or "http://localhost:3400/reservation"
-event_ms = environ.get("EVENT_URL") or "http://localhost:3600/event"
-manage_event_ms = environ.get("MANAGE_EVENT_URL") or "http://localhost:3500/event"
+reservation_ms = environ.get("RESERVATION_MS_URL") 
+event_ms = environ.get("EVENT_MS_URL")
+manage_event_ms = environ.get("MANAGE_EVENT_MS_URL") 
 connection = None
 channel = None
 exchangename = "generic_topic"
@@ -56,7 +56,7 @@ app.add_middleware(
 def reserve(reservation: schemas.Reservation):
     # check if reservation name contains fail
     if "fail" in reservation.reservation_name:
-        return HTTPException(status_code=400, detail={"message":"Simulated failure of reservation creation"})
+        return JSONResponse(status_code=400, content={"message":"Simulated failure of reservation creation"})
     
     reservation_details = {
         "user_id": reservation.user_id,
@@ -69,7 +69,7 @@ def reserve(reservation: schemas.Reservation):
     res = requests.post(reservation_ms, json=reservation_details)
     if res.status_code not in range(200,300):
         channel.basic_publish(exchange=exchangename, routing_key="reservation.error", body=json.dumps(res.json()))
-        return HTTPException(status_code=400, detail={"message":res.json()})
+        return JSONResponse(status_code=400, content={"message":res.json()})
 
     res = res.json()['reservation']
     
@@ -79,15 +79,15 @@ def reserve(reservation: schemas.Reservation):
         "datetime_start": res["reservation_start_time"],
         "datetime_end": res["reservation_end_time"],
     }    
-    update_event = requests.put(event_ms + f"/{reservation.event_id}", json=event_details)
+    update_event = requests.put(event_ms + f"event/{reservation.event_id}", json=event_details)
     if update_event.status_code not in range(200,300):
         channel.basic_publish(exchange=exchangename, routing_key="event.error", body=json.dumps(update_event.json()))
-        return HTTPException(status_code=400, detail={"message":update_event.json()})
+        return JSONResponse(status_code=400, content={"message":update_event.json()})
     
-    event = requests.get(manage_event_ms + f"/{reservation.event_id}")
+    event = requests.get(manage_event_ms + f"event/{reservation.event_id}")
     if event.status_code not in range(200,300):
         channel.basic_publish(exchange=exchangename, routing_key="manage_event.error", body=json.dumps(event.json()))
-        return HTTPException(status_code=400, detail={"message":event.json()})
+        return JSONResponse(status_code=400, content={"message":event.json()})
     
     event = event.json()
     print(event)
