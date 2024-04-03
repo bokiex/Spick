@@ -94,13 +94,16 @@ def create_invitee(db: Session, invitee: schemas.Invitee):
     return db_invitee
 
 def add_opt_schedule(db: Session, optimized_schedules: schemas.OptimizedSchedules):
+    res = []
     for schedule in optimized_schedules.schedules:
-        event_id = schedule.event_id
-        start_time = schedule.start
-        end_time = schedule.end
+        # Move the retrieval of attending_users outside the inner loop
         attending_users = schedule.attending_users
-
+        
         for user_id in attending_users:
+            event_id = schedule.event_id
+            start_time = schedule.start
+            end_time = schedule.end
+
             db_opt = models.Optimized(
                 event_id=event_id,
                 attendee_id=user_id,
@@ -108,6 +111,10 @@ def add_opt_schedule(db: Session, optimized_schedules: schemas.OptimizedSchedule
                 end_time=end_time
             )
             db.add(db_opt)
+            res.append(db_opt)
+
+    db.commit()  # Committing after all additions are done is more efficient
+    return res
         
     db.commit()  # Commit once after all inserts to optimize transaction
 

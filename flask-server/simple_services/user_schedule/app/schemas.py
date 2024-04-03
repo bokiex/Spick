@@ -8,15 +8,11 @@ class UserScheduleCreate(BaseModel):
     start_time: str
     end_time: str
 
-class UserScheduleList(BaseModel):
-    sched_list: List[UserScheduleCreate]
-    
-class ScheduleDeleteResponse(BaseModel):
-    message: str
-
 class UserScheduleInDB(UserScheduleCreate):
     schedule_id: int
 
-    class Config:
-        orm_mode = True
-        from_attributes = True
+class UserScheduleList(BaseModel):
+    sched_list: List[UserScheduleInDB]
+
+class intake(BaseModel):
+        sched_list: List[UserScheduleCreate]

@@ -49,15 +49,15 @@ def online():
     return {"message": "Event is online."}
 
 # Get all events
-@app.get("/event", response_model=list[schemas.EventResponse])
+@app.get("/event")
 def get_events(db: Session = Depends(get_db)):
     res = crud.get_events(db)
     if res == []:
-        return jsonable_encoder({"message": "No events found."})
-    return jsonable_encoder(res)
+        return JSONResponse(status_code=404, content={"message": "No events found."})
+    return JSONResponse(status_code=200, content={"data": jsonable_encoder(res)})
 
 # Get event by ID
-@app.get("/event/{event_id}", response_model=schemas.EventResponse)
+@app.get("/event/{event_id}")
 def get_event_by_id(event_id: str, db: Session = Depends(get_db)):
  
     res = crud.get_event_by_id(event_id, db)
@@ -206,7 +206,7 @@ def get_invitees(event_id:str, db: Session = Depends(get_db)):
     respondents = crud.get_invitee_responded(db, event_id)
     
     invitees_left = len(all_invitees) - len(respondents)
-    return JSONResponse(status_code=200, content={"all_invitees": jsonable_encoder(all_invitees), "respondents": respondents, "invitees_left": invitees_left, "message": "Invitees found."})
+    return JSONResponse(status_code=200, content={"all_invitees": jsonable_encoder(all_invitees), "respondents": jsonable_encoder(respondents), "invitees_left": invitees_left, "message": "Invitees found."})
 
 @app.put("/invitee")
 def update_invitee(invitee: schemas.Invitee, db: Session = Depends(get_db)):
@@ -236,7 +236,7 @@ def create_invitees(invitee: schemas.Invitee, db: Session = Depends(get_db)):
 def add_opt_schedule(optimized: schemas.OptimizedSchedules, db: Session = Depends(get_db)):
     res = crud.add_opt_schedule(db, optimized)
     if res is None:
-        return JSONResponse(status_code=404, content={"message": "Optimized schedule has already been invited to this event."})
+        return JSONResponse(status_code=404, content={"message": "Error adding optimized schedules."})
     return JSONResponse(status_code=201, content={"message": "Optimized schedule has been added."})
 
 

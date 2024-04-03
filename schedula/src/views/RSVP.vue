@@ -146,8 +146,8 @@ function getEvents() {
 </script>
 
 <template>
-    <div class="m-auto relative w-full h-screen space-y-6 sm:w-[450px]">
-        <div class="my-10 relative h-[700px] space-y-6">
+    <div class="m-auto relative w-full h-screen space-y-6 sm:w-[900px]">
+        <div class="my-10 relative h-[800px] space-y-6">
             <div class="container p-4" v-if="online === false">
                 <div class="row justify-content-center">
                     <!-- Form Start -->
@@ -266,7 +266,8 @@ function getEvents() {
                 delete: true,
                 create: true
             }" :snap-to-time="15" :events="events" :min-date="minDate" :max-date="maxDate"
-                        :selected-date="minDate">
+                        :selected-date="minDate"
+                        :time-cell-height="20">
                     </VueCal>
                 </div>
 

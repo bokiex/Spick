@@ -41,7 +41,6 @@ function previewFile(event) {
 
 async function saveSettings() {
     // Logic to save user settings
-
     const formData = new FormData()
     formData.append(
         'user',
@@ -126,7 +125,6 @@ async function updatePassword() {
 }
 function logout() {
     localStorage.removeItem('userID')
-    localStorage.removeItem('userId')
     router.push({ name: 'SignInSignUp' })
 }
 </script>
@@ -135,9 +133,14 @@ function logout() {
     <div class="space-y-6 p-10 pb-16 justify-center md:flex">
         <div class="flex-1 lg:max-w-2xl">
             <div class="space-y-6">
-                <div>
-                    <h3 class="text-lg font-medium">Account Settings</h3>
-                    <p class="text-sm text-muted-foreground">Edit your account information here!</p>
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <h3 class="text-lg font-medium">Account Settings</h3>
+                        <p class="text-sm text-muted-foreground">Edit your account information here!</p>
+                    </div>
+                    <div class="flex justify-end">
+                        <Button type="submit" @click="logout">Log Out</Button>
+                    </div>
                 </div>
                 <Separator class="shrink-0 bg-border h-px w-full" />
                 <div class="space-y-2">
@@ -184,7 +187,7 @@ function logout() {
                     </Label>
                     <input
                         type="text"
-                        id="userName"
+                        id="userTele"
                         v-model="user.tele"
                         class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                     />
@@ -197,7 +200,7 @@ function logout() {
                     </Label>
                     <input
                         type="text"
-                        id="userName"
+                        id="userEmail"
                         v-model="user.email"
                         class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                     />
@@ -256,9 +259,9 @@ function logout() {
                 <div class="flex justify-start">
                     <Button type="button" @click="updatePassword()">Save Changes</Button>
                 </div>
-                <div class="flex justify-end">
+                <!-- <div class="flex justify-end">
                     <Button type="submit" @click="logout">Log Out</Button>
-                </div>
+                </div> -->
             </div>
         </div>
     </div>

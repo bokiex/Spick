@@ -1,4 +1,0 @@
-# FROM kong:3.6.0-ubuntu
-FROM kong/kong-gateway:3.2.2.5
-COPY kong.yaml /etc/kong/kong.yaml
-RUN cp /etc/kong/kong.conf.default  /etc/kong/kong.conf

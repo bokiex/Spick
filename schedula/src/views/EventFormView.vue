@@ -131,11 +131,12 @@ async function submitForm() {
 
     if (currentStep.value === 100) {
         // Send the form data to your backend
+        console.log(image)
         const create_event = {
             user_id: user_id,
             event_name: event_name.value,
             event_desc: event_desc.value,
-            image: image.value.name || "None",
+            image: image.value.name || 'None',
             invitees: invitees.value,
             type: type.value,
             township: township.value,

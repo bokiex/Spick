@@ -27,6 +27,7 @@ export default {
                 this.showModal = true
             } catch (error) {
                 console.log(error)
+                alert("Sign Up Failed " + error.message)
             }
         },
         closeAndRedirect() {
@@ -39,12 +40,14 @@ export default {
                     username: this.username,
                     password: this.password
                 })
-                console.log(response)
+                alert(response.data.message)
+                // console.log(response)
                 localStorage.setItem('userID', response.data.user.user_id)
-                console.log(localStorage)
+                // console.log(localStorage)
                 router.push('/')
             } catch (error) {
                 console.log(error)
+                alert("Login Failed")
             }
         },
 
@@ -62,6 +65,8 @@ export default {
         <div class="forms-container">
             <div class="signin-signup">
                 <form @submit.prevent="signIn" class="sign-in-form">
+                    <h1>Welcome to Spick!!</h1>
+                    <br>
                     <h2 class="title">Sign in</h2>
                     <div class="input-field">
                         <i class="fas fa-user"></i>
@@ -74,6 +79,8 @@ export default {
                     <input type="submit" value="Login" class="btn solid" />
                 </form>
                 <form @submit.prevent="signUp" class="sign-up-form">
+                    <h1>Join Us on Spick Now!!</h1>
+                    <br>
                     <h2 class="title">Sign up</h2>
                     <div class="input-field">
                         <i class="fas fa-user"></i>
@@ -218,6 +225,12 @@ input {
     display: grid;
     grid-template-columns: 1fr;
     z-index: 5;
+}
+
+.signin-signup h1{
+    font-size: 2.5rem;
+    color: #105a7c;
+    margin-bottom: 10px;
 }
 
 form {

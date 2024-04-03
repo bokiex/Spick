@@ -6,8 +6,8 @@ import Button from '@/components/Button.vue'
 import { useRouter, useRoute } from 'vue-router'
 import { computed, onMounted, ref } from 'vue'
 import Skeleton from '@/components/Skeleton.vue'
-import {format_date, format_time} from '@/utils/format_datetime'
-import {getImageUrl} from '@/utils/get_image'
+import { format_date, format_time } from '@/utils/format_datetime'
+import { getImageUrl } from '@/utils/get_image'
 
 const router = useRouter()
 const route = useRoute()
@@ -27,14 +27,17 @@ const side_description = computed(() =>
           ' ' +
           format_time(event.value?.time_out)
 )
-const invitees_responded = computed(() => event.value?.invitees.filter((invitee) => {
-   
-    return invitee.status
-}))
+const invitees_responded = computed(() =>
+    event.value?.invitees.filter((invitee) => {
+        return invitee.status
+    })
+)
 const invitees_not_responded = computed(() =>
     event.value?.invitees.filter((invitee) => !invitee.status)
 )
-const is_responded = computed(() => invitees_responded.value?.find((invitee) => invitee.user_id == userID))
+const is_responded = computed(() =>
+    invitees_responded.value?.find((invitee) => invitee.user_id == userID)
+)
 
 onMounted(async () => {
     try {
@@ -43,9 +46,15 @@ onMounted(async () => {
             res.json()
         )
 
-        
-        host.value = await fetch('http://localhost:8101/users/user_id/' + event_data.user_id).then((res) =>
+        const event_invitees = await fetch('http://localhost:8200/event/' + event_id).then((res) =>
             res.json()
+        )
+
+        // Fetch user data from complex event microservice
+        const invitee_data = event_invitees.invitees.map((invitee) => JSON.stringify(invitee))
+
+        host.value = await fetch('http://localhost:8101/users/user_id/' + event_data.user_id).then(
+            (res) => res.json()
         )
         event.value = event_data
         
@@ -82,8 +91,6 @@ const reservation = () => {
 //         // More attendees...
 //     ]
 // }
-
-
 </script>
 
 <template>
@@ -176,9 +183,19 @@ const reservation = () => {
                                         </div>
                                     </div>
                                 </div>
-                                <Button v-else-if="isHost && isRSVPClosed" @click="reservation()">Reserve</Button>
-                                <Button v-else-if="!isHost && !isRSVPClosed && !is_responded" @click="RSVP()">RSVP</Button>
-                                <Button variant="secondary" v-else-if="!isHost && !isRSVPClosed && is_responded">You have responded</Button>
+                                <Button v-else-if="isHost && isRSVPClosed" @click="reservation()"
+                                    >Reserve</Button
+                                >
+                                <Button
+                                    v-else-if="!isHost && !isRSVPClosed && !is_responded"
+                                    @click="RSVP()"
+                                    >RSVP</Button
+                                >
+                                <Button
+                                    variant="secondary"
+                                    v-else-if="!isHost && !isRSVPClosed && is_responded"
+                                    >You have responded</Button
+                                >
                             </div>
                         </Card>
                         <Card>
@@ -213,7 +230,7 @@ const reservation = () => {
                                         >
                                         </Avatar>
                                         <span class="p-2 text-center font-light text-xs">
-                                            {{invitee.username}}
+                                            {{ invitee.username }}
                                         </span>
                                     </div>
                                 </div>
