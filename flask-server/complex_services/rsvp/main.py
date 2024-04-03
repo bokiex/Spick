@@ -66,11 +66,26 @@ app.add_middleware(
 )
 
 
+def check_rsvp():
+    event_result = requests.get(event_ms + "online")
+    if event_result.status_code > 300:
+        return False
+    user_result = requests.get(user_ms + "online")
+    if user_result.status_code > 300:
+        return False
+    user_schedule_result = requests.get(user_schedule_ms + "online")
+    if user_schedule_result.status_code > 300:
+        return False
+    optimize_result = requests.get(optimize_ms + "online")
+    if optimize_result.status_code > 300:
+        return False
+    return True
+
 @app.post("/rsvp/accept")
 def accept_invitation(request: AcceptInvitationSchema):
-    print(event_ms)
-    print(user_ms)
-    print(user_schedule_ms)
+    if not check_rsvp():
+        return JSONResponse(status_code=503, content={"message": "Service Unavailable"})
+
     # Directly setting status to "Y" since this is an acceptance
     update_payload = {
         "event_id": request.event_id,
@@ -106,6 +121,8 @@ def accept_invitation(request: AcceptInvitationSchema):
 
 @app.put("/rsvp/decline")
 def decline_invitation(request: DeclineInvitationSchema):
+    if not check_rsvp():
+        return JSONResponse(status_code=503, content={"message": "Service Unavailable"})
     update_payload = {
         "event_id": request.event_id,
         "user_id": request.user_id,
@@ -125,8 +142,6 @@ def decline_invitation(request: DeclineInvitationSchema):
     # Assuming check_and_trigger_optimization exists and works as expected
     x = check_and_trigger_optimization((opt_data))  # Ensure this function is defined or adjusted for FastAPI
     return JSONResponse(status_code=x.status_code, content=x.json())
-    
-    
     
     
 def check_and_trigger_optimization(data):
@@ -192,6 +207,8 @@ def check_and_trigger_optimization(data):
 
 @app.post("/rsvp/optimize")
 def optimize_schedule(request: TimeoutOptimizeScheduleRequest):
+    if not check_rsvp():
+        return JSONResponse(status_code=503, content={"message": "Service Unavailable"})
     if not request.event_id:
         res = "invalid event_id"
         return res
