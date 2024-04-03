@@ -10,7 +10,8 @@ export default {
             telegramHandle: '',
             password: '',
             showModal: false, // For controlling the visibility of the custom alert
-            user_ms: 'http://127.0.0.1:8103/'
+            user_ms: 'http://127.0.0.1:8103/',
+            signup:false
         }
     },
     methods: {
@@ -61,7 +62,7 @@ export default {
 }
 </script>
 <template>
-    <div class="container">
+    <div class="container" style="width:100%;margin:0 auto;">
         <div class="forms-container">
             <div class="signin-signup">
                 <form @submit.prevent="signIn" class="sign-in-form">
@@ -170,7 +171,8 @@ input {
     position: relative;
     /* width: 100%; */
     background-color: #fff;
-    min-height: 100vh;
+    height:100vh;
+    min-width:100vw;
     overflow: hidden;
 }
 
