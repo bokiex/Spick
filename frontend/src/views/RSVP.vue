@@ -30,30 +30,31 @@ const vuecal = ref()
 var eventName = ref(null)
 const event_id = route.params.id
 var timeout = ref(null)
-var invited = false
+var invited = ref(false)
 var event = null
 var minDate = ref(null)
 var maxDate = ref(null)
 var valid = ref(null)
 var online = ref(null)
+var loaded = ref(false) 
 
 onMounted(() => {
     try {
     axios.get(eventurl.concat(event_id))
         .then((response) => {
-            online = true
+            online.value = true
             event = response.data
             console.log(event)
             if (event.detail !== undefined) {
-                valid = false
+                valid.value = false
             }
             else {
-                valid = true
-                eventName = event.event_name
+                valid.value = true
+                eventName.value = event.event_name
                 var startdate = new Date(Date.parse(event.datetime_start))
                 var enddate = new Date(Date.parse(event.datetime_end))
-                minDate = startdate.getFullYear()+'-'+(startdate.getMonth()+1)+'-'+startdate.getDate()
-                maxDate = enddate.getFullYear()+'-'+(enddate.getMonth()+1)+'-'+enddate.getDate()
+                minDate.value = startdate.getFullYear()+'-'+(startdate.getMonth()+1)+'-'+startdate.getDate()
+                maxDate.value = enddate.getFullYear()+'-'+(enddate.getMonth()+1)+'-'+enddate.getDate()
                 timeout.value = event.time_out
                 for (var user of event.invitees) {
                     
@@ -61,20 +62,23 @@ onMounted(() => {
                      
                         if(user.status === null){
                             console.log('invited')
-                            invited = true
+                            invited.value = true
                         }
                         else if (user.status === 'Y'){
-                            invited = 'Y'
+                            invited.value = 'Y'
                         }
                         else if (user.status === 'N'){
-                            invited = 'N'
+                            invited.value = 'N'
                         }
                     }
                 }
             }
         })}
         catch{
-            online = false
+            online.value = false
+        }
+        finally{
+            loaded.value = true
         }
 })
 
@@ -148,7 +152,7 @@ function getEvents() {
 </script>
 
 <template>
-    <div class="m-auto relative w-full h-screen space-y-6 sm:w-[900px]">
+    <div class="m-auto relative w-full h-screen space-y-6 sm:w-[900px]" v-if="loaded">
         <div class="my-10 relative h-[800px] space-y-6">
             <div class="container p-4" v-if="online === false">
                 <div class="row justify-content-center">

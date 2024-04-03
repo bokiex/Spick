@@ -3,7 +3,6 @@ import VueCal from 'vue-cal'
 import 'vue-cal/dist/vuecal.css'
 import '@vuepic/vue-datepicker/dist/main.css'
 import { ref, onMounted, computed } from 'vue'
-import { onBeforeMount } from 'vue'
 import axios from 'axios'
 
 var events = ref([])
@@ -13,16 +12,7 @@ const userID = localStorage.getItem('userID')
 var today = new Date()
 var selected_date = ref(null)
 
-onBeforeMount(async () => {
-    //for testing
-    events.value.push({
-        start: '05-04-2024',
-        end: '06-04-2024',
-        title: 'urmum',
-        desc: 'gay'
-    })
-    console.log(events.value)
-    // for testing end
+onMounted(async () => {
     selected_date =
         today.getFullYear() +
         '-' +
@@ -33,6 +23,7 @@ onBeforeMount(async () => {
         await axios.get(event_ms).then((response) => {
             let data = response.data
             for (var i = data.length - 1; i >= 0; i--) {
+                console.log(data[i])
                 const invitees_user_ids = []
                 for (var j in data[i].invitees) {
                     if (data[i].invitees[j].user_id == userID) {
@@ -101,11 +92,11 @@ onBeforeMount(async () => {
         <vue-cal
             v-if="loaded"
             :selected-date="selected_date"
-            :time-from="9 * 60"
+            :time-from="0 * 60"
             :time-to="24 * 60"
             :disable-views="['years']"
             events-count-on-year-view
-            :events="events.value"
+            :events="events"
         ></vue-cal>
         <!-- Modal -->
         <!-- <div

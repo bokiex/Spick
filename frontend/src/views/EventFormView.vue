@@ -129,7 +129,7 @@ function previewFile(event) {
 
 async function submitForm() {
     // Make sure all steps are validated before submitting
-    loading.value = true
+
     if (currentStep.value === 100) {
         // Send the form data to your backend
         console.log(image)
@@ -161,12 +161,9 @@ async function submitForm() {
                 const data = await res.json()
 
                 throw new Error(data)
-            } else {
-                loading.value = false
             }
         } catch (err) {
             error.value = err.message
-            loading.value = false
             console.error('Error fetching data: ', error)
         }
     }
@@ -390,20 +387,20 @@ function tryAgain() {
                         <Separator class="shrink-0 bg-border h-px w-full" />
 
                         <div class="space-y-2">
-                            <Label for="datetime_start">Range Start</Label>
+                            <Label for="datetime_start">Start Time</Label>
                             <VueDatePicker v-model="datetime_start" time-picker-inline />
                         </div>
                         <div class="space-y-2">
-                            <Label for="datetime_end">Range End</Label>
+                            <Label for="datetime_end">End Time</Label>
                             <VueDatePicker v-model="datetime_end" time-picker-inline />
                         </div>
                         <div class="space-y-2">
-                            <Label for="time_out">Event Invite Expiry</Label>
+                            <Label for="time_out">Time Out</Label>
                             <VueDatePicker v-model="time_out" time-picker-inline />
                         </div>
                         <div class="space-y-2">
                             <div class="label">
-                                <label for="township">Preferred Area</label>
+                                <label for="township">Prefered Area</label>
                             </div>
                             <input
                                 required
@@ -422,7 +419,7 @@ function tryAgain() {
                             <DialogTrigger>
                                 <Button @click="submitForm" type="button"> Submit </Button>
                             </DialogTrigger>
-                            <DialogPortal v-if="!loading">
+                            <DialogPortal>
                                 <DialogOverlay
                                     class="fixed inset-0 z-50 bg-black/80 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0"
                                 />
@@ -436,9 +433,7 @@ function tryAgain() {
                                     <DialogDescription
                                         class="text-mauve11 mt-[10px] mb-5 text-[15px] leading-normal"
                                     >
-                                        <div v-if="error">
-                                            Sorry, seems like our servers are down at the moment
-                                        </div>
+                                        <div v-if="error">{{ error }}</div>
                                         <div v-else>
                                             Your event invite has been created and sent to the
                                             invitees.
