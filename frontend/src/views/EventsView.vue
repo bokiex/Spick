@@ -28,38 +28,37 @@ onMounted(async () => {
             }
         }
     )
-    const data = await res.then((data) => {
-        console.log(res)
-        for (var i in data) {
-            console.log(data[i])
-            const invitees_user_ids = []
-            data[i].datetime_start = new Date(data[i].datetime_start)
-            data[i].datetime_end = new Date(data[i].datetime_end)
-            // check if userID is in invitees
-            for (var j in data[i].invitees) {
-                if (data[i].invitees[j].user_id == userID) {
-                    invitees_user_ids.push(data[i].invitees[j].user_id)
-                }
-            }
 
-            // if userID doesn't exist in invitee and is not equal to user_id, then remove the event
-            if (!invitees_user_ids.includes(Number(userID)) && data[i].user_id != userID) {
-                console.log(data[i].user_id, userID, 'removed')
-                data.splice(i, 1)
-                i--
-            } else {
-                console.log(data[i].user_id, userID, 'kept')
+    console.log(res)
+    for (var i in res) {
+        console.log(res[i])
+        const invitees_user_ids = []
+        res[i].datetime_start = new Date(res[i].datetime_start)
+        res[i].datetime_end = new Date(res[i].datetime_end)
+        // check if userID is in invitees
+        for (var j in res[i].invitees) {
+            if (res[i].invitees[j].user_id == userID) {
+                invitees_user_ids.push(res[i].invitees[j].user_id)
             }
         }
 
-        if (data == null || data.length == 0) {
-            problem.value = 'no events'
-            loading.value = false
-            events.value = []
+        // if userID doesn't exist in invitee and is not equal to user_id, then remove the event
+        if (!invitees_user_ids.includes(Number(userID)) && res[i].user_id != userID) {
+            console.log(res[i].user_id, userID, 'removed')
+            res.splice(i, 1)
+            i--
+        } else {
+            console.log(res[i].user_id, userID, 'kept')
         }
-        events.value = data
+    }
+
+    if (res == null || res.length == 0) {
+        problem.value = 'no events'
         loading.value = false
-    })
+        events.value = []
+    }
+    events.value = res
+    loading.value = false
 })
 
 const navigate = (id) => {
