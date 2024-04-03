@@ -7,7 +7,7 @@ import {onBeforeMount} from 'vue'
 import axios from 'axios'
 
 var events = ref([])
-var loading = true
+var loaded = ref(false)
 const event_ms = 'http://localhost:8200/event'
 const userID = localStorage.getItem('userID')
 var today = new Date()
@@ -93,13 +93,13 @@ onBeforeMount(async () => {
     } catch (error) {
         console.error('Failed to fetch event data:', error)
     } finally {
-        loading = false
+        loaded.value = true
     }
 })
 </script>
 <template>
     <div class="">
-        <vue-cal
+        <vue-cal v-if = "loaded.value"
             :selected-date="selected_date"
             :time-from="9 * 60"
             :time-to="24 * 60"
