@@ -46,12 +46,9 @@ onMounted(async () => {
             res.json()
         )
 
-        const event_invitees = await fetch('http://localhost:8200/event/' + event_id).then((res) =>
-            res.json()
-        )
+   
 
         // Fetch user data from complex event microservice
-        const invitee_data = event_invitees.invitees.map((invitee) => JSON.stringify(invitee))
 
         host.value = await fetch('http://localhost:8101/users/user_id/' + event_data.user_id).then(
             (res) => res.json()
