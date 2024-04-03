@@ -31,14 +31,21 @@ def optimize_schedule(schedule_list: List[ScheduleItem]):
     optimized_schedules = []
     schedules_by_day = defaultdict(lambda: defaultdict(list))
 
-    # Organize schedules by event and then by day
+    # Step 1: Organize schedules by event and then by day using datetime for processing
     for schedule in schedule_list:
-        day_key = schedule.start_time.date()
-        schedules_by_day[schedule.event_id][day_key].append(schedule)
+        start_datetime = datetime.fromisoformat(schedule.start_time)  # Convert to datetime
+        end_datetime = datetime.fromisoformat(schedule.end_time)  # Convert to datetime
+        day_key = start_datetime.date()
+        
+        # Append the original schedule object; datetime objects are used for logic only
+        schedules_by_day[schedule.event_id][day_key].append((schedule, start_datetime, end_datetime))
 
+    # Step 2: Processing logic and building the optimized schedules
     for event_id, schedules_per_day in schedules_by_day.items():
         for day, day_schedules in schedules_per_day.items():
-            time_blocks = [(s.start_time, 1, s.user_id) for s in day_schedules] + [(s.end_time, -1, s.user_id) for s in day_schedules]
+            # Use the datetime objects for sorting and logic
+            time_blocks = [(start_dt, 1, sch.user_id) for sch, start_dt, end_dt in day_schedules] + \
+                          [(end_dt, -1, sch.user_id) for sch, start_dt, end_dt in day_schedules]
             time_blocks.sort()
             current_users = set()
             max_overlap_users = set()
@@ -46,24 +53,25 @@ def optimize_schedule(schedule_list: List[ScheduleItem]):
             start_overlap = None
 
             for time, action, user_id in time_blocks:
-                if action == 1:  # start
+                if action == 1:  # Start of an event
                     current_users.add(user_id)
                     if len(current_users) > max_attendees:
                         max_attendees = len(current_users)
                         max_overlap_users = current_users.copy()
                         start_overlap = time
-                else:
+                else:  # End of an event
                     current_users.remove(user_id)
 
             if max_overlap_users:
-                end_overlap = min(s.end_time for s in day_schedules if s.user_id in max_overlap_users and s.start_time <= start_overlap)
-                non_attendees = [s.user_id for s in day_schedules if s.user_id not in max_overlap_users]
+                # Finding the minimum end time for the max overlap period
+                end_overlap = min(end_dt for _, start_dt, end_dt in day_schedules if start_dt <= start_overlap and _.user_id in max_overlap_users)
+                non_attendees = [sch.user_id for sch, _, _ in day_schedules if sch.user_id not in max_overlap_users]
 
                 optimized_schedules.append(OptimizedScheduleDay(
                     event_id=event_id,
-                    date=str(day),
-                    start=start_overlap,
-                    end=end_overlap,
+                    date=day.isoformat(),  # Convert day back to string
+                    start=start_overlap.isoformat(),  # Convert datetime to ISO format string
+                    end=end_overlap.isoformat(),  # Convert datetime to ISO format string
                     attending_users=list(max_overlap_users),
                     non_attending_users=non_attendees
                 ))

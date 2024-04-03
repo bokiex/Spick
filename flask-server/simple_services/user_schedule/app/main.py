@@ -64,9 +64,8 @@ def online():
     return {"message": "Schedule is online."}
 
 @app.post("/user_schedule", response_model=schemas.UserScheduleList)
-def create_schedules(schedule_list: schemas.UserScheduleList, db: Session = Depends(get_db)):
-    print(schedule_list)
-    created_schedules = crud.create_user_schedules(db=db, schedule_list=schedule_list)
+def create_schedules(schedule_list: schemas.intake, db: Session = Depends(get_db)):
+    created_schedules = crud.create_user_schedules(db=db, schedule_list=schedule_list.sched_list)
     return schemas.UserScheduleList(sched_list=created_schedules)
 
 #input

@@ -8,10 +8,11 @@ def get_user_schedules(db: Session, event_id: str):
     return db.query(models.UserSchedule).filter(models.UserSchedule.event_id == event_id).all()
 
 # crud.py
-def create_user_schedules(db: Session, schedule_list: List[schemas.UserScheduleCreate]):
+def create_user_schedules(db: Session, schedule_list: schemas.intake):
     created_schedules = []
     for schedule_data in schedule_list:
         db_schedule = models.UserSchedule(**schedule_data.dict())
+        print(jsonable_encoder(schedule_data))
         print(jsonable_encoder(db_schedule))
         db.add(db_schedule)
         db.commit()
