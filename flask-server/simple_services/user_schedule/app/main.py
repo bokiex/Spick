@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 import crud, models, schemas, database
 from typing import List
 from fastapi.middleware.cors import CORSMiddleware
-
+from fastapi.responses import JSONResponse
 
 app = FastAPI()
 
