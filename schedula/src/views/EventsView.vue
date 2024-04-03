@@ -26,6 +26,7 @@ onMounted(async () => {
         }
     )
     const data = res
+
     for (var i in data) {
         const invitees_user_ids = []
         data[i].datetime_start = new Date(data[i].datetime_start)
@@ -36,17 +37,18 @@ onMounted(async () => {
                 invitees_user_ids.push(data[i].invitees[j].user_id)
             }
         }
-        console.log(invitees_user_ids)
-        console.log(userID)
         // if userID doesn't exist in invitee and is not equal to user_id, then remove the event
         if (!invitees_user_ids.includes(Number(userID)) && data[i].user_id != userID) {
             data.splice(i, 1)
-            console.log('here')
             i--
         }
     }
+
+    if (data == null || data.length == 0) {
+        problem.value = 'no events'
+        events.value = []
+    }
     events.value = data
-    console.log(events.value)
     loading.value = false
 })
 
