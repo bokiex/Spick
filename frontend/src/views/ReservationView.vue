@@ -18,7 +18,7 @@ onMounted(async () => {
     const timeslots_data = await fetch('http://localhost:8200/timeslot/' + event_id).then((res) =>
         res.json()
     )
-    timeslots.value = timeslots_data
+    timeslots.value = JSON.parse(timeslots_data)
 
     const recommendation_data = await fetch('http://localhost:8100/event/' + event_id).then((res) =>
         res.json()
@@ -26,7 +26,8 @@ onMounted(async () => {
 
     recommendations.value = recommendation_data.recommendations
 
-    console.log(timeslots_data)
+    console.log(timeslots.value)
+
     console.log(recommendation_data)
 })
 // const timeslots = [

@@ -32,7 +32,7 @@ onMounted(async () => {
     )
     const data = res
     console.log(res)
-    for (var i in data) {
+    for (var i = data.length - 1; i >= 0; i--) {
         console.log(data[i])
         const invitees_user_ids = []
         data[i].datetime_start = new Date(data[i].datetime_start)
@@ -48,7 +48,6 @@ onMounted(async () => {
         if (!invitees_user_ids.includes(Number(userID)) && data[i].user_id != userID) {
             console.log(data[i].user_id, userID, 'removed')
             data.splice(i, 1)
-            i--
         } else {
             console.log(data[i].user_id, userID, 'kept')
         }

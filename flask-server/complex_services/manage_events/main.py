@@ -101,7 +101,7 @@ def get_events():
                 if user['user_id'] == event["user_id"]:
                     event["host"] = new_user
         event["invitees"] = new_invitees
-    return event_result
+    return JSONResponse(status_code=200, content=event_result)
 
 @app.get("/event/{event_id}")
 def get_event_by_id(event_id: str):
@@ -136,21 +136,21 @@ def get_event_by_id(event_id: str):
                 event_result["host"] = new_user
     event_result["invitees"] = new_invitees
     print(event_result)
-    return event_result
+    return JSONResponse(status_code=200, content=event_result)
 
 @app.get("/timeslot/{event_id}")
 def get_timeslot_by_event_id(event_id: str):
     timeslot_result = requests.get(event_ms + "get_optimize/" + event_id)
     if timeslot_result.status_code not in range(200,300):
         channel.basic_publish(exchange=exchangename, routing_key="get_timeslot.error",body=json.dumps(timeslot_result.json()), properties=pika.BasicProperties(delivery_mode=2))
-        return timeslot_result.json()
+        return JSONResponse(status_code=500, content=timeslot_result.json())
     
     
     
     user_result = requests.get(user_ms + "users")
     if user_result.status_code not in range(200,300):
         channel.basic_publish(exchange=exchangename, routing_key="get_event.error",body=json.dumps(user_result.json()), properties=pika.BasicProperties(delivery_mode=2))
-        return user_result.json()
+        return JSONResponse(status_code=500, content=user_result.json())
     
 
     timeslot_data = timeslot_result.json()
@@ -164,18 +164,15 @@ def get_timeslot_by_event_id(event_id: str):
                     'image': user['image']
                 } for user in user_data}
     
-    print(user_lookup)
     timeslots = []
     for timeslot in timeslot_data.get('data', []):
         new_invitees = [user_lookup.get(int(invitee_id)) for invitee_id in timeslot["invitees"] if int(invitee_id) in user_lookup]
-        print(new_invitees)
         timeslot["invitees"] = [invitee for invitee in new_invitees if invitee is not None]
         timeslots.append(timeslot)
-        print(timeslot)
 
     
-
-    return timeslots
+    print(json.dumps(timeslots))
+    return JSONResponse(status_code=200, content=json.dumps(timeslots))
 """
 Sample event JSON input:
 {
@@ -240,10 +237,10 @@ def create_event(event: str = Form(...), file: Optional[UploadFile] = File(defau
     print("\n----- Getting recommendation list -----")
     #recommendation_result = requests.post(recommendation_ms, json=jsonable_encoder({"type": event_dict["type"], "township": event_dict["township"]}))
     recommendation_result = requests.post(recommendation_ms + "recommendation", json=jsonable_encoder({"type": event.type, "township": event.township}))
-    print(recommendation_result.json())
 
     # If search is invalid and recommendation returns no results
     if recommendation_result.status_code == 404:
+        channel.basic_publish(exchange=exchangename, routing_key="create_event.error",body=json.dumps(recommendation_result.json()), properties=pika.BasicProperties(delivery_mode=2))
         return JSONResponse(status_code=404, content={"error": "No recommendations found"})
     
     # If recommendation service is not available
@@ -251,10 +248,9 @@ def create_event(event: str = Form(...), file: Optional[UploadFile] = File(defau
         # Publish to error queue
         message = json.dumps(recommendation_result.json())
         channel.basic_publish(exchange=exchangename, routing_key="create_event.error",body=message, properties=pika.BasicProperties(delivery_mode=2))
-        return JSONResponse(status_code=500, content={"error": "recommendation service not available"})
+        return JSONResponse(status_code=500, content={"error": "Recommendation service not available"})
 
     print("\n------ Recommendation list retrieved ------")
-    print(recommendation_result.json())
   
     event_dict = jsonable_encoder(event)
     
@@ -276,7 +272,7 @@ def create_event(event: str = Form(...), file: Optional[UploadFile] = File(defau
     
     if event_result.status_code not in range(200,300):
         channel.basic_publish(exchange=exchangename, routing_key="create_event.error",body=json.dumps(event_result), properties=pika.BasicProperties(delivery_mode=2))
-        return event_result
+        return JSONResponse(status_code=500, content=event_result.json())
     
     print("\n------ Event created ------")
     event_result = event_result.json()
@@ -288,7 +284,6 @@ def create_event(event: str = Form(...), file: Optional[UploadFile] = File(defau
     # Send notification to users
     channel.basic_publish(exchange=exchangename, routing_key="create_event.notification",body=json.dumps(notification), properties=pika.BasicProperties(delivery_mode=2))
     
-    print(event_result["data"]["event_id"])
     # Start scheduler for event time out
     scheduler.add_job(on_timeout, 'date', run_date=event_result["data"]["time_out"], args=[event_result["data"]["event_id"]])
     scheduler.print_jobs()

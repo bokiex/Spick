@@ -228,7 +228,7 @@ const reservation = () => {
                         <Card>
                             <div class="flex flex-col gap-y-1.5 p-4 space-y-1">
                                 <h3 class="text-lg font-semibold">Attendees</h3>
-                                <div class="flex overflow-hidden gap-x-3">
+                                <div class="flex overflow-hidden">
                                     <div v-for="invitee in event?.invitees" :key="invitee.user_id">
                                         <div
                                             class="flex flex-col items-center justify-center"

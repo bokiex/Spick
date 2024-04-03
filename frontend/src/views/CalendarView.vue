@@ -3,22 +3,82 @@ import VueCal from 'vue-cal'
 import 'vue-cal/dist/vuecal.css'
 import '@vuepic/vue-datepicker/dist/main.css'
 import { ref, onMounted } from 'vue'
+import axios from 'axios'
 
-const events = ref([])
+var events = ref([])
 const loading = ref(true)
 const event_ms = 'http://localhost:8200/event'
 const userID = localStorage.getItem('userID')
+var today = new Date()
+var selected_date = ref(null)
+
 onMounted(async () => {
+    selected_date =
+        today.getFullYear() +
+        '-' +
+        ('0' + (today.getMonth() + 1)).slice(-2) +
+        '-' +
+        ('0' + today.getDate()).slice(-2)
     try {
-        // Example API call - replace with your actual API call
-        const data = await fetch(event_ms).then((res) => {
-            if (res.status != 200) {
-                console.error('Failed to fetch event data:', res)
-                return []
-            } else {
-                console.log(res.json())
+        await axios.get(event_ms).then((response) => {
+            let data = response.data
+            for (var i = data.length - 1; i >= 0; i--) {
+                const invitees_user_ids = []
+                for (var j in data[i].invitees) {
+                    if (data[i].invitees[j].user_id == userID) {
+                        invitees_user_ids.push(data[i].invitees[j].user_id)
+                    }
+                }
+                if (
+                    (!invitees_user_ids.includes(Number(userID)) && data[i].user_id != userID) ||
+                    data[i].reservation_address === null
+                ) {
+                    data.splice(i, 1)
+                } else {
+                    data[i].datetime_start = new Date(data[i].datetime_start)
+                    data[i].datetime_end = new Date(data[i].datetime_end)
+                }
+            }
+            for (var event of data) {
+                var topush = {
+                    start:
+                        event.datetime_start.getFullYear() +
+                        '-' +
+                        ('0' + (event.datetime_start.getMonth() + 1)).slice(-2) +
+                        '-' +
+                        ('0' + event.datetime_start.getDate()).slice(-2) +
+                        ' ' +
+                        ('0' + event.datetime_start.getHours()).slice(-2) +
+                        ':' +
+                        ('0' + event.datetime_start.getMinutes()).slice(-2),
+                    end:
+                        event.datetime_end.getFullYear() +
+                        '-' +
+                        ('0' + (event.datetime_end.getMonth() + 1)).slice(-2) +
+                        '-' +
+                        ('0' + event.datetime_end.getDate()).slice(-2) +
+                        ' ' +
+                        ('0' + event.datetime_end.getHours()).slice(-2) +
+                        ':' +
+                        ('0' + event.datetime_end.getMinutes()).slice(-2),
+                    title: event.event_name,
+                    content: event.event_desc
+                }
+                events.push(topush)
             }
         })
+        // Example API call - replace with your actual API call
+        // const data = await fetch(event_ms).then((res) => res.json())
+        // console.log(data)
+        // events.value = data.map((event) => ({
+        //     start: event.range_start,
+        //     end: event.range_end,
+        //     title: event.event_name,
+        //     desc: event.event_desc,
+        //     // Add other custom fields as needed
+        //     images: event.image,
+        //     recommendations: event.recommendation
+        // }))
     } catch (error) {
         console.error('Failed to fetch event data:', error)
     } finally {
@@ -29,9 +89,9 @@ onMounted(async () => {
 <template>
     <div class="">
         <vue-cal
-            selected-date="2024-03-19"
+            :selected-date="selected_date"
             :time-from="9 * 60"
-            :time-to="23 * 60"
+            :time-to="24 * 60"
             :disable-views="['years']"
             events-count-on-year-view
             :events="events"

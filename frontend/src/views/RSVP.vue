@@ -27,6 +27,7 @@ const rsvpurl = 'http://localhost:8201/rsvp/'
 const userID = localStorage.getItem('userID')
 
 const vuecal = ref()
+var eventName = ref(null)
 const event_id = route.params.id
 var timeout = ref(null)
 var invited = false
@@ -48,6 +49,7 @@ onMounted(() => {
             }
             else {
                 valid = true
+                eventName = event.event_name
                 var startdate = new Date(Date.parse(event.datetime_start))
                 var enddate = new Date(Date.parse(event.datetime_end))
                 minDate = startdate.getFullYear()+'-'+(startdate.getMonth()+1)+'-'+startdate.getDate()
@@ -240,7 +242,7 @@ function getEvents() {
                         <div>
                             <h3 class="text-lg font-medium">Event Invitation</h3>
                             <p class="text-sm text-muted-foreground">
-                                You have been invited to attend
+                                You have been invited to attend {{ eventName }}
                             </p>
                         </div>
                         <Separator class="shrink-0 bg-border h-px w-full" />
