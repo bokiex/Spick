@@ -7,7 +7,7 @@ import { format_date, format_time } from '@/utils/format_datetime'
 import { getImageUrl } from '@/utils/get_image'
 
 const router = useRouter()
-const userID = localStorage.getItem('userID')
+const userID = Number(localStorage.getItem('userID'))
 var loading = ref(true)
 const events = ref(null)
 var problem = ref(null)
@@ -17,28 +17,42 @@ onMounted(async () => {
         // if status code is not 200, then set events to empty array
         (res) => {
             if (res.status != 200) {
-                console.error('Failed to fetch event data:', data)
+                console.error('Failed to fetch event data:', res)
                 problem.value = 'fetch failed'
                 events.value = []
+                loading.value = false
+                return
             } else {
                 return res.json()
             }
         }
     )
     const data = res
+
     for (var i in data) {
+        const invitees_user_ids = []
         data[i].datetime_start = new Date(data[i].datetime_start)
         data[i].datetime_end = new Date(data[i].datetime_end)
-
+        // check if userID is in invitees
+        for (var j in data[i].invitees) {
+            if (data[i].invitees[j].user_id == userID) {
+                invitees_user_ids.push(data[i].invitees[j].user_id)
+            }
+        }
         // if userID doesn't exist in invitee and is not equal to user_id, then remove the event
-        if (!data[i].invitees.includes(userID) && data[i].user_id != userID) {
-            console.log("removing event")
+        if (!invitees_user_ids.includes(Number(userID)) && data[i].user_id != userID) {
             data.splice(i, 1)
             i--
         }
     }
+
+    if (data == null || data.length == 0) {
+        problem.value = 'no events'
+        loading.value = false
+        events.value = []
+    }
     events.value = data
-    console.log(events.value)
+    console.log(userID)
     loading.value = false
 })
 
@@ -77,10 +91,10 @@ const navigate = (id) => {
                     <div class="center" style="text-align: center">
                         <div style="text-align: center">
                             <h1 class="header form-input" style="font-size: x-large">
-                                Could not fetch events, please try again later
+                                No events to be found, create an event here!
                             </h1>
-                            <router-link class="btn exit" type="button" :to="`/`">
-                                Home
+                            <router-link class="btn exit" type="button" :to="`/create`">
+                                Event
                             </router-link>
                         </div>
                     </div>
