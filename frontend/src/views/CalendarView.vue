@@ -5,7 +5,7 @@ import '@vuepic/vue-datepicker/dist/main.css'
 import { ref, onMounted } from 'vue'
 import axios from 'axios'
 
-var events = ref([])
+var events = []
 const loading = ref(true)
 const event_ms = 'http://localhost:8100/event'
 const userID = localStorage.getItem('userID')
