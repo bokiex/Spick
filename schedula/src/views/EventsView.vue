@@ -83,10 +83,10 @@ const navigate = (id) => {
                     <div class="center" style="text-align: center">
                         <div style="text-align: center">
                             <h1 class="header form-input" style="font-size: x-large">
-                                Could not fetch events, please try again later
+                                No events to be found, create an event here!
                             </h1>
-                            <router-link class="btn exit" type="button" :to="`/`">
-                                Home
+                            <router-link class="btn exit" type="button" :to="`/create`">
+                                Event
                             </router-link>
                         </div>
                     </div>
