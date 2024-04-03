@@ -245,7 +245,7 @@ def get_opt_schedule(event_id: str, db: Session = Depends(get_db)):
     results = crud.get_opt_schedule(db, event_id)
     print(results)
     res = [
-    {"start_time": result.start_time, "end_time": result.end_time, "invitees": result.invitees.split(','), "event_id": result.event_id}
+    {"start_time": result.start_time, "end_time": result.end_time, "invitees": result.invitees.split(','), "event_id": event_id}
     for result in results
 ]   
     if res is None:

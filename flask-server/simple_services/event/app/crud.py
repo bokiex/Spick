@@ -119,5 +119,13 @@ def add_opt_schedule(db: Session, optimized_schedules: schemas.OptimizedSchedule
     db.commit()  # Commit once after all inserts to optimize transaction
 
 def get_opt_schedule(db: Session, event_id: str):
-    return db.query(models.Optimized.start_time, models.Optimized.end_time, func.group_concat(func.distinct(models.Optimized.attendee_id)).label('invitees'),
-        func.group_concat(func.distinct(models.Optimized.event_id)).label('event_id')).group_by(models.Optimized.start_time, models.Optimized.end_time).all()
+    return db.query(
+        models.Optimized.start_time, 
+        models.Optimized.end_time,
+        func.group_concat(func.distinct(models.Optimized.attendee_id)).label('invitees')
+    ).filter(
+        models.Optimized.event_id == event_id
+    ).group_by(
+        models.Optimized.start_time, 
+        models.Optimized.end_time
+    ).all()
