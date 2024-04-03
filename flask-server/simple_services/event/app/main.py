@@ -73,7 +73,7 @@ def update_event(event_id: str, event: schemas.EventPut, db: Session = Depends(g
     res = crud.update_event(event_id, event, db)
     if res == []:
         return JSONResponse(status_code=404, content=jsonable_encoder({"message": "No event found."}))
-    return JSONResponse(status_code=204, content=jsonable_encoder(res))
+    return JSONResponse(status_code=200, content=jsonable_encoder(res))
 
 # Delete event
 @app.delete("/event/{event_id}")

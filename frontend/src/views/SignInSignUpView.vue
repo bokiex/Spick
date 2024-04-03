@@ -10,7 +10,7 @@ export default {
             telegramHandle: '',
             password: '',
             showModal: false, // For controlling the visibility of the custom alert
-            user_ms: 'http://127.0.0.1:8103/'
+            user_ms: 'http://localhost:8103/'
         }
     },
     methods: {
@@ -27,7 +27,7 @@ export default {
                 this.showModal = true
             } catch (error) {
                 console.log(error)
-                alert("Sign Up Failed " + error.message)
+                alert('Sign Up Failed ' + error.message)
             }
         },
         closeAndRedirect() {
@@ -47,7 +47,7 @@ export default {
                 router.push('/')
             } catch (error) {
                 console.log(error)
-                alert("Login Failed")
+                alert('Login Failed')
             }
         },
 
@@ -66,7 +66,7 @@ export default {
             <div class="signin-signup">
                 <form @submit.prevent="signIn" class="sign-in-form">
                     <h1>Welcome to Spick!!</h1>
-                    <br>
+                    <br />
                     <h2 class="title">Sign in</h2>
                     <div class="input-field">
                         <i class="fas fa-user"></i>
@@ -80,7 +80,7 @@ export default {
                 </form>
                 <form @submit.prevent="signUp" class="sign-up-form">
                     <h1>Join Us on Spick Now!!</h1>
-                    <br>
+                    <br />
                     <h2 class="title">Sign up</h2>
                     <div class="input-field">
                         <i class="fas fa-user"></i>
@@ -227,7 +227,7 @@ input {
     z-index: 5;
 }
 
-.signin-signup h1{
+.signin-signup h1 {
     font-size: 2.5rem;
     color: #105a7c;
     margin-bottom: 10px;

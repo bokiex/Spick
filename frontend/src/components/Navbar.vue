@@ -14,11 +14,12 @@ const code = ref(null)
 </script>
 <template>
     <NavigationMenuRoot class="flex w-full justify-center">
-        <div
-            class="flex w-full justify-center m-0 list-none rounded-[6px] bg-white p-1"
-        >
-        <div class="flex-grow"></div>
-            <div class="flex justify-center gap-4 ">
+        <div class="flex w-full justify-center m-0 list-none rounded-[6px] bg-white p-1">
+            <div class="flex-shrink-0 px-3 py-2 flex items-center justify-center">
+                <h1 class="text-3xl text-black">Spick</h1>
+            </div>
+            <div class="flex-grow"></div>
+            <div class="flex justify-center gap-4">
                 <NavigationMenuItem
                     class="flex items-center transition-colors hover:bg-accent hover:text-accent-foreground focus:outline-none focus:bg-accent focus:text-accent-foreground block select-none rounded-[4px] px-3 py-2 text-[15px] font-medium leading-none no-underline outline-none"
                 >
@@ -56,7 +57,9 @@ const code = ref(null)
                     class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                     placeholder="XJSDFD"
                 />
-                <router-link class = "btn btn-go" type = "button" :to="`events/${code}/RSVP`"><SendHorizonal /></router-link>
+                <router-link class="btn btn-go" type="button" :to="`events/${code}/RSVP`"
+                    ><SendHorizonal
+                /></router-link>
             </NavigationMenuItem>
             <div class="flex-grow-0"></div>
         </div>
