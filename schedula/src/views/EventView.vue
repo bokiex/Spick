@@ -171,7 +171,7 @@ const reservation = () => {
                                                 class="flex flex-col items-center justify-center"
                                                 :key="invitee.user_id"
                                             >
-                                                {{ console.log(invitee) }}
+                                              
                                                 <Avatar :src="getImageUrl(invitee.image)" />
                                                 <span class="p-2 text-center font-light text-xs">
                                                     {{ invitee.username }}
