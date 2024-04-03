@@ -7,7 +7,7 @@ import { format_date, format_time } from '@/utils/format_datetime'
 import { getImageUrl } from '@/utils/get_image'
 
 const router = useRouter()
-const userID = localStorage.getItem('userID')
+const userID = Number(localStorage.getItem('userID'))
 var loading = ref(true)
 const events = ref(null)
 var problem = ref(null)
@@ -17,9 +17,11 @@ onMounted(async () => {
         // if status code is not 200, then set events to empty array
         (res) => {
             if (res.status != 200) {
-                console.error('Failed to fetch event data:', data)
+                console.error('Failed to fetch event data:', res)
                 problem.value = 'fetch failed'
                 events.value = []
+                loading.value = false
+                return
             } else {
                 return res.json()
             }
@@ -46,9 +48,11 @@ onMounted(async () => {
 
     if (data == null || data.length == 0) {
         problem.value = 'no events'
+        loading.value = false
         events.value = []
     }
     events.value = data
+    console.log(userID)
     loading.value = false
 })
 
