@@ -29,7 +29,6 @@ onMounted(async () => {
             }
         }
         events.value = data
-        console.log(data)
     } catch (error) {
         console.error('Failed to fetch event data:', error)
     } finally {
@@ -38,7 +37,6 @@ onMounted(async () => {
 })
 
 const navigate = (id) => {
-    console.log(id)
     router.push({ path: `/events/${id}` })
 }
 
