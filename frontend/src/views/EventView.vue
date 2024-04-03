@@ -180,21 +180,6 @@ const reservation = () => {
                                 </p>
 
                                 <div v-if="isHost && !isRSVPClosed">
-                                    <div v-if="invitees_responded.length != 0">
-                                        <p class="text-muted-foreground">Responded</p>
-                                        <div class="flex overflow-hidden gap-x-3">
-                                            <div
-                                                v-for="invitee in invitees_responded"
-                                                class="flex flex-col items-center justify-center"
-                                                :key="invitee.user_id"
-                                            >
-                                                <Avatar :src="getImageUrl(invitee.image)" />
-                                                <span class="p-2 text-center font-light text-xs">
-                                                    {{ invitee.username }}
-                                                </span>
-                                            </div>
-                                        </div>
-                                    </div>
                                     <div v-if="invitees_not_responded.length != 0">
                                         <p class="text-muted-foreground">Not Responded</p>
                                         <div class="flex overflow-hidden gap-x-3">
@@ -261,20 +246,21 @@ const reservation = () => {
                         <Card>
                             <div class="flex flex-col gap-y-1.5 p-4 space-y-1">
                                 <h3 class="text-lg font-semibold">Attendees</h3>
-                                <div class="flex overflow-hidden gap-x-3">
-                                    <div
-                                        class="flex flex-col items-center justify-center"
-                                        v-for="invitee in event?.invitees"
-                                        :key="invitee.user_id"
-                                    >
-                                        <Avatar
-                                            :src="getImageUrl(invitee.image)"
-                                            class="w-12 h-12 rounded-full"
+                                <div class="flex overflow-hidden">
+                                    <div v-for="invitee in event?.invitees" :key="invitee.user_id">
+                                        <div
+                                            class="flex flex-col items-center justify-center"
+                                            v-if="invitee.status == 'Y'"
                                         >
-                                        </Avatar>
-                                        <span class="p-2 text-center font-light text-xs">
-                                            {{ invitee.username }}
-                                        </span>
+                                            <Avatar
+                                                :src="getImageUrl(invitee.image)"
+                                                class="w-12 h-12 rounded-full"
+                                            >
+                                            </Avatar>
+                                            <span class="p-2 text-center font-light text-xs">
+                                                {{ invitee.username }}
+                                            </span>
+                                        </div>
                                     </div>
                                 </div>
                             </div>

@@ -4,6 +4,7 @@ import pika
 from os import environ
 from os import environ
 from dotenv import load_dotenv 
+from datetime import datetime
 
 load_dotenv()
 e_queue_name = environ.get('ERROR_QUEUE_NAME') or "Error" #Error
@@ -23,7 +24,10 @@ def receiveError(channel):
         
 def callback(channel, method, properties, body):
     print("\nError microservice: Received an error by " + __file__)
-    processError(body)
+    with open("errorlogs.txt","a+") as f:
+        now = datetime.now()
+        cur_time = now.strftime("%H:%M:%S")
+        f.write(cur_time + "Error microservice: Received an error by " + __file__ + "    " + processError(body))
     print()
     
 def processError(errorMsg):
@@ -31,9 +35,11 @@ def processError(errorMsg):
     try:
         error = json.loads(errorMsg)
         print("--JSON:", error)
+        return "--JSON " + error
     except Exception as e:
         print("--NOT JSON:", e)
         print("--DATA:", errorMsg)
+        return "--NOT JSON:" + e + "--DATA:" + errorMsg
     print()
     
 if __name__ == "__main__":
