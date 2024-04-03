@@ -69,8 +69,23 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+
+def check_get_event():
+    event_result = requests.get(event_ms + "online")
+    if event_result.status_code not in range(200,300):
+        return False
+    user_result = requests.get(user_ms + "online")
+    if user_result.status_code not in range(200,300):
+        return False
+    return True
+
 @app.get("/event")
 def get_events():
+    online = check_get_event()
+    if not online:
+        return JSONResponse(status_code=500, content={"error": "Service unavailable"})
     event_result = requests.get(event_ms + "event")
     if event_result.status_code not in range(200,300):
         channel.basic_publish(exchange=exchangename, routing_key="get_event.error",body=json.dumps(event_result.json()), properties=pika.BasicProperties(delivery_mode=2))
@@ -105,6 +120,9 @@ def get_events():
 
 @app.get("/event/{event_id}")
 def get_event_by_id(event_id: str):
+    online = check_get_event()
+    if not online:
+        return JSONResponse(status_code=500, content={"error": "Service unavailable"})
     event_result = requests.get(event_ms + "event/" + event_id)
 
     if event_result.status_code not in range(200,300):
@@ -138,8 +156,20 @@ def get_event_by_id(event_id: str):
     print(event_result)
     return JSONResponse(status_code=200, content=event_result)
 
+def check_timeslot_get():
+    event_result = requests.get(event_ms + "online")
+    if event_result.status_code not in range(200,300):
+        return False
+    user_result = requests.get(user_ms + "online")
+    if user_result.status_code not in range(200,300):
+        return False
+    return True
+
 @app.get("/timeslot/{event_id}")
 def get_timeslot_by_event_id(event_id: str):
+    online = check_timeslot_get()
+    if not online:
+        return JSONResponse(status_code=500, content={"error": "Service unavailable"})
     timeslot_result = requests.get(event_ms + "get_optimize/" + event_id)
     if timeslot_result.status_code not in range(200,300):
         channel.basic_publish(exchange=exchangename, routing_key="get_timeslot.error",body=json.dumps(timeslot_result.json()), properties=pika.BasicProperties(delivery_mode=2))
@@ -226,9 +256,26 @@ Sample event JSON output:
 }
 """
 
+def check_create_event():
+    event_result = requests.get(event_ms + "online")
+    if event_result.status_code not in range(200,300):
+        return False
+    user_result = requests.get(user_ms + "online")
+    if user_result.status_code not in range(200,300):
+        return False
+    recommendation_ms = requests.get(recommendation_ms + "online")
+    if recommendation_ms.status_code not in range(200,300):
+        return False
+    rsvp_ms = requests.get(rsvp_ms + "online")
+    if rsvp_ms.status_code not in range(200,300):
+        return False
+    return True
+
 @app.post("/create_event")
 def create_event(event: str = Form(...), file: Optional[UploadFile] = File(default=None)):
-    
+    online = check_create_event()
+    if not online:
+        return JSONResponse(status_code=500, content={"error": "Service unavailable"})
     event_data = json.loads(event)
     print(event_data)
     event = schemas.Recommend(**event_data)
