@@ -65,7 +65,7 @@ onMounted(async () => {
                     title: event.event_name,
                     content: event.event_desc
                 }
-                events.push(topush)
+                events.value.push(topush)
             }
         })
         // Example API call - replace with your actual API call
@@ -89,9 +89,10 @@ onMounted(async () => {
 </script>
 <template>
     <div class="">
-        <vue-cal v-if = "loaded"
+        <vue-cal
+            v-if="loaded"
             :selected-date="selected_date"
-            :time-from="9 * 60"
+            :time-from="0 * 60"
             :time-to="24 * 60"
             :disable-views="['years']"
             events-count-on-year-view
