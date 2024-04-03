@@ -1,44 +1,56 @@
 <script setup>
-import { RadioGroupItem, RadioGroupRoot, Label } from 'radix-vue'
-import { ref } from 'vue'
+import { RadioGroupItem, RadioGroupIndicator, RadioGroupRoot, Label } from 'radix-vue'
+import { ref, onMounted, onBeforeMount } from 'vue'
+import { format_date, format_time } from '@/utils/format_datetime'
+import { useRoute } from 'vue-router'
+import { getImageUrl } from '@/utils/get_image'
+
+const route = useRoute()
+const event_id = route.params.id
+
+const timeslots = ref([])
+const recommendations = ref([])
+
+onMounted(async () => {
+    const timeslots_data = await fetch('http://localhost:8200/timeslot/' + event_id).then((res) =>
+        res.json()
+    )
+    timeslots.value = timeslots_data
+
+    const recommendation_data = await fetch('http://localhost:8100/event/' + event_id).then((res) =>
+        res.json()
+    )
+
+    recommendations.value = recommendation_data.recommendations
+
+    console.log(timeslots_data)
+    console.log(recommendation_data)
+})
+// const timeslots = [
+//     {
+//         date: '2024-03-14',
+//         start_time: '2024-03-14T21:00:00',
+//         end_time: '2024-03-14T13:00:00'
+//     },
+//     {
+//         date: '2024-03-15',
+//         start_time: '2024-03-14T21:00:00',
+//         end_time: '2024-03-14T13:00:00'
+//     },
+//     {
+//         date: '2024-03-16',
+//         start_time: '2024-03-14T21:00:00',
+//         end_time: '2024-03-14T13:00:00'
+//     }
+// ]
 
 const userID = localStorage.getItem('userID')
-const selectedTimeslot = ref(null)
-const selectedVenu = ''
-const timeslots = [
-    {
-        date: '2024-03-14',
-        start_time: '2024-03-14T21:00:00',
-        end_time: '2024-03-14T13:00:00'
-    },
-    {
-        date: '2024-03-15',
-        start_time: '2024-03-14T21:00:00',
-        end_time: '2024-03-14T13:00:00'
-    },
-    {
-        date: '2024-03-16',
-        start_time: '2024-03-14T21:00:00',
-        end_time: '2024-03-14T13:00:00'
-    }
-]
-const venues = [
-    {
-        name: 'SMU',
-        address: 'Victoria Road',
-        imageUrl: 'https://via.placeholder.com/150'
-    },
-    {
-        name: 'SMU',
-        address: 'Victoria Road',
-        imageUrl: 'https://via.placeholder.com/150'
-    },
-    {
-        name: 'SMU',
-        address: 'Victoria Road',
-        imageUrl: 'https://via.placeholder.com/150'
-    }
-]
+const selectedTimeslot = ref(timeslots[0])
+const selectedVenue = ''
+
+const reserve = () => {
+    console.log(selectedTimeslot.value)
+}
 </script>
 
 <template>
@@ -49,46 +61,43 @@ const venues = [
                 <!-- Time Slot Start -->
 
                 <div class="timeslots-container">
-                    <RadioGroupRoot v-model="selectedTimeslot">
+                    <RadioGroupRoot v-model="selectedTimeslot" :default-value="timeslots[0]">
                         <div class="grid grid-row-3 gap-4">
-                            <Label
-                                v-for="(timeslot, index) in timeslots"
-                                :for="index"
-                                class="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary"
-                            >
-                                <RadioGroupItem
-                                    :id="index"
-                                    :value="timeslot"
-                                    class="peer sr-only aspect-square h-4 w-4 rounded-full border border-primary text-primary ring-offset-background focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                            <div v-for="(timeslot, index) in timeslots">
+                                <RadioGroupItem :id="index" :value="index" class="peer sr-only" />
+                                <Label
+                                    :for="index"
+                                    class="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary"
                                 >
-                                    <RadioGroupIndicator class="flex items-center justify-center">
-                                        <Circle class="h-2.5 w-2.5 fill-current text-current" />
-                                    </RadioGroupIndicator>
-                                </RadioGroupItem>
-
-                                <p class="text-sm font-medium leading-none">
-                                    {{
-                                        new Date(timeslot.date).toLocaleDateString('en-US', {
-                                            weekday: 'long',
-                                            month: 'long',
-                                            day: 'numeric'
-                                        })
-                                    }}
-                                </p>
-                                <p class="text-sm text-muted-foreground">
-                                    {{
-                                        new Date(timeslot.start_time).toLocaleTimeString('en-US', {
-                                            timeStyle: 'short'
-                                        })
-                                    }}
-                                    -
-                                    {{
-                                        new Date(timeslot.end_time).toLocaleTimeString('en-US', {
-                                            timeStyle: 'short'
-                                        })
-                                    }}
-                                </p>
-                            </Label>
+                                    <p class="text-sm font-medium leading-none">
+                                        {{ format_date(timeslot.start_time) }}
+                                    </p>
+                                    <p class="text-sm text-muted-foreground">
+                                        {{ format_time(timeslot.start_time) }}
+                                        -
+                                        {{ format_time(timeslot.end_time) }}
+                                    </p>
+                                    <div class="flex flex-col gap-y-1.5 p-4 space-y-1">
+                                        <h3 class="text-lg font-semibold">Attendees</h3>
+                                        <div class="flex overflow-hidden gap-x-3">
+                                            <div
+                                                class="flex flex-col items-center justify-center"
+                                                v-for="invitee in timeslot.invitees"
+                                                :key="invitee.user_id"
+                                            >
+                                                <Avatar
+                                                    :src="getImageUrl(invitee.image)"
+                                                    class="w-12 h-12 rounded-full"
+                                                >
+                                                </Avatar>
+                                                <span class="p-2 text-center font-light text-xs">
+                                                    {{ invitee.username }}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </Label>
+                            </div>
                         </div>
                     </RadioGroupRoot>
                 </div>
@@ -99,30 +108,30 @@ const venues = [
                 <div class="venues-container">
                     <RadioGroupRoot v-model="selectedVenue">
                         <div class="grid grid-row-3 gap-4">
-                            <Label
-                                v-for="(venue, index) in venues"
-                                :for="index + 100"
-                                class="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary"
-                            >
+                            <div v-for="(recommendation, index) in recommendations">
                                 <RadioGroupItem
                                     :id="index + 100"
-                                    :value="venue"
-                                    class="peer sr-only aspect-square h-4 w-4 rounded-full border border-primary text-primary ring-offset-background focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                                    :value="index + 100"
+                                    class="peer sr-only"
+                                />
+                                <Label
+                                    :for="index + 100"
+                                    class="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary"
                                 >
-                                    <RadioGroupIndicator class="flex items-center justify-center">
-                                        <Circle class="h-2.5 w-2.5 fill-current text-current" />
-                                    </RadioGroupIndicator>
-                                </RadioGroupItem>
-                                <img :src="venue.imageUrl" :alt="venue.name" />
-                                <div class="venue-card-content">
-                                    <h3>{{ venue.name }}</h3>
-                                    <p>{{ venue.address }}</p>
-                                </div>
-                            </Label>
+                                    <img
+                                        :src="recommendation.recommendation_photo"
+                                        :alt="recommendation.recommendation_name"
+                                    />
+                                    <div class="recommendation-card-content">
+                                        <h3>{{ recommendation.recommendation_name }}</h3>
+                                        <p>{{ recommendation.recommendation_address }}</p>
+                                    </div>
+                                </Label>
+                            </div>
                         </div>
                     </RadioGroupRoot>
                 </div>
-
+                <Button @click="reserve()">Reserve</Button>
                 <!-- Venue end -->
             </div>
         </div>
@@ -130,33 +139,6 @@ const venues = [
 </template>
 
 <style scoped>
-.checkbox-box {
-    display: block;
-    padding: 10px; /* Add padding for better spacing */
-}
-
-.checkbox-box input[type='radio'] {
-    display: none;
-}
-
-.checkbox-box label {
-    display: block;
-    border: 2px solid #ccc;
-    border-radius: 10px;
-    background-color: #98c1d9;
-    padding: 10px; /* Add padding to style the entire row */
-    cursor: pointer; /* Add cursor pointer for better UX */
-}
-
-.checkbox-box input[type='radio']:checked + label {
-    background-color: #3d5a80;
-    color: white;
-}
-
-.checkbox-row {
-    margin-bottom: 10px; /* Add margin between rows */
-}
-
 .reservation-page {
     display: flex;
     justify-content: center;
@@ -176,42 +158,6 @@ const venues = [
     margin: 10px;
     text-align: center;
     height: calc(100vh - 60px);
-}
-
-.timeslot-card,
-.venue-card {
-    background-color: white;
-    border-radius: 10px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    margin-bottom: 10px;
-    padding: 20px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    margin-left: 5px;
-    margin-right: 5px;
-}
-
-.timeslot-card h3,
-.venue-card h3 {
-    margin: 0;
-    font-size: 18px;
-    color: #333;
-    margin-bottom: 5px;
-}
-
-.timeslot-card p,
-.venue-card p {
-    font-size: 16px;
-    color: #555;
-}
-
-.venue-card img {
-    width: 70%;
-    height: 50%;
-    object-fit: cover;
-    margin-bottom: 10px;
-    border-radius: 8px;
 }
 
 /* Responsive Design */

@@ -31,7 +31,7 @@ class Invitee(Base):
     event = relationship("Event", back_populates="invitees")
 
 class Recommendation(Base):
-    __tablename__ = 'recommendation'
+    __tablename__ = 'recommendations'
     recommendation_id = Column(Integer, primary_key=True, autoincrement=True, index=True)
     recommendation_name = Column(String(64), nullable=False)
     recommendation_address = Column(String(64), nullable=False)

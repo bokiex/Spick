@@ -82,7 +82,7 @@ const navigate = (id) => {
                     <div class="text-sm text-muted-foreground">
                         <p>{{ format_date(event?.datetime_start) }}</p>
                         <p>{{ format_time(event?.datetime_start) }}</p>
-                        <p>{{ event?.event_desc }}</p>
+                    
                     </div>
                 </div>
             </Card>

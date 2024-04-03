@@ -1,8 +1,7 @@
 from sqlalchemy.orm import Session, joinedload
 import models, schemas
-
-
-
+from sqlalchemy import func
+from fastapi.encoders import jsonable_encoder
 
 def get_events(db: Session):
 
@@ -13,7 +12,8 @@ def get_events(db: Session):
     return res
 
 def create_event(db: Session, event: schemas.Event):
-
+    
+    print(event)
     event_data = event.model_dump(exclude={"recommendations", "invitees"})
     print(event_data)
 
@@ -22,8 +22,11 @@ def create_event(db: Session, event: schemas.Event):
    
     # Convert recommendation to db model
     if hasattr(event, 'recommendations') and event.recommendations:
+            print("\n\n----- recommendation is here------\n\n")
             for rec in event.recommendations:
+             
                 db_rec = models.Recommendation(**rec.model_dump(), event=db_event) 
+              
                 db_event.recommendations.append(db_rec)
     
     # Convert invitees to db model
@@ -107,3 +110,7 @@ def add_opt_schedule(db: Session, optimized_schedules: schemas.OptimizedSchedule
             db.add(db_opt)
         
     db.commit()  # Commit once after all inserts to optimize transaction
+
+def get_opt_schedule(db: Session, event_id: str):
+    return db.query(models.Optimized.start_time, models.Optimized.end_time, func.group_concat(func.distinct(models.Optimized.attendee_id)).label('invitees'),
+        func.group_concat(func.distinct(models.Optimized.event_id)).label('event_id')).group_by(models.Optimized.start_time, models.Optimized.end_time).all()

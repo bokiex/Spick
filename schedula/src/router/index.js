@@ -48,7 +48,7 @@ const router = createRouter({
             meta: { hideNavbar: true }
         },
         {
-            path: '/reservation',
+            path: '/events/:id/reservation',
             name: 'reservation',
             component: ReservationView
         },

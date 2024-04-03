@@ -240,6 +240,17 @@ def add_opt_schedule(optimized: schemas.OptimizedSchedules, db: Session = Depend
     return JSONResponse(status_code=201, content={"message": "Optimized schedule has been added."})
 
 
+@app.get("/get_optimize/{event_id}")
+def get_opt_schedule(event_id: str, db: Session = Depends(get_db)):
+    results = crud.get_opt_schedule(db, event_id)
+    print(results)
+    res = [
+    {"start_time": result.start_time, "end_time": result.end_time, "invitees": result.invitees.split(','), "event_id": result.event_id}
+    for result in results
+]   
+    if res is None:
+        return JSONResponse(status_code=404, content={"message": "No optimized schedule found."})
+    return JSONResponse(status_code=200, content={"data": jsonable_encoder(res), "message": "Optimized schedule found."})
 #!/usr/bin/env python3
 # The above shebang (#!) operator tells Unix-like environments
 # to run this file as a python3 script

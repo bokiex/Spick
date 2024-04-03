@@ -133,8 +133,47 @@ def get_event_by_id(event_id: str):
             if user['user_id'] == event_result["user_id"]:
                 event_result["host"] = new_user
     event_result["invitees"] = new_invitees
+    print(event_result)
     return event_result
 
+@app.get("/timeslot/{event_id}")
+def get_timeslot_by_event_id(event_id: str):
+    timeslot_result = requests.get(event_ms + "get_optimize/" + event_id)
+    if timeslot_result.status_code not in range(200,300):
+        channel.basic_publish(exchange=exchangename, routing_key="get_timeslot.error",body=json.dumps(timeslot_result.json()), properties=pika.BasicProperties(delivery_mode=2))
+        return timeslot_result.json()
+    
+    
+    
+    user_result = requests.get(user_ms + "users")
+    if user_result.status_code not in range(200,300):
+        channel.basic_publish(exchange=exchangename, routing_key="get_event.error",body=json.dumps(user_result.json()), properties=pika.BasicProperties(delivery_mode=2))
+        return user_result.json()
+    
+
+    timeslot_data = timeslot_result.json()
+    user_data = user_result.json()
+  
+    user_lookup = {user['user_id']: {
+                    'user_id': user['user_id'],
+                    'username': user['username'],
+                    'email': user['email'],
+                    'telegram_tag': user['telegram_tag'],
+                    'image': user['image']
+                } for user in user_data}
+    
+    print(user_lookup)
+    timeslots = []
+    for timeslot in timeslot_data.get('data', []):
+        new_invitees = [user_lookup.get(int(invitee_id)) for invitee_id in timeslot["invitees"] if int(invitee_id) in user_lookup]
+        print(new_invitees)
+        timeslot["invitees"] = [invitee for invitee in new_invitees if invitee is not None]
+        timeslots.append(timeslot)
+        print(timeslot)
+
+    
+
+    return timeslots
 """
 Sample event JSON input:
 {
@@ -189,7 +228,7 @@ Sample event JSON output:
 """
 
 @app.post("/create_event")
-async def create_event(event: str = Form(...), file: Optional[UploadFile] = File(default=None)):
+def create_event(event: str = Form(...), file: Optional[UploadFile] = File(default=None)):
     
     event_data = json.loads(event)
     print(event_data)
@@ -218,18 +257,18 @@ async def create_event(event: str = Form(...), file: Optional[UploadFile] = File
     event_dict = jsonable_encoder(event)
     
     # Add recommendation to event
-    event_dict["recommendation"] = recommendation_result.json()
+    event_dict["recommendations"] = recommendation_result.json()
 
     # Add image filename to event
     event_dict["image"] = file.filename
-  
+    print(event_dict)
     # Send event to event microservice
     print("\n------ Sending event to event microservice ------")
-    async with httpx.AsyncClient() as client:
-        files = {
-            "files": (file.filename, file.file, file.content_type),
-        }
-        event_result = await client.post(event_ms + "event", data={"event": json.dumps(event_dict)}, files=files)
+    
+    files = {
+        "files": (file.filename, file.file, file.content_type),
+    }
+    event_result = requests.post(event_ms + "event", data={"event": json.dumps(event_dict)}, files=files)
      
     # If event service is not available
     

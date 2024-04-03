@@ -39,28 +39,16 @@ const is_responded = computed(() => invitees_responded.value?.find((invitee) => 
 onMounted(async () => {
     try {
         // Example API call - replace with your actual API call
-        const event_data = await fetch('http://localhost:8100/event' + `/${event_id}`).then((res) =>
+        const event_data = await fetch('http://localhost:8200/event' + `/${event_id}`).then((res) =>
             res.json()
         )
 
-        const invitees_user_ids = event_data.invitees.map((invitee) => invitee.user_id)
-        console.log(invitees_user_ids)
-        const invitee_data = await fetch('http://localhost:8101/users/user_id', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({user_ids: invitees_user_ids })
-        }).then((res) => res.json())
-
+        
         host.value = await fetch('http://localhost:8101/users/user_id/' + event_data.user_id).then((res) =>
             res.json()
         )
         event.value = event_data
-        event.value.invitees = event.value.invitees.map((invitee) => {
-            const user = invitee_data.find((user) => user.user_id == invitee.user_id)
-            return { ...invitee, ...user }
-        })
+        
         console.log(event.value)
     } catch (error) {
         console.error('Failed to fetch event data:', error)
@@ -164,7 +152,7 @@ const reservation = () => {
                                                 class="flex flex-col items-center justify-center"
                                                 :key="invitee.user_id"
                                             >
-                                                <Avatar :src="invitee.image" />
+                                                <Avatar :src="getImageUrl(invitee.image)" />
                                                 <span class="p-2 text-center font-light text-xs">
                                                     {{ invitee.username }}
                                                 </span>
@@ -180,7 +168,7 @@ const reservation = () => {
                                                 :key="invitee.user_id"
                                             >
                                                 {{ console.log(invitee) }}
-                                                <Avatar :src="invitee.image" />
+                                                <Avatar :src="getImageUrl(invitee.image)" />
                                                 <span class="p-2 text-center font-light text-xs">
                                                     {{ invitee.username }}
                                                 </span>
@@ -198,7 +186,7 @@ const reservation = () => {
                                 <h3 class="text-lg font-semibold">Organizer</h3>
                                 <div class="flex overflow-hidden gap-x-3">
                                     <div class="flex flex-col items-center justify-center">
-                                        <Avatar :src="host?.image" class="w-12 h-12 rounded-full">
+                                        <Avatar :src="getImageUrl(host?.image)" class="w-12 h-12 rounded-full">
                                         </Avatar>
                                         <span class="p-2 text-center font-light text-xs">
                                             {{ host?.username }}
@@ -220,7 +208,7 @@ const reservation = () => {
                                         :key="invitee.user_id"
                                     >
                                         <Avatar
-                                            src="https://images.unsplash.com/photo-1492633423870-43d1cd2775eb?&w=128&h=128&dpr=2&q=80"
+                                            :src="getImageUrl(invitee.image)"
                                             class="w-12 h-12 rounded-full"
                                         >
                                         </Avatar>
