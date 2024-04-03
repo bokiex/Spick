@@ -2,7 +2,12 @@
 import { clsx } from 'clsx'
 import { twMerge } from 'tailwind-merge'
 
-const props = defineProps()
+const props = defineProps({
+    class: {
+        type: String,
+        default: ''
+    }
+})
 </script>
 
 <template>

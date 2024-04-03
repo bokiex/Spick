@@ -5,6 +5,7 @@ import { useRouter } from 'vue-router'
 import { ref, onMounted } from 'vue'
 import { format_date, format_time } from '@/utils/format_datetime'
 import { getImageUrl } from '@/utils/get_image'
+import Skeleton from '@/components/Skeleton.vue'
 
 const router = useRouter()
 const userID = Number(localStorage.getItem('userID'))
@@ -25,6 +26,7 @@ onMounted(async () => {
                 loading.value = false
                 return []
             } else {
+                loading.value = false
                 return res.json()
             }
         }
@@ -54,11 +56,10 @@ onMounted(async () => {
 
     if (data == null || data.length == 0) {
         problem.value = 'no events'
-        loading.value = false
+
         events.value = []
     }
     events.value = data
-    loading.value = false
 })
 
 const navigate = (id) => {
@@ -67,7 +68,7 @@ const navigate = (id) => {
 </script>
 
 <template>
-    <div v-if="!loading">
+    <div>
         <div class="container p-4" v-if="problem === 'fetch failed'">
             <div class="row justify-content-center">
                 <!-- Form Start -->
@@ -116,7 +117,7 @@ const navigate = (id) => {
                     <Button> Search </Button>
                 </div>
             </div>
-            <div class="flex flex-wrap justify-around gap-4 items-center p-4">
+            <div class="flex flex-wrap justify-around gap-4 items-center p-4" v-if="!loading">
                 <Card
                     class="pt-6 hover:bg-accent max-w-64"
                     v-for="event in events"
@@ -162,5 +163,12 @@ const navigate = (id) => {
             </div>
         </div>
     </div>
-    <div v-else>Loading</div>
+ 
+        <div class="flex flex-wrap justify-around gap-4 items-center p-4" v-if="loading">
+            <Skeleton class="h-80 pt-6 w-64 rounded-xl" />
+            <Skeleton class="h-80 pt-6 w-64 rounded-xl" />
+            <Skeleton class="h-80 pt-6 w-64 rounded-xl" />
+            <Skeleton class="h-80 pt-6 w-64 rounded-xl" />
+        </div>
+
 </template>
