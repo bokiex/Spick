@@ -25,14 +25,15 @@ cd spick
 1. Backend Setup: To set up the backend, navigate to the flask-server directory and use Docker Compose to build and run the project:
 
 ```
+// You should be in Spick/flask-server
 cd flask-server
 docker-compose up --build
 ```
 
-1. Frontend Setup: Open a new terminal window or tab for the frontend setup. Navigate to the schedula directory, install the necessary packages, and start the development server:
+1. Frontend Setup: Open a new terminal window or tab for the frontend setup. Navigate to the frontend directory, install the necessary packages, and start the development server:
 
 ```
-cd frontend
+// You should be in Spick/frontend/
 npm install
 npm run dev
 ```

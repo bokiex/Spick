@@ -5,15 +5,18 @@ import { useRouter } from 'vue-router'
 import { ref, onMounted } from 'vue'
 import { format_date, format_time } from '@/utils/format_datetime'
 import { getImageUrl } from '@/utils/get_image'
+import Skeleton from '@/components/Skeleton.vue'
 
 const router = useRouter()
 const userID = Number(localStorage.getItem('userID'))
 var loading = ref(true)
 const events = ref(null)
 var problem = ref(null)
+const event_ms = 'http://localhost:8100/event'
+console.log(event_ms)
 onMounted(async () => {
     // Example API call - replace with your actual API call
-    const res = await fetch('http://localhost:8100/event').then(
+    const res = await fetch(event_ms).then(
         // if status code is not 200, then set events to empty array
         (res) => {
             console.log(res)
@@ -24,41 +27,40 @@ onMounted(async () => {
                 loading.value = false
                 return
             } else {
+                loading.value = false
                 return res.json()
             }
         }
     )
-
+    const data = res
     console.log(res)
-    for (var i in res) {
-        console.log(res[i])
+    for (var i = data.length - 1; i >= 0; i--) {
+        console.log(data[i])
         const invitees_user_ids = []
-        res[i].datetime_start = new Date(res[i].datetime_start)
-        res[i].datetime_end = new Date(res[i].datetime_end)
+        data[i].datetime_start = new Date(data[i].datetime_start)
+        data[i].datetime_end = new Date(data[i].datetime_end)
         // check if userID is in invitees
-        for (var j in res[i].invitees) {
-            if (res[i].invitees[j].user_id == userID) {
-                invitees_user_ids.push(res[i].invitees[j].user_id)
+        for (var j in data[i].invitees) {
+            if (data[i].invitees[j].user_id == userID) {
+                invitees_user_ids.push(data[i].invitees[j].user_id)
             }
         }
 
         // if userID doesn't exist in invitee and is not equal to user_id, then remove the event
-        if (!invitees_user_ids.includes(Number(userID)) && res[i].user_id != userID) {
-            console.log(res[i].user_id, userID, 'removed')
-            res.splice(i, 1)
-            i--
+        if (!invitees_user_ids.includes(Number(userID)) && data[i].user_id != userID) {
+            console.log(data[i].user_id, userID, 'removed')
+            data.splice(i, 1)
         } else {
-            console.log(res[i].user_id, userID, 'kept')
+            console.log(data[i].user_id, userID, 'kept')
         }
     }
 
-    if (res == null || res.length == 0) {
+    if (data == null || data.length == 0) {
         problem.value = 'no events'
-        loading.value = false
+
         events.value = []
     }
-    events.value = res
-    loading.value = false
+    events.value = data
 })
 
 const navigate = (id) => {
@@ -67,7 +69,7 @@ const navigate = (id) => {
 </script>
 
 <template>
-    <div v-if="!loading">
+    <div>
         <div class="container p-4" v-if="problem === 'fetch failed'">
             <div class="row justify-content-center">
                 <!-- Form Start -->
@@ -116,7 +118,7 @@ const navigate = (id) => {
                     <Button> Search </Button>
                 </div>
             </div>
-            <div class="flex flex-wrap justify-around gap-4 items-center p-4">
+            <div class="flex flex-wrap justify-around gap-4 items-center p-4" v-if="!loading">
                 <Card
                     class="pt-6 hover:bg-accent max-w-64"
                     v-for="event in events"
@@ -162,5 +164,12 @@ const navigate = (id) => {
             </div>
         </div>
     </div>
-    <div v-else>Loading</div>
+ 
+        <div class="flex flex-wrap justify-around gap-4 items-center p-4" v-if="loading">
+            <Skeleton class="h-80 pt-6 w-64 rounded-xl" />
+            <Skeleton class="h-80 pt-6 w-64 rounded-xl" />
+            <Skeleton class="h-80 pt-6 w-64 rounded-xl" />
+            <Skeleton class="h-80 pt-6 w-64 rounded-xl" />
+        </div>
+
 </template>

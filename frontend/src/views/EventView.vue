@@ -16,17 +16,42 @@ const host = ref(null)
 const event_id = route.params.id
 const event = ref(null)
 const loading = ref(true)
+const isReserved = computed(() => event.value?.reservation_name != null)
 const isRSVPClosed = computed(() => !event.value?.time_out)
 const isHost = computed(() => event.value?.user_id == userID)
-const side_title = computed(() => (isHost.value ? 'Waiting for response' : 'RSVP now'))
-const side_description = computed(() =>
-    isRSVPClosed.value
-        ? 'RSVP is closed'
-        : 'Timeout: ' +
-          format_date(event.value?.time_out) +
-          ' ' +
-          format_time(event.value?.time_out)
-)
+const side_title = computed(() => {
+    if (isHost.value) {
+        if (isRSVPClosed.value && !isReserved.value) {
+            return 'Ready to reserve a place?'
+        } else {
+            if (isReserved.value) {
+                return 'Hope your event goes well!'
+            } else {
+                return 'Not all invitees have responded yet.'
+            }
+        }
+    } else {
+        if (isRSVPClosed.value) {
+            return 'RSVP period is over :('
+        }
+        return 'RSVP Now!'
+    }
+})
+const side_description = computed(() => {
+    if (isRSVPClosed.value) {
+        if (!isHost.value) {
+            return 'Keep a look out for the next event!'
+        }
+        return "Wow, that's a lot of people!"
+    } else {
+        return (
+            'Timeout: ' +
+            format_date(event.value?.time_out) +
+            ' ' +
+            format_time(event.value?.time_out)
+        )
+    }
+})
 const invitees_responded = computed(() =>
     event.value?.invitees.filter((invitee) => {
         return invitee.status
@@ -46,15 +71,13 @@ onMounted(async () => {
             res.json()
         )
 
-   
-
         // Fetch user data from complex event microservice
 
         host.value = await fetch('http://localhost:8101/users/user_id/' + event_data.user_id).then(
             (res) => res.json()
         )
         event.value = event_data
-        
+
         console.log(event.value)
     } catch (error) {
         console.error('Failed to fetch event data:', error)
@@ -106,28 +129,28 @@ const reservation = () => {
                     class="absolute bottom-0 left-0 right-0 transform translate-y-1/2 mx-auto w-1/2"
                 >
                     <div class="flex flex-col gap-y-1.5 p-6 space-y-1">
-                        <Skeleton v-if="loading" class="w-24 h-6" />
-                        <h3 v-else class="font-semibold tracking-tight text-2xl">
+                        <Skeleton v-if="loading" class="w-48 h-6" />
+                        <h3 v-else-if="!loading" class="font-semibold tracking-tight text-2xl">
                             {{ event?.event_name }}
                         </h3>
                         <div class="flex gap-x-1 text-muted-foreground">
                             <Calendar class="flex-shrink-0" />
                             <Skeleton v-if="loading" class="w-24 h-6" />
-                            <span v-else class="text-sm">
+                            <span class="text-sm" v-else-if="!loading">
                                 {{ format_date(event?.datetime_start) }}
                             </span>
                         </div>
                         <div class="flex gap-x-1 text-muted-foreground">
                             <Clock class="flex-shrink-0" />
                             <Skeleton v-if="loading" class="w-24 h-6" />
-                            <span class="text-sm">
+                            <span class="text-sm" v-else-if="!loading">
                                 {{ format_time(event?.datetime_start) }}
                             </span>
                         </div>
                         <div class="flex gap-x-1 text-muted-foreground">
                             <MapPin class="flex-shrink-0" />
                             <Skeleton v-if="loading" class="w-24 h-6" />
-                            <span class="text-sm">
+                            <span class="text-sm" v-else-if="!loading">
                                 {{ event?.reservation_address }}
                             </span>
                         </div>
@@ -137,15 +160,24 @@ const reservation = () => {
             <div class="grid grid-cols-5 mt-36 p-4">
                 <div class="col-span-3 p-4">
                     <h3 class="font-semibold tracking-tight text-2xl">Event Description</h3>
-                    <Skeleton v-if="loading" class="w-24 h-6" />
-                    <div v-else class="text-muted-foreground">{{ event?.event_desc }}</div>
+                    <Skeleton v-if="loading" class="w-96 h-6" />
+                    <div v-else-if="!loading" class="text-muted-foreground">
+                        {{ event?.event_desc }}
+                    </div>
                 </div>
                 <div class="col-span-2 p-4">
                     <div class="space-y-4 w-full">
                         <Card>
                             <div class="flex flex-col gap-y-1.5 p-4 space-y-1">
-                                <h3 class="text-lg font-semibold">{{ side_title }}</h3>
-                                <p class="text-muted-foreground">{{ side_description }}</p>
+                                <Skeleton v-if="loading" class="w-24 h-6" />
+                                <h3 v-else-if="!loading" class="text-lg font-semibold">
+                                    {{ side_title }}
+                                </h3>
+                                <Skeleton v-if="loading" class="w-24 h-6" />
+
+                                <p v-else-if="!loading" class="text-muted-foreground">
+                                    {{ side_description }}
+                                </p>
 
                                 <div v-if="isHost && !isRSVPClosed">
                                     <div v-if="invitees_responded.length != 0">
@@ -171,7 +203,6 @@ const reservation = () => {
                                                 class="flex flex-col items-center justify-center"
                                                 :key="invitee.user_id"
                                             >
-                                              
                                                 <Avatar :src="getImageUrl(invitee.image)" />
                                                 <span class="p-2 text-center font-light text-xs">
                                                     {{ invitee.username }}
@@ -180,7 +211,9 @@ const reservation = () => {
                                         </div>
                                     </div>
                                 </div>
-                                <Button v-else-if="isHost && isRSVPClosed" @click="reservation()"
+                                <Button
+                                    v-else-if="isHost && isRSVPClosed && !isReserved"
+                                    @click="reservation()"
                                     >Reserve</Button
                                 >
                                 <Button
@@ -193,6 +226,9 @@ const reservation = () => {
                                     v-else-if="!isHost && !isRSVPClosed && is_responded"
                                     >You have responded</Button
                                 >
+                                <Button variant="secondary" v-else-if="isReserved"
+                                    >Be there or be square</Button
+                                >
                             </div>
                         </Card>
                         <Card>
@@ -200,15 +236,25 @@ const reservation = () => {
                                 <h3 class="text-lg font-semibold">Organizer</h3>
                                 <div class="flex overflow-hidden gap-x-3">
                                     <div class="flex flex-col items-center justify-center">
-                                        <Avatar :src="getImageUrl(host?.image)" class="w-12 h-12 rounded-full">
-                                        </Avatar>
-                                        <span class="p-2 text-center font-light text-xs">
+                                        <Skeleton v-if="loading" class="h-12 w-12 rounded-full" />
+                                        <Avatar
+                                            v-else-if="!loading"
+                                            :src="getImageUrl(host?.image)"
+                                            class="w-12 h-12 rounded-full"
+                                        />
+                                        <Skeleton v-if="loading" class="w-48 h-6 p-2" />
+                                        <span
+                                            v-else-if="!loading"
+                                            class="p-2 text-center font-light text-xs"
+                                        >
                                             {{ host?.username }}
                                         </span>
                                     </div>
                                 </div>
-
-                                <p>{{ host?.email }}</p>
+                                <Skeleton v-if="loading" class="w-48 h-6" />
+                                <p v-else-if="!loading" class="p-2 font-light text-sm">
+                                    Email: {{ host?.email }}
+                                </p>
                             </div>
                         </Card>
 

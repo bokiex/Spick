@@ -76,8 +76,8 @@ def reserve(reservation: schemas.Reservation):
     
     event_details = {
         "reservation_name": reservation.reservation_name,
-        "reservation_start_time": str(reservation.datetime_start),
-        "reservation_end_time": str(reservation.datetime_end),
+        "datetime_start": str(reservation.datetime_start),
+        "datetime_end": str(reservation.datetime_end),
         "reservation_address": reservation.reservation_address
     }   
 
