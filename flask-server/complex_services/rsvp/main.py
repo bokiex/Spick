@@ -185,6 +185,8 @@ def check_and_trigger_optimization(data):
     else:
         # Condition where total_invitees != current_responses
         return jsonable_encoder({"message": "Optimization not triggered, condition not met."})
+    res = "Failed to check for optimization."
+    return res
 
 
 @app.post("/rsvp/optimize")
@@ -198,7 +200,9 @@ def optimize_schedule(request: TimeoutOptimizeScheduleRequest):
         channel.basic_publish(exchange=exchangename, routing_key="get_event.error",body=json.dumps(timeout_status.json()), properties=pika.BasicProperties(delivery_mode=2))
         return timeout_status.json()
     
-    if timeout_status.json().timeout == None:
+    print(timeout_status.json())
+
+    if timeout_status.json()['time_out'] == None:
         res = "Event was already optimized."
         return res
 
