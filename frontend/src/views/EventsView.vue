@@ -18,13 +18,12 @@ onMounted(async () => {
     const res = await fetch(event_ms).then(
         // if status code is not 200, then set events to empty array
         (res) => {
-            console.log(res)
             if (res.status != 200) {
                 console.error('Failed to fetch event data:', res)
                 problem.value = 'fetch failed'
                 events.value = []
                 loading.value = false
-                return
+                return []
             } else {
                 return res.json()
             }
