@@ -106,7 +106,11 @@ const reserve = () => {
 
                 <div class="timeslots-container">
                     <RadioGroupRoot v-model="selectedTimeslot" :default-value="timeslots[0]">
-                        <div class="grid grid-row-3 gap-4">
+                        <div
+                            class="grid grid-row-3 gap-4"
+                            v-if="!Object.keys(timeslots).length"
+                        ></div>
+                        <div class="grid grid-row-3 gap-4" v-else>
                             <div v-for="(timeslot, index) in timeslots">
                                 <RadioGroupItem :id="index" :value="index" class="peer sr-only" />
                                 <Label

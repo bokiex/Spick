@@ -131,33 +131,33 @@ def decline_invitation(request: DeclineInvitationSchema):
     
 def check_and_trigger_optimization(data):
     # Assuming the total_invitees and current_responses are fetched from the event status update response or elsewhere
-    print("\n\n-----------Check and trigger has been triggered-----------\n\n")
+    print("\n\n-----------Optimisation has been triggered-----------\n\n")
     invitees_left = data['invitees_left']
     event_id = data['event_id']
     if invitees_left == 0 :
         response = requests.get(f"{user_schedule_ms}user_schedule/{event_id}")
         if response.status_code >300:
-            channel.basic_publish(exchange=exchangename, routing_key="user_schedule.error",body=response, properties=pika.BasicProperties(delivery_mode=2))
+            channel.basic_publish(exchange=exchangename, routing_key="user_schedule.error",body=json.dumps(response.json()), properties=pika.BasicProperties(delivery_mode=2))
             return response.json()
         
         payload = response.json()
 
         opt = requests.post(optimize_ms + "optimize_schedule", json=payload)
         if opt.status_code >300:
-            channel.basic_publish(exchange=exchangename, routing_key="optimize.error",body=opt, properties=pika.BasicProperties(delivery_mode=2))
+            channel.basic_publish(exchange=exchangename, routing_key="optimize.error",body=json.dumps(opt.json()), properties=pika.BasicProperties(delivery_mode=2))
             return opt.json()
         
         opt = opt.json()
 
         opt_update = requests.post(event_ms + "update_optimize", json = opt)
         if opt_update.status_code >300:
-            channel.basic_publish(exchange=exchangename, routing_key="update.error",body=opt_update, properties=pika.BasicProperties(delivery_mode=2))
+            channel.basic_publish(exchange=exchangename, routing_key="update.error",body=json.dumps(opt_update.json()), properties=pika.BasicProperties(delivery_mode=2))
             return opt_update.json()
 
         #get the event table entry 
         event_details = requests.get(f"{event_ms}event/{event_id}")
         if event_details.status_code not in range(200,300):
-            channel.basic_publish(exchange=exchangename, routing_key="timeout.error",body=event_details, properties=pika.BasicProperties(delivery_mode=2))
+            channel.basic_publish(exchange=exchangename, routing_key="timeout.error",body=json.dumps(event_details.json()), properties=pika.BasicProperties(delivery_mode=2))
             return event_details.json()
         
         # Update event timeout to null
@@ -165,14 +165,14 @@ def check_and_trigger_optimization(data):
 
         event_result = requests.put(f"{event_ms}event/{event_id}", json=jsonable_encoder(payload))
         if event_result.status_code not in range(200,300):
-            channel.basic_publish(exchange=exchangename, routing_key="event.error",body=event_result, properties=pika.BasicProperties(delivery_mode=2))
+            channel.basic_publish(exchange=exchangename, routing_key="event.error",body=json.dumps(event_result.json()), properties=pika.BasicProperties(delivery_mode=2))
             return event_result.json()
 
         host_id = event_details.json()["user_id"]
         
         host_tag = requests.get(f"{user_ms}users/user_id/{host_id}")
         if host_tag.status_code not in range(200,300):
-            channel.basic_publish(exchange=exchangename, routing_key="user.error",body=host_tag, properties=pika.BasicProperties(delivery_mode=2))
+            channel.basic_publish(exchange=exchangename, routing_key="user.error",body=json.dumps(host_tag.json()), properties=pika.BasicProperties(delivery_mode=2))
             return host_tag.json()
 
         host_tag = host_tag.json()["telegram_tag"]
