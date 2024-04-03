@@ -55,13 +55,13 @@ def update_event(event_id: str, event: schemas.EventPut, db: Session ):
         
         return None
    
-    for key, value in event.dict(exclude_unset=True, exclude={'invitees', 'recommendations'}).items():
+    for key, value in event.model_dump(exclude_unset=True, exclude={'invitees', 'recommendations'}).items():
         setattr(db_event, key, value)
     db.commit()
     db.refresh(db_event)
     return get_event_by_id(event_id, db)
 
-def delete_event(db: Session, event_id: str):
+def delete_event( event_id: str, db: Session):
     db_event = db.query(models.Event).filter(models.Event.event_id == event_id).first()
     if db_event:
         db.delete(db_event)

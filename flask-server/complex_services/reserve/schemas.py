@@ -1,9 +1,12 @@
 from pydantic import BaseModel
 
-
-
-
-
+class Attendee(BaseModel):
+    user_id: int
+    username: str
+    email: str
+    telegram_tag: str
+    image: str | None = None
+    status: str | None = None
 
 class Reservation(BaseModel):
     user_id: int
@@ -12,7 +15,7 @@ class Reservation(BaseModel):
     reservation_name: str
     datetime_start: str
     datetime_end: str
-    attendees: list
+    attendees: list[Attendee]
 
 
     

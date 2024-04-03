@@ -77,8 +77,8 @@ def update_event(event_id: str, event: schemas.EventPut, db: Session = Depends(g
 
 # Delete event
 @app.delete("/event/{event_id}")
-def delete_event(event_id: str):
-    res = crud.delete_event(event_id)
+def delete_event(event_id: str, db: Session = Depends(get_db)):
+    res = crud.delete_event(event_id, db)
     if res == []:
         return JSONResponse(status_code=404, content=jsonable_encoder({"message": "No event found."}))
     return JSONResponse(status_code=200, content=jsonable_encoder(res))
@@ -130,7 +130,8 @@ def create_event(event: str = Form(...),  files: Optional[UploadFile] = File(def
     
     
     res = crud.create_event(db, event)
-    upload_file(files)
+    if files is not None:
+        upload_file(files)
     
 
     if res is None:
@@ -138,23 +139,7 @@ def create_event(event: str = Form(...),  files: Optional[UploadFile] = File(def
     
     return JSONResponse(status_code=201, content={"data": jsonable_encoder(res), "message": "Event has been created."})
 
-"""
-{
-    "data": [
-        {
-            "user_id": 1,
-            "event_id": 1,
-            "status": "Y"
-        },
-        {
-            "user_id": 3,
-            "event_id": 1,
-            "status": "Y"
-        }
-    ],
-    "message": "Invitees found."
-}
-"""
+
 @app.get("/event/invitee/responded/{event_id}")
 def get_invitee_responded(event_id: str, db: Session = Depends(get_db)):
     res = crud.get_invitee_responded(db, event_id)
@@ -162,41 +147,7 @@ def get_invitee_responded(event_id: str, db: Session = Depends(get_db)):
         return []
     return JSONResponse(status_code=200, content={"data": jsonable_encoder(res), "message": "Invitees found."})
 
-"""
-{
-    "all_invitees": [
-        {
-            "user_id": 1,
-            "event_id": 1,
-            "status": "Y"
-        },
-        {
-            "user_id": 2,
-            "event_id": 1,
-            "status": null
-        },
-        {
-            "user_id": 3,
-            "event_id": 1,
-            "status": "Y"
-        }
-    ],
-    "respondents": [
-        {
-            "user_id": 1,
-            "event_id": 1,
-            "status": "Y"
-        },
-        {
-            "user_id": 3,
-            "event_id": 1,
-            "status": "Y"
-        }
-    ],
-    "invitees_left": 1,
-    "message": "Invitees found."
-}
-"""
+
 @app.get("/invitee/{event_id}")
 def get_invitees(event_id:str, db: Session = Depends(get_db)):
     all_invitees = crud.get_invitee(db, event_id)
@@ -216,12 +167,7 @@ def update_invitee(invitee: schemas.Invitee, db: Session = Depends(get_db)):
     return JSONResponse(status_code=200, content={"data": jsonable_encoder(res), "message": "Invitee has been updated."})
 
 
-"""
-{
-    "event_id": 1,
-    "user_id": 1
-}
-"""
+
 @app.post("/invitee")
 def create_invitees(invitee: schemas.Invitee, db: Session = Depends(get_db)):
     
@@ -251,6 +197,3 @@ def get_opt_schedule(event_id: str, db: Session = Depends(get_db)):
     if res is None:
         return JSONResponse(status_code=404, content={"message": "No optimized schedule found."})
     return JSONResponse(status_code=200, content={"data": jsonable_encoder(res), "message": "Optimized schedule found."})
-#!/usr/bin/env python3
-# The above shebang (#!) operator tells Unix-like environments
-# to run this file as a python3 script

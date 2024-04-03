@@ -59,9 +59,7 @@ def check_online():
     event_ms_result = requests.get(event_ms + f"online")
     if event_ms_result.status_code not in range(200,300):
         return False
-    manage_event_ms_result = requests.get(manage_event_ms + f"online")
-    if manage_event_ms_result.status_code not in range(200,300):
-        return False
+    
     return True
 
 
@@ -102,21 +100,16 @@ def reserve(reservation: schemas.Reservation):
         channel.basic_publish(exchange=exchangename, routing_key="event.error", body=json.dumps(update_event.json()))
         return JSONResponse(status_code=400, content={"message":update_event.json()})
     
-    # event = requests.get(manage_event_ms + f"event/{reservation.event_id}")
-    # if event.status_code not in range(200,300):
-    #     channel.basic_publish(exchange=exchangename, routing_key="manage_event.error", body=json.dumps(event.json()))
-    #     return JSONResponse(status_code=400, content={"message":event.json()})
-    
-    # event = event.json()
-    print("\n\n ------- SAFE PLACE ------- \n\n")
-    print(reservation)
-
+   
+  
+    print(update_event.json())
+    print(reservation.model_dump()["attendees"])
     # convert datetime into date and time 
     # reservation.datetime_start = reservation.datetime_start.strftime("%m-%d %H:%M:%S")
     notification = {
-        "notification_list": [i["telegram_tag"] for i in reservation.dict()["attendees"]],
+        "notification_list": [i["telegram_tag"] for i in reservation.model_dump()["attendees"]],
         "message": f"{reservation.reservation_name} at {reservation.reservation_address} has been reserved at {reservation.datetime_start}. See you there!"
     }
     channel.basic_publish(exchange=exchangename, routing_key="reservation.notification", body=json.dumps(notification))
-    return JSONResponse(status_code=201, content={"message": "Reservation created successfully."})
+    return JSONResponse(status_code=201, content=update_event.json())
 

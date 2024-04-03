@@ -81,9 +81,6 @@ def check_rsvp():
         return False
     return True
 
-@app.get("/online")
-def online():
-    return JSONResponse(status_code=200, content={"message": "Event is online."})
 
 @app.post("/rsvp/accept")
 def accept_invitation(request: AcceptInvitationSchema):
@@ -143,9 +140,10 @@ def decline_invitation(request: DeclineInvitationSchema):
         return retrieve_response.json()
     opt_data = retrieve_response.json()
     opt_data["event_id"] = request.event_id
-    # Assuming check_and_trigger_optimization exists and works as expected
-    x = check_and_trigger_optimization((opt_data))  # Ensure this function is defined or adjusted for FastAPI
-    return JSONResponse(status_code=x.status_code, content=x.json())
+   
+    x = check_and_trigger_optimization((opt_data))  
+    res = "Declined Successfully"
+    return JSONResponse(status_code=x.status_code, content=res)
     
     
 def check_and_trigger_optimization(data):

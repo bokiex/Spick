@@ -24,4 +24,4 @@ class UserScheduleList(BaseModel):
     sched_list: List[ScheduleItem]
 
 class TimeoutOptimizeScheduleRequest(BaseModel):
-    event_id: str  # Assuming eventID is a string. Adjust the type if necessary.    
+    event_id: str 

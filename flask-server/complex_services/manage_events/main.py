@@ -221,7 +221,7 @@ def check_create_event():
     return True
 
 @app.post("/create_event")
-def create_event(event: str = Form(...), file: Optional[UploadFile] = File(default=None)):
+def create_event(event: str = Form(...), files: Optional[UploadFile] = File(default=None)):
     online = check_create_event()
     if not online:
         return JSONResponse(status_code=500, content={"error": "Service unavailable"})
@@ -254,14 +254,17 @@ def create_event(event: str = Form(...), file: Optional[UploadFile] = File(defau
     event_dict["recommendations"] = recommendation_result.json()
 
     # Add image filename to event
-    event_dict["image"] = file.filename
+    if files is not None:
+        event_dict["image"] = files.filename
+        files = {
+        "files": (files.filename, files.file, files.content_type),
+    }
+   
     print(event_dict)
     # Send event to event microservice
     print("\n------ Sending event to event microservice ------")
     
-    files = {
-        "files": (file.filename, file.file, file.content_type),
-    }
+    
     event_result = requests.post(event_ms + "event", data={"event": json.dumps(event_dict)}, files=files)
      
     # If event service is not available
