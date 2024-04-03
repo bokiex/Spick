@@ -52,8 +52,24 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+def check_online():
+    reservation_result = requests.get(reservation_ms + f"online")
+    if reservation_result.status_code not in range(200,300):
+        return False
+    event_ms_result = requests.get(event_ms + f"online")
+    if event_ms_result.status_code not in range(200,300):
+        return False
+    manage_event_ms_result = requests.get(manage_event_ms + f"online")
+    if manage_event_ms_result.status_code not in range(200,300):
+        return False
+    return True
+
+
+
 @app.post("/reserve")
 def reserve(reservation: schemas.Reservation):
+    if not check_online():
+        return JSONResponse(status_code=400, content={"message":"One or more of the microservices are offline."})
     # check if reservation name contains fail
     print(reservation)
     if "fail" in reservation.reservation_name:
