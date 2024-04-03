@@ -198,7 +198,7 @@ def optimize_schedule(request: TimeoutOptimizeScheduleRequest):
         channel.basic_publish(exchange=exchangename, routing_key="get_event.error",body=json.dumps(timeout_status.json()), properties=pika.BasicProperties(delivery_mode=2))
         return timeout_status.json()
     
-    if timeout_status.json().timeout == None:
+    if timeout_status.json().time_out == None:
         res = "Event was already optimized."
         return res
 

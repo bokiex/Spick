@@ -6,29 +6,25 @@ import { ref, onMounted } from 'vue'
 
 const events = ref([])
 const loading = ref(true)
-const event_ms = 'http://localhost:8100/event'
+const event_ms = 'http://localhost:8200/event'
 const userID = localStorage.getItem('userID')
 onMounted(async () => {
     try {
         // Example API call - replace with your actual API call
-        const data = await fetch(event_ms).then((res) => res.json())
-        console.log(data)
-        events.value = data.map((event) => ({
-            start: event.range_start,
-            end: event.range_end,
-            title: event.event_name,
-            desc: event.event_desc,
-            // Add other custom fields as needed
-            images: event.image,
-            recommendations: event.recommendation
-        }))
+        const data = await fetch(event_ms).then((res) => {
+            if (res.status != 200) {
+                console.error('Failed to fetch event data:', res)
+                return []
+            } else {
+                console.log(res.json())
+            }
+        })
     } catch (error) {
         console.error('Failed to fetch event data:', error)
     } finally {
         loading.value = false
     }
 })
-
 </script>
 <template>
     <div class="">

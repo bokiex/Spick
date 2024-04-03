@@ -66,7 +66,7 @@ export default {
         <div class="forms-container">
             <div class="signin-signup">
                 <form @submit.prevent="signIn" class="sign-in-form">
-                    <h1>Welcome to Spick!!</h1>
+                    <h1>Spick</h1>
                     <br />
                     <h2 class="title">Sign in</h2>
                     <div class="input-field">
@@ -112,10 +112,10 @@ export default {
         <div class="panels-container">
             <div class="panel left-panel">
                 <div class="content">
-                    <h3>New here ?</h3>
+                    <h3>New here?</h3>
                     <p>
-                        Sign up now to be part of the scheduling squad and start coordinating your
-                        events with ease!!
+                        Sign up now to be part of the Spick squad and start coordinating your events
+                        with ease!
                     </p>
                     <button class="btn transparent" id="sign-up-btn" @click="signUpClick">
                         Sign up

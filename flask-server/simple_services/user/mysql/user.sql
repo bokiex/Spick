@@ -17,5 +17,7 @@ CREATE TABLE IF NOT EXISTS `user` (
   ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 INSERT INTO `user` (`user_id`, `username`, `email`, `password_hash`, `telegram_tag`, `image`, `telegram_id`) VALUES
-(1, 'bokyan', 'bok@bok.com', 'pbkdf2:sha256:600000$Ant22xex5VCnUclw$b65776c52241f4a3394e58a264f8d01e8cbf960c9a72399c3d4c36047327432d', '@bokyannn', NULL, NULL),
-(2, 'kae', 'kae@kae.com', 'pbkdf2:sha256:600000$Ant22xex5VCnUclw$b65776c52241f4a3394e58a264f8d01e8cbf960c9a72399c3d4c36047327432d', '@hotatementai', NULL, NULL)
+(1, 'kaegene', 'kae@kae.com', 'pbkdf2:sha256:600000$Ant22xex5VCnUclw$b65776c52241f4a3394e58a264f8d01e8cbf960c9a72399c3d4c36047327432d', '@hotatementai', NULL, NULL),
+(2, 'troy', 'troy@troy.com', 'pbkdf2:sha256:600000$Ant22xex5VCnUclw$b65776c52241f4a3394e58a264f8d01e8cbf960c9a72399c3d4c36047327432d', '@ttroylim', NULL, NULL),
+(3, 'dycia', 'dycia@dycia.com', 'pbkdf2:sha256:600000$Ant22xex5VCnUclw$b65776c52241f4a3394e58a264f8d01e8cbf960c9a72399c3d4c36047327432d', '@ddyciaa', NULL, NULL),
+(4, 'bowen', 'bowen@bowen.com', 'pbkdf2:sha256:600000$Ant22xex5VCnUclw$b65776c52241f4a3394e58a264f8d01e8cbf960c9a72399c3d4c36047327432d', '@vrejmomeny', NULL, NULL)

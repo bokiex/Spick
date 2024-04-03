@@ -174,9 +174,8 @@ function viewEvents() {
 }
 
 function tryAgain() {
-    error.value = null;
+    error.value = null
 }
-
 </script>
 <template>
     <div class="m-auto relative w-full h-screen space-y-6 sm:w-[450px]">
@@ -248,13 +247,19 @@ function tryAgain() {
                         </div>
 
                         <div class="flex gap-5">
-                            <div v-for="(invitee, index) in invitees" :key="index" class="relative">
+                            <div
+                                v-for="(invitee, index) in invitees"
+                                :key="index"
+                                class="flex flex-col items-center justify-center relative"
+                            >
                                 <Avatar :src="invitee.image" :name="invitee.username" />
 
                                 <CircleX
                                     class="absolute -top-2 -right-2 cursor-pointer hover:text-destructive transition-colors duration-150"
                                     @click="() => invitees.splice(index, 1)"
-                                />
+                                /><span class="p-2 font-light text-xs">
+                                    {{ invitee.username }}
+                                </span>
                             </div>
                         </div>
 
@@ -440,7 +445,9 @@ function tryAgain() {
                                             <Button variant="outline" @click="tryAgain" v-if="error"
                                                 >Try Again
                                             </Button>
-                                            <Button variant="outline" @click="viewEvents" v-else>View Event </Button>
+                                            <Button variant="outline" @click="viewEvents" v-else
+                                                >View Event
+                                            </Button>
                                         </DialogClose>
                                     </div>
                                 </DialogContent>
