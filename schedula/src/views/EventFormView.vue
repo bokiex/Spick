@@ -173,6 +173,10 @@ function viewEvents() {
     router.push({ name: 'events' })
 }
 
+function tryAgain() {
+    error.value = null;
+}
+
 </script>
 <template>
     <div class="m-auto relative w-full h-screen space-y-6 sm:w-[450px]">
@@ -433,7 +437,7 @@ function viewEvents() {
 
                                     <div class="mt-[25px] flex justify-end">
                                         <DialogClose as-child>
-                                            <Button variant="outline" v-if="error"
+                                            <Button variant="outline" @click="tryAgain" v-if="error"
                                                 >Try Again
                                             </Button>
                                             <Button variant="outline" @click="viewEvents" v-else>View Event </Button>
