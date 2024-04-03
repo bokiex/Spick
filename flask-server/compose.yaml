@@ -323,7 +323,7 @@ services:
 
     reserve:
         platform: linux/amd64
-        container_name: rsvp
+        container_name: reserve
         build:
             context: ./complex_services/reserve/
             dockerfile: Dockerfile
