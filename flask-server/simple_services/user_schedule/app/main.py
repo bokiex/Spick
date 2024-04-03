@@ -61,7 +61,7 @@ Output
 
 @app.get("/online")
 def online():
-    return {"message": "Schedule is online."}
+    return JSONResponse(status_code=200, content={"message": "User Schedule is online."})
 
 @app.post("/user_schedule", response_model=schemas.UserScheduleList)
 def create_schedules(schedule_list: schemas.intake, db: Session = Depends(get_db)):

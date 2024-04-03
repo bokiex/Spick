@@ -4,6 +4,7 @@ from datetime import datetime
 from collections import defaultdict
 from schemas import OptimizedScheduleDay, OptimizedSchedules, ScheduleItem, CommonSlot
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 
 app = FastAPI()
 
@@ -24,7 +25,7 @@ app.add_middleware(
 
 @app.get("/online")
 def online():
-    return {"message": "Optimizer is online."}
+    return JSONResponse(status_code=200, content={"message": "Optimizer is online."})
 
 @app.post('/optimize_schedule', response_model=OptimizedSchedules)
 def optimize_schedule(schedule_list: List[ScheduleItem]):

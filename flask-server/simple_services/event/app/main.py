@@ -46,7 +46,7 @@ def get_db():
 
 @app.get("/online")
 def online():
-    return {"message": "Event is online."}
+    return JSONResponse(status_code=200, content={"message": "Event is online."})
 
 # Get all events
 @app.get("/event")

@@ -331,7 +331,7 @@ def processImage(resource_name):
 
 @app.get("/online")
 def online():
-    return {"message": "Recommendation service is online."}
+    return JSONResponse(status_code=200, content={"message": "Service is online."})
 
 # Get recommendations from Places API
 @app.post("/recommendation", response_model=list[schemas.Recommendation])

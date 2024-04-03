@@ -18,7 +18,7 @@ def get_db():
         
 @app.get("/online")
 def online():
-    return {"message": "Reservation is online."}
+    return JSONResponse(status_code=200, content={"message": "Reservation is online."})
 
 @app.get("/reservation", response_model=list[schemas.ReservationResponse])
 def get_reservation(db: Session = Depends(get_db)):

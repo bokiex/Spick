@@ -49,7 +49,7 @@ user_ms = environ.get("USER_MS_URL") or "http://localhost:8101/"
 
 @app.get("/online")
 def online():
-    return {"message": "Authentication is online."}
+    return JSONResponse(status_code=200, content={"message": "Authentication is online."}) 
 
 @app.post("/signup")
 def signup(user: schemas.User):

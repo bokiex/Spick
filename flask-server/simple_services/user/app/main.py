@@ -45,7 +45,7 @@ def get_db():
 
 @app.get("/online")
 def online():
-    return {"status": "OK"}
+    return JSONResponse(status_code=200, content={"message": "User is online."})
 
 # Get all users
 @app.get("/users", response_model=list[schemas.UserResponse])
