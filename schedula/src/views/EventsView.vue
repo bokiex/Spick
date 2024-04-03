@@ -18,8 +18,12 @@ onMounted(async () => {
         for (let i = 0; i < data.length; i++) {
             data[i].datetime_start = new Date(data[i].datetime_start)
             data[i].datetime_end = new Date(data[i].datetime_end)
+            var inviteeslist = []
+            for (var invitee of data[i].invitees){
+                inviteeslist.push(invitee.user_id)
+            }
             // if userID doesn't exist in invitee and is not equal to user_id, then remove the event
-            if (!data[i].invitee.includes(userID) && data[i].user_id != userID) {
+            if (!inviteeslist.includes(userID) && data[i].user_id != userID) {
                 data.splice(i, 1)
                 i--
             }
