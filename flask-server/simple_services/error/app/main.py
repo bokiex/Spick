@@ -9,6 +9,7 @@ from datetime import datetime
 load_dotenv()
 e_queue_name = environ.get('ERROR_QUEUE_NAME') or "Error" #Error
 
+
 def receiveError(channel):
     try:
         channel.basic_consume(queue=e_queue_name, on_message_callback=callback, auto_ack=True)
@@ -27,7 +28,7 @@ def callback(channel, method, properties, body):
     with open("errorlogs.txt","a+") as f:
         now = datetime.now()
         cur_time = now.strftime("%H:%M:%S")
-        f.write(cur_time + "Error microservice: Received an error by " + __file__ + "    " + processError(body))
+        f.write(cur_time + "Error microservice: Received an error by " + __file__ + "    " + processError(body) + "\ns")
     print()
     
 def processError(errorMsg):
@@ -39,8 +40,8 @@ def processError(errorMsg):
     except Exception as e:
         print("--NOT JSON:", e)
         print("--DATA:", errorMsg)
+        print()
         return "--NOT JSON:" + e + "--DATA:" + errorMsg
-    print()
     
 if __name__ == "__main__":
     print("Error microservice: Getting Connection")
