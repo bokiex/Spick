@@ -25,7 +25,7 @@ onMounted(async () => {
                             invitees_user_ids.push(data[i].invitees[j].user_id)
                         }
                     }
-                    if (!invitees_user_ids.includes(Number(userID)) || data[i].reservation_address === null) {
+                    if ((!invitees_user_ids.includes(Number(userID)) && data[i].user_id != userID) || data[i].reservation_address === null) {
                         data.splice(i, 1)
                     }
                     else {
