@@ -15,6 +15,15 @@ onMounted(async () => {
     try {
         // Example API call - replace with your actual API call
         const data = await fetch('http://localhost:8100/event').then((res) => res.json())
+        for (let i = 0; i < data.length; i++) {
+            data[i].datetime_start = new Date(data[i].datetime_start)
+            data[i].datetime_end = new Date(data[i].datetime_end)
+            // if userID doesn't exist in invitee and is not equal to user_id, then remove the event
+            if (!data[i].invitee.includes(userID) && data[i].user_id != userID) {
+                data.splice(i, 1)
+                i--
+            }
+        }
         events.value = data
         console.log(data)
     } catch (error) {
