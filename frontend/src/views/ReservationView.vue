@@ -1,11 +1,13 @@
 <script setup>
+import Avatar from '@/components/Avatar.vue'
 import { RadioGroupItem, RadioGroupIndicator, RadioGroupRoot, Label } from 'radix-vue'
 import { ref, onMounted, onBeforeMount } from 'vue'
 import { format_date, format_time } from '@/utils/format_datetime'
-import { useRoute } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 import { getImageUrl } from '@/utils/get_image'
 import Button from '@/components/Button.vue'
 
+const router = useRouter()
 const route = useRoute()
 const event_id = route.params.id
 
@@ -16,7 +18,7 @@ onMounted(async () => {
     const timeslots_data = await fetch('http://localhost:8200/timeslot/' + event_id).then((res) =>
         res.json()
     )
-    timeslots.value = timeslots_data
+    timeslots.value = JSON.parse(timeslots_data)
 
     const recommendation_data = await fetch('http://localhost:8100/event/' + event_id).then((res) =>
         res.json()
@@ -24,7 +26,8 @@ onMounted(async () => {
 
     recommendations.value = recommendation_data.recommendations
 
-    console.log(timeslots_data)
+    console.log(timeslots.value)
+
     console.log(recommendation_data)
 })
 // const timeslots = [
@@ -50,8 +53,8 @@ const selectedTimeslot = ref(0)
 const selectedVenue = ref(100)
 
 const reserve = () => {
-   
-    console.log(JSON.stringify({
+    console.log(
+        JSON.stringify({
             user_id: userID,
             event_id: event_id,
             reservation_address:
@@ -60,7 +63,8 @@ const reserve = () => {
             datetime_start: timeslots.value[selectedTimeslot.value].start_time,
             datetime_end: timeslots.value[selectedTimeslot.value].end_time,
             attendees: timeslots.value[selectedTimeslot.value].invitees
-        }))
+        })
+    )
 
     fetch('http://localhost:8202/reserve', {
         method: 'POST',
@@ -78,6 +82,7 @@ const reserve = () => {
             attendees: timeslots.value[selectedTimeslot.value].invitees
         })
     })
+    router.push('/')
 }
 </script>
 

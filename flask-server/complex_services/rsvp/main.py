@@ -4,6 +4,7 @@ from schemas import AcceptInvitationSchema, ScheduleItem, DeclineInvitationSchem
 from typing import List
 import requests
 from fastapi.encoders import jsonable_encoder
+from fastapi.responses import JSONResponse
 import sys
 import amqp_connection
 import pika
@@ -80,7 +81,7 @@ def accept_invitation(request: AcceptInvitationSchema):
     status_response = requests.put(event_ms + "invitee", json=update_payload)
     if status_response.status_code not in range(200,300):
         channel.basic_publish(exchange=exchangename, routing_key="update_status.error",body=json.dumps(status_response.json()), properties=pika.BasicProperties(delivery_mode=2))
-        return status_response.json()
+        return status_response
     
     schedule_response = requests.post(user_schedule_ms + "user_schedule", json= jsonable_encoder({"sched_list": request.sched_list}))
     if schedule_response.status_code > 300:
@@ -200,11 +201,11 @@ def optimize_schedule(request: TimeoutOptimizeScheduleRequest):
         channel.basic_publish(exchange=exchangename, routing_key="get_event.error",body=json.dumps(timeout_status.json()), properties=pika.BasicProperties(delivery_mode=2))
         return timeout_status.json()
     
-    print(timeout_status.json())
+    
 
     if timeout_status.json()['time_out'] == None:
         res = "Event was already optimized."
-        return res
+        return JSONResponse(status_code=409, content=jsonable_encoder(res))
 
     response = requests.get(f"{user_schedule_ms}user_schedule/{request.event_id}")
     if response.status_code > 300:

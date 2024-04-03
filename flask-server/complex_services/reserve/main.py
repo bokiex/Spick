@@ -70,7 +70,7 @@ def reserve(reservation: schemas.Reservation):
     res = requests.post(reservation_ms + "reservation", json=reservation_details)
     if res.status_code not in range(200,300):
         channel.basic_publish(exchange=exchangename, routing_key="reservation.error", body=json.dumps(res.json()))
-        return JSONResponse(status_code=400, content={"message":res.json()})
+        return JSONResponse(status_code=400, content=res.json())
 
  
     
@@ -81,8 +81,7 @@ def reserve(reservation: schemas.Reservation):
         "reservation_address": reservation.reservation_address
     }   
 
-    print(event_details)
-    update_event = requests.put(event_ms + f"event/{reservation.event_id}", json=event_details)
+    update_event = requests.put(event_ms + f"event/{reservation.event_id}", json=jsonable_encoder(event_details))
     if update_event.status_code not in range(200,300):
         channel.basic_publish(exchange=exchangename, routing_key="event.error", body=json.dumps(update_event.json()))
         return JSONResponse(status_code=400, content={"message":update_event.json()})
