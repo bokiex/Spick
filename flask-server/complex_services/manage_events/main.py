@@ -271,7 +271,7 @@ def create_event(event: str = Form(...), file: Optional[UploadFile] = File(defau
     # If event service is not available
     
     if event_result.status_code not in range(200,300):
-        channel.basic_publish(exchange=exchangename, routing_key="create_event.error",body=json.dumps(event_result), properties=pika.BasicProperties(delivery_mode=2))
+        channel.basic_publish(exchange=exchangename, routing_key="create_event.error",body=json.dumps(event_result.json()), properties=pika.BasicProperties(delivery_mode=2))
         return JSONResponse(status_code=500, content=event_result.json())
     
     print("\n------ Event created ------")

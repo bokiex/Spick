@@ -225,7 +225,7 @@ def optimize_schedule(request: TimeoutOptimizeScheduleRequest):
     
     event_details = requests.get(f"{event_ms}event/{request.event_id}")
     if event_details.status_code not in range(200,300):
-        channel.basic_publish(exchange=exchangename, routing_key="timeout.error",body=event_details, properties=pika.BasicProperties(delivery_mode=2))
+        channel.basic_publish(exchange=exchangename, routing_key="timeout.error",body=json.dumps(event_details.json()), properties=pika.BasicProperties(delivery_mode=2))
         return event_details.json()
         
     # Update event timeout to null
@@ -233,14 +233,14 @@ def optimize_schedule(request: TimeoutOptimizeScheduleRequest):
 
     event_result = requests.put(f"{event_ms}event/{request.event_id}", json=jsonable_encoder(payload))
     if event_result.status_code not in range(200,300):
-        channel.basic_publish(exchange=exchangename, routing_key="event.error",body=event_result, properties=pika.BasicProperties(delivery_mode=2))
+        channel.basic_publish(exchange=exchangename, routing_key="event.error",body=json.dumps(event_result.json()), properties=pika.BasicProperties(delivery_mode=2))
         return event_result.json()
 
     host_id = event_details.json()["user_id"]
         
     host_tag = requests.get(f"{user_ms}users/user_id/{host_id}")
     if host_tag.status_code not in range(200,300):
-        channel.basic_publish(exchange=exchangename, routing_key="user.error",body=host_tag, properties=pika.BasicProperties(delivery_mode=2))
+        channel.basic_publish(exchange=exchangename, routing_key="user.error",body=json.dumps(host_tag.json()), properties=pika.BasicProperties(delivery_mode=2))
         return host_tag.json()
 
     host_tag = host_tag.json()["telegram_tag"]

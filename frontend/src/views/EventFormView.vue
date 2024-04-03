@@ -129,7 +129,7 @@ function previewFile(event) {
 
 async function submitForm() {
     // Make sure all steps are validated before submitting
-
+    loading.value = true
     if (currentStep.value === 100) {
         // Send the form data to your backend
         console.log(image)
@@ -164,7 +164,10 @@ async function submitForm() {
             }
         } catch (err) {
             error.value = err.message
+
             console.error('Error fetching data: ', error)
+        } finally {
+            loading.value = false
         }
     }
 }
@@ -387,20 +390,20 @@ function tryAgain() {
                         <Separator class="shrink-0 bg-border h-px w-full" />
 
                         <div class="space-y-2">
-                            <Label for="datetime_start">Start Time</Label>
+                            <Label for="datetime_start">Range Start</Label>
                             <VueDatePicker v-model="datetime_start" time-picker-inline />
                         </div>
                         <div class="space-y-2">
-                            <Label for="datetime_end">End Time</Label>
+                            <Label for="datetime_end">Range End</Label>
                             <VueDatePicker v-model="datetime_end" time-picker-inline />
                         </div>
                         <div class="space-y-2">
-                            <Label for="time_out">Time Out</Label>
+                            <Label for="time_out">Event Timeout</Label>
                             <VueDatePicker v-model="time_out" time-picker-inline />
                         </div>
                         <div class="space-y-2">
                             <div class="label">
-                                <label for="township">Prefered Area</label>
+                                <label for="township">Preferred Area</label>
                             </div>
                             <input
                                 required
@@ -419,7 +422,7 @@ function tryAgain() {
                             <DialogTrigger>
                                 <Button @click="submitForm" type="button"> Submit </Button>
                             </DialogTrigger>
-                            <DialogPortal>
+                            <DialogPortal v-if="!loading">
                                 <DialogOverlay
                                     class="fixed inset-0 z-50 bg-black/80 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0"
                                 />
