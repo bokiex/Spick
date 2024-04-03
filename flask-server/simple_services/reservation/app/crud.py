@@ -6,6 +6,7 @@ def get_reservations(db: Session):
     return db.query(models.Reservation).all()
 
 def create_reservation(db: Session, reservation: schemas.Reservation):
+    print(reservation.dict())
     db_reservation = models.Reservation(**reservation.dict())
     
     try: 

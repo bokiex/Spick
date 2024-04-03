@@ -4,6 +4,7 @@ import { ref, onMounted, onBeforeMount } from 'vue'
 import { format_date, format_time } from '@/utils/format_datetime'
 import { useRoute } from 'vue-router'
 import { getImageUrl } from '@/utils/get_image'
+import Button from '@/components/Button.vue'
 
 const route = useRoute()
 const event_id = route.params.id
@@ -45,18 +46,56 @@ onMounted(async () => {
 // ]
 
 const userID = localStorage.getItem('userID')
-const selectedTimeslot = ref(timeslots[0])
-const selectedVenue = ''
+const selectedTimeslot = ref(0)
+const selectedVenue = ref(100)
 
 const reserve = () => {
-    console.log(selectedTimeslot.value)
+   
+    console.log(JSON.stringify({
+            user_id: userID,
+            event_id: event_id,
+            reservation_address:
+                recommendations.value[selectedVenue.value - 100].recommendation_address,
+            reservation_name: recommendations.value[selectedVenue.value - 100].recommendation_name,
+            datetime_start: timeslots.value[selectedTimeslot.value].start_time,
+            datetime_end: timeslots.value[selectedTimeslot.value].end_time,
+            attendees: timeslots.value[selectedTimeslot.value].invitees
+        }))
+
+    fetch('http://localhost:8202/reserve', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            user_id: userID,
+            event_id: event_id,
+            reservation_address:
+                recommendations.value[selectedVenue.value - 100].recommendation_address,
+            reservation_name: recommendations.value[selectedVenue.value - 100].recommendation_name,
+            datetime_start: timeslots.value[selectedTimeslot.value].start_time,
+            datetime_end: timeslots.value[selectedTimeslot.value].end_time,
+            attendees: timeslots.value[selectedTimeslot.value].invitees
+        })
+    })
 }
 </script>
 
 <template>
     <div class="reservation-page">
         <div class="container my-4">
-            <h3>Reservation</h3>
+            <div style="display: flex; justify-content: space-between; align-items: center">
+                <div>
+                    <h3 class="text-lg font-medium">Reservation</h3>
+                    <p class="text-sm text-muted-foreground">
+                        Select the time and place a reservation!
+                    </p>
+                </div>
+                <div class="flex justify-end">
+                    <Button type="submit" @click="reserve">Reserve</Button>
+                </div>
+            </div>
+            <Separator class="shrink-0 bg-border h-px w-full" />
             <div class="grid grid-cols-2" style="margin-top: 2rem">
                 <!-- Time Slot Start -->
 
@@ -131,7 +170,7 @@ const reserve = () => {
                         </div>
                     </RadioGroupRoot>
                 </div>
-                <Button @click="reserve()">Reserve</Button>
+
                 <!-- Venue end -->
             </div>
         </div>
