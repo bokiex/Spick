@@ -43,14 +43,13 @@ async function saveSettings() {
     // Logic to save user settings
 
     const formData = new FormData()
-    console.log('User object:', user);
     formData.append(
         'user',
         JSON.stringify({
             username: user.value.name,
             telegram_tag: user.value.tele,
             email: user.value.email,
-            image: user.value.image
+            image: user.value.image.name
         })
     ) // eventData is your form's data as a JS object
     if (user.value.image instanceof File) {
@@ -61,7 +60,7 @@ async function saveSettings() {
             username: user.value.name,
             telegram_tag: user.value.tele,
             email: user.value.email,
-            image: user.value.image,
+            image: user.value.image.name,
         }),
             user.value.image)
 
@@ -185,7 +184,7 @@ function logout() {
                     </Label>
                     <input
                         type="text"
-                        id="userTele"
+                        id="userName"
                         v-model="user.tele"
                         class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                     />
@@ -198,7 +197,7 @@ function logout() {
                     </Label>
                     <input
                         type="text"
-                        id="userEmail"
+                        id="userName"
                         v-model="user.email"
                         class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                     />
