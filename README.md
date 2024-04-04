@@ -44,3 +44,18 @@ npm run dev
 This will start the frontend development server. Make sure you have Node.js and npm installed on your machine.
 
 ---
+
+## Test Accounts
+---
+1. Username: kaegene
+password: 123
+
+2. Username: troy
+Password: 123
+
+3. Username: dycia
+Password: 123
+
+4. Username: bowen
+Password: 123
+---
