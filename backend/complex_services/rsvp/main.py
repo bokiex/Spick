@@ -81,6 +81,10 @@ def check_rsvp():
         return False
     return True
 
+@app.get("/online")
+def online():
+    return JSONResponse(status_code=200, content={"message": "Event is online."})
+
 
 @app.post("/rsvp/accept")
 def accept_invitation(request: AcceptInvitationSchema):
