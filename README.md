@@ -10,7 +10,7 @@ Spick is a free event management platform designed to tackle the challenges of s
 
 ## Prerequisites
 
-Makre sure all of these are running and installed on your local machine before you start the project:
+Make sure all of these are running and installed on your local machine before you start the project:
 
 -   Docker
 -   Node.js
@@ -25,6 +25,9 @@ cd spick
 1. Backend Setup: To set up the backend, navigate to the backend directory and use Docker Compose to build and run the project:
 
 ```
+// Download the .env file and shift it to the flask-server folder
+We need this .env to get the variables needed to by the compose.yaml
+
 // You should be in Spick/backend
 cd backend
 docker-compose up --build
