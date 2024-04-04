@@ -22,11 +22,11 @@ git clone https://github.com/bokiex/Spick.git
 cd spick
 ```
 
-1. Backend Setup: To set up the backend, navigate to the flask-server directory and use Docker Compose to build and run the project:
+1. Backend Setup: To set up the backend, navigate to the backend directory and use Docker Compose to build and run the project:
 
 ```
-// You should be in Spick/flask-server
-cd flask-server
+// You should be in Spick/backend
+cd backend
 docker-compose up --build
 ```
 
